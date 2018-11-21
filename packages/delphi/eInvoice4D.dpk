@@ -1,0 +1,73 @@
+package eInvoice4D;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  xmlrtl,
+  soaprtl,
+  dbrtl,
+  inet,
+  CustomIPTransport,
+  IndyIPCommon,
+  IndySystem,
+  IndyProtocols,
+  IndyCore,
+  IndyIPClient,
+  bindengine,
+  bindcomp,
+  RESTComponents;
+
+contains
+  DForce.ei.Response.Factory in '..\..\source\DForce.ei.Response.Factory.pas',
+  DForce.ei.Response.Interfaces in '..\..\source\DForce.ei.Response.Interfaces.pas',
+  DForce.ei.Response in '..\..\source\DForce.ei.Response.pas',
+  DForce.ei.Utils in '..\..\source\DForce.ei.Utils.pas',
+  DForce.ei.Validation.Factory in '..\..\source\DForce.ei.Validation.Factory.pas',
+  DForce.ei.Validation.Interfaces in '..\..\source\DForce.ei.Validation.Interfaces.pas',
+  DForce.ei.Exception in '..\..\source\DForce.ei.Exception.pas',
+  DForce.ei.Invoice.Base in '..\..\source\DForce.ei.Invoice.Base.pas',
+  DForce.ei.Invoice.Ex in '..\..\source\DForce.ei.Invoice.Ex.pas',
+  DForce.ei.Invoice.Factory in '..\..\source\DForce.ei.Invoice.Factory.pas',
+  DForce.ei.Invoice.Interfaces in '..\..\source\DForce.ei.Invoice.Interfaces.pas',
+  DForce.ei in '..\..\source\DForce.ei.pas',
+  DForce.ei.Provider.Aruba in '..\..\source\DForce.ei.Provider.Aruba.pas',
+  DForce.ei.Provider.Base in '..\..\source\DForce.ei.Provider.Base.pas',
+  DForce.ei.Provider.Interfaces in '..\..\source\DForce.ei.Provider.Interfaces.pas',
+  DForce.ei.Provider.Register in '..\..\source\DForce.ei.Provider.Register.pas',
+  DForce.ei.GenericCollection in '..\..\source\DForce.ei.GenericCollection.pas',
+  DForce.ei.GenericCollection.Interfaces in '..\..\source\DForce.ei.GenericCollection.Interfaces.pas',
+  DForce.ei.Provider.Notary in '..\..\source\DForce.ei.Provider.Notary.pas',
+  DForce.ei.Logger in '..\..\source\DForce.ei.Logger.pas',
+  DForce.ei.Validation.Engine in '..\..\source\DForce.ei.Validation.Engine.pas',
+  DForce.ei.Validation.ValidationResult in '..\..\source\DForce.ei.Validation.ValidationResult.pas',
+  DForce.ei.Validation.Validator.Rules in '..\..\source\DForce.ei.Validation.Validator.Rules.pas',
+  DForce.ei.Validation.Validator.Values in '..\..\source\DForce.ei.Validation.Validator.Values.pas',
+  DForce.ei.Validation.Validator.Custom in '..\..\source\DForce.ei.Validation.Validator.Custom.pas';
+
+end.

@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{6FDFE884-9223-49E0-8404-75021A7B2FC0}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="eInvoice4D.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\samples\Demo01\Demo01.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\companions\eInvoiceService\eInvoiceService.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="eInvoice4D">
+        <MSBuild Projects="eInvoice4D.dproj"/>
+    </Target>
+    <Target Name="eInvoice4D:Clean">
+        <MSBuild Projects="eInvoice4D.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="eInvoice4D:Make">
+        <MSBuild Projects="eInvoice4D.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Demo01">
+        <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj"/>
+    </Target>
+    <Target Name="Demo01:Clean">
+        <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Demo01:Make">
+        <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="eInvoiceService">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceService.dproj"/>
+    </Target>
+    <Target Name="eInvoiceService:Clean">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceService.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="eInvoiceService:Make">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceService.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="eInvoiceServiceParams">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj"/>
+    </Target>
+    <Target Name="eInvoiceServiceParams:Clean">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="eInvoiceServiceParams:Make">
+        <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="eInvoice4D;Demo01;eInvoiceService;eInvoiceServiceParams"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="eInvoice4D:Clean;Demo01:Clean;eInvoiceService:Clean;eInvoiceServiceParams:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="eInvoice4D:Make;Demo01:Make;eInvoiceService:Make;eInvoiceServiceParams:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
