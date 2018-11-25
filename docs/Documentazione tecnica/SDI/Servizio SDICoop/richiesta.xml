@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='RichiestaStyle.xsl'?><ns3:Richiesta xmlns:ns3="http://www.fatturapa.it/sdi/richiesta/v2.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="2.2">
+    <TipoRichiesta>10</TipoRichiesta>
+    <Descrizione>Il presente accordo definisce le modalita' di erogazione, accesso ed utilizzo dei servizi sopra elencati per la trasmissione delle fatture elettroniche destinate alla Pubblica Amministrazione tramite il Sistema di Interscambio, secondo quanto previsto dal D.M. 3 Aprile 2013, numero 55,dei dati delle fatture emesse e ricevute secondo quanto previsto dal D. Lgs. 127/2015 e dal D.L. 193/2016, delle comunicazioni dei dati delle liquidazioni periodiche IVA secondo quanto previsto dal D.L. 193/2016.   </Descrizione>
+    <Sottoscrittore>
+        <Denominazione>LOGRES SRL</Denominazione>
+        <CodiceFiscale>09875340151</CodiceFiscale>
+        <CasellaPEC>logres@legalmail.it</CasellaPEC>
+        <SitoInternet>www.logres.it</SitoInternet>
+        <RiferimentoAccordo>
+            <Cognome>Cassano</Cognome>
+            <Nome>Maurizio</Nome>
+            <Telefono>0231800102</Telefono>
+            <Email>maurizio.cassano@studio-cassano.it</Email>
+            <OrarioDisponibile>dalle 9 alle 18 dal lun al ven</OrarioDisponibile>
+            <CodiceFiscale>CSSMRZ57R26F205S</CodiceFiscale>
+        </RiferimentoAccordo>
+        <RiferimentoTecnico>
+            <Cognome>Codebue</Cognome>
+            <Nome>Fabio</Nome>
+            <Telefono>3483515786</Telefono>
+            <Email>f.codebue@p-soft.biz</Email>
+            <OrarioDisponibile>dalle 9 alle 18 dal lun al ven</OrarioDisponibile>
+        </RiferimentoTecnico>
+    </Sottoscrittore>
+    <Proponente>
+        <Denominazione>Sistema d'Interscambio per la Fatturazione elettronica</Denominazione>
+        <SitoInternet>www.fatturapa.gov.it</SitoInternet>
+        <CasellaPEC>sdi01@pec.fatturapa.it</CasellaPEC>
+    </Proponente>
+    <Dati>
+        <Accreditamento>
+            <SDICoop>
+                <Trasmissione>
+                    <TrasmissioneFatture>
+                        <Descrizione>Il servizio consente al Sistema di Interscambio di trasmettere i messaggi di ricevuta e di notifica al sottoscrittore. Il servizio e' erogato dal sottoscrittore e fruito dal proponente. La descrizione del servizio e' riportata nel documento "SDICoop_Trasmissione" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDI-Coop_Trasmissione" nella versione in allegato al presente accordo.</Descrizione>
+                        <NomeWSDL>TrasmissioneFatture_v1.1.wsdl</NomeWSDL>
+                        <EndPoint>https://fatturazioneelettronica.quiko.net</EndPoint>
+                        <EndPointTest>https://testfe.quiko.net</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.1</Versione>
+                    </TrasmissioneFatture>
+                    <SdIRiceviFile>
+                        <Descrizione>Il servizio consente al sottoscrittore di trasmettere le fatture al Sistema di Interscambio. Il servizio e' erogato dal proponente e fruito dal sottoscrittore. La descrizione del servizio e' riportata nel documento "SDICoop_Trasmissione" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDICoop_Trasmissione" nella versione in allegato al presente accordo. </Descrizione>
+                        <NomeWSDL>SdIRiceviFile_v1.0.wsdl</NomeWSDL>
+                        <EndPoint>https://servizi.fatturapa.it/ricevi_file</EndPoint>
+                        <EndPointTest>https://testservizi.fatturapa.it/ricevi_file</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.0</Versione>
+                    </SdIRiceviFile>
+                </Trasmissione>
+                <Ricezione>
+                    <RicezioneFatture>
+                        <Descrizione>Il servizio consente al sottoscrittore di ricevere le fatture dal Sistema di Interscambio. Il servizio e' erogato dal sottoscrittore e fruito dal proponente. La descrizione del servizio e' riportata nel documento "SDICoop_Ricezione" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDICoop_Ricezione" nella versione in allegato al presente accordo. </Descrizione>
+                        <NomeWSDL>RicezioneFatture_v1.0.wsdl</NomeWSDL>
+                        <EndPoint>https://fatturazioneelettronica.quiko.net</EndPoint>
+                        <EndPointTest>https://testfe.quiko.net</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.0</Versione>
+                    </RicezioneFatture>
+                    <SdIRiceviNotifica>
+                        <Descrizione>Il servizio consente al sottoscrittore di trasmettere al Sistema di Interscambio i messaggi di notifica. Il servizio e' erogato dal proponente e fruito dal sottoscrittore. La descrizione del servizio e' riportata nel documento "SDICoop_Ricezione" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDICoop_Ricezione" nella versione in allegato al presente accordo. </Descrizione>
+                        <NomeWSDL>SdIRiceviNotifica_v1.0.wsdl</NomeWSDL>
+                        <EndPoint>https://servizi.fatturapa.it/ricevi_notifica</EndPoint>
+                        <EndPointTest>https://testservizi.fatturapa.it/ricevi_notifica</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.0</Versione>
+                    </SdIRiceviNotifica>
+                </Ricezione>
+                <DatiFattura>
+                    <TrasmissioneDatiFattura>
+                        <Descrizione>Il servizio consente al sottoscrittore di trasmettere i dati delle fatture emesse e ricevute al Sistema Ricevente, i dati delle liquidazioni periodiche IVA. La descrizione del servizio e' riportata nel documento "SDIDati" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDIDati" nella versione in allegato al presente accordo.  </Descrizione>
+                        <NomeWSDL>SdITrasmissioneFile_v2.0.wsdl</NomeWSDL>
+                        <EndPoint>https://servizi.fatturapa.it/dati-fattura</EndPoint>
+                        <EndPointTest>https://testservizi.fatturapa.it/dati-fattura</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.0</Versione>
+                    </TrasmissioneDatiFattura>
+                    <EsitoDatiFattura>
+                        <Descrizione>Il servizio consente al sottoscrittore di trasmettere i dati delle fatture emesse e ricevute al Sistema Ricevente, i dati delle liquidazioni periodiche IVA. La descrizione del servizio e' riportata nel documento "SDIDati" nella versione in allegato al presente accordo. Il wsdl del servizio e' riportato nel documento "SDIDati" nella versione in allegato al presente accordo.  </Descrizione>
+                        <NomeWSDL>SdITrasmissioneFile_v2.0.wsdl</NomeWSDL>
+                        <EndPoint>https://servizi.fatturapa.it/dati-fattura</EndPoint>
+                        <EndPointTest>https://testservizi.fatturapa.it/dati-fattura</EndPointTest>
+                        <DimensioneMaxMessaggio>5 Megabyte</DimensioneMaxMessaggio>
+                        <Versione>1.0</Versione>
+                    </EsitoDatiFattura>
+                </DatiFattura>
+                <Sicurezza>Il servizio e' disponibile tramite protocollo HTTPS basato sulla mutua identificazione chiamante-chiamato tramite certificati elettronici emessi dalla CA del proponente e forniti da questo al sottoscrittore. Al fine di produrre i certificati da utilizzare sia nella fase di accreditamento per la verifica della connettivita', cosiddetti "certificati di test", sia nella fase di avvio del servizio, cosiddetti "certificati di produzione"; il sottoscrittore, unitamente alla richiesta di accreditamento, fornisce al proponente gli elementi tecnici necessari tramite i file CSR (Certificate Signing Request) necessari per la generazione dei certificati. I file sono prodotti secondo le indicazioni riportate sul sito www.fatturapa.gov.it nella sezione "Strumenti - Accreditare il canale".</Sicurezza>
+            </SDICoop>
+            <DupliceRuolo>Si</DupliceRuolo>
+            <AttivazioneAvvioRevocaServizio>Il servizio e' attivato dal proponente in seguito alla ricezione della richiesta di accreditamento predisposta e firmata elettronicamente, secondo quanto riportato sul sito www.fatturapa.gov.it nella sezione "Strumenti - Accreditare il canale"; il servizio e' avviato dal proponente successivamente all'attivazione in seguito all'esito positivo delle prove di interoperabilita' e tramite la consegna al sottoscrittore dei certificati elettronici di identificazione. Il sottoscrittore puo' richiedere la revoca del servizio in qualsiasi momento fermo restando la facolta' del proponente di confermare o meno l'operazione di revoca compatibilmente con il sussistere di flussi ancora oggetto di elaborazione. Il proponente puo' richiedere la revoca del servizio per gravi inadempienze da parte del sottoscrittore o per un utilizzo improprio del servizio stesso. La data di avvio delle prove di interoperabilita' verra' comunicata dal proponente al sottoscrittore con e-mail agli indirizzi di posta indicati per il Riferimento dell'Accordo e il Riferimento Tecnico. Nelle attivita' necessarie per portare a termine l'accreditamento del canale, il proponente non puo' prestare assistenza per problematiche legate alla particolare tecnologia delle piattaforme adottate dal sottoscrittore. Condizione necessaria ad un efficace ricorso al canale e' che il sottoscrittore abbia una adeguata capacita' di utilizzo dello stesso e che riesca a svolgere agevolmente le attivita' propedeutiche all'accreditamento; pertanto la richiesta verra' revocata se, trascorsi 15 giorni dalla comunicazione di avvio delle prove di interoperabilita' per l'attivazione del servizio, queste non si siano concluse positivamente per cause non ascrivibili al proponente.</AttivazioneAvvioRevocaServizio>
+            <ModificaServizio>Le modalita' di funzionamento del servizio oggetto del presente accordo possono essere oggetto di modifiche da parte del proponente in qualsiasi momento, gli aggiornamenti sono comunicati al sottoscrittore sia tramite pubblicazione sul sito www.fatturapa.gov.it sia tramite gli indirizzi di posta elettronica riportate nella sezione "Dati del sottoscrittore". Tra la data di comunicazione e la data di applicazione degli aggiornamenti e' garantito un intervallo temporale di sessanta giorni. </ModificaServizio>
+            <Disponibilita>Sia il proponente sia il sottoscrittore garantiscono la disponibilita' del servizio dalle ore 01:00 alle ore 24:00, dal lunedi' alla domenica, dal 1 gennaio al 31 dicembre di ogni anno; l'intervallo dalle ore 00:00 alle ore 00:59 e' utilizzabile per la manutenzione ordinaria del servizio. L'eccezionale indisponibilita' per manutenzione straordinaria deve essere comunicata preventivamente tramite gli indirizzi di posta elettronica specificando chiaramente la data e ora di inizio e la data e ora di fine del periodo di indisponibilita' e richiedendo la conferma della ricezione del messaggio da parte del destinatario; il proponente comunica l'indisponibilita' del servizio anche tramite pubblicazione sul sito www.fatturapa.gov.it. In ogni caso la non disponibilita' e' ammessa per un intervallo temporale non superiore alle 8 ore per singola interruzione e per non piu' di tre interruzioni nello stesso mese.</Disponibilita>
+        </Accreditamento>
+        <CSRClientProd>
+            <NomeCsr>logresclient.csr</NomeCsr>
+            <CN>SDI-09875340151</CN>
+            <CSRCert>TUlJRENUQ0NBZkVDQVFBd2daRXhDekFKQmdOVkJBWVRBa2xVTVE4d0RRWURWUVFJREFaTmFXeGhibTh4RHpBTkJnTlZCQWNNQmsxcA0KYkdGdWJ6RVRNQkVHQTFVRUNnd0tURzluY21WeklITnliREVZTUJZR0ExVUVBd3dQVTBSSkxUQTVPRGMxTXpRd01UVXhNVEV3THdZSg0KS29aSWh2Y05BUWtCRmlKdFlYVnlhWHBwYnk1allYTnpZVzV2UUhOMGRXUnBieTFqWVhOellXNXZMbWwwTUlJQklqQU5CZ2txaGtpRw0KOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNwRWNUS05DVjBucllGWjV6UTkwajdMUzNtSzYxQ1hCKzE1ZGw2V29pcFpYYkF4QQ0KU1dXQnlrYzFOblFyTnhRM1BOREVtbEJnRTExdWhrL05GcFRzNEhSbW00bEtjRFdYaGdtcWZKYUZXRHNDTW8rLzNZYWhnR0Y1c0puZA0KODkxNmdveHZwRXJNbGlOVnkvZ0dTdThJbDBmUXRPeFAvbEZGaXYweVlGbE5vaGxkeVdWTFdzMkxnMVRGdHJpZkgxbDF5cVVwMlZTcg0KRWVjQkp3VFRhZDhpSnFIZ1kwYnlXc0hadzNYTHh1WGtjRC8xTkptVXZXUTJvbFdJci9pYVBoU050ZXpLYzJveUxjNDIzVFdiMmx0WA0KS1BzRmVQQ1dNUmhlU1lKQ3ZYSkFVbWIvSFJVTDU2aFpuR2NpSStyaXJLWkxudVRSbmVsMmZ4QlpPY2MydjR2TURRSURBUUFCb0RJdw0KRlFZSktvWklodmNOQVFrSE1RZ01CbXh2WjNKbGN6QVpCZ2txaGtpRzl3MEJDUUl4REF3S1RHOW5jbVZ6SUhOeWJEQU5CZ2txaGtpRw0KOXcwQkFRc0ZBQU9DQVFFQUU2RlIzSGVOV29oYXBleGx6YzduVlM2QTduZ2NsbzR3ZGpzeWZEVnZCZGJmaFZubFpkODAwMGI3N0ppcQ0KZUlqeENQUzdwVnJXTTJYNFFBMkdJMmVaSlVoL0F6MnRkVkx6ckk2QmJiV1lBMkV5ZkM4LzhUYTJxR01keFNrT0JZTnd3cG9KdW1Ebg0KVmxOQ3BKNnJGV0pFZFFJSnBSbFZEQ3A3cE1NSElJblEwenhHUDMzK2JOcW9aOTd6bVQraU5UbHNmUlNKNnJINkx6dm9aYmswb093Vw0KTjlhVStpLy9DVllqNFZIcWV6Wks3aHU1Q3liMEhnbUFjKzFqcE1qUDg0UzJDUm9kWk9pMS84bVhMQ1Y4eDR5Y2VlSG9LSVRkTlk3WQ0KQnV3Um5yKzFTQjNwazRIZGdjb1RNODU3WWpvcTFERzNvSUkzMDFCVHJRMUVaRUdHSkpVbVFBPT0=</CSRCert>
+        </CSRClientProd>
+        <CSRServerProd>
+            <NomeCsr>logres.csr</NomeCsr>
+            <CN>P-QUIKO.P-SOFT.BIZ</CN>
+            <CSRCert>TUlJREREQ0NBZlFDQVFBd2daUXhDekFKQmdOVkJBWVRBbWwwTVE4d0RRWURWUVFJREFaTmFXeGhibTh4RHpBTkJnTlZCQWNNQmsxcA0KYkdGdWJ6RVRNQkVHQTFVRUNnd0tURzluY21WeklITnliREViTUJrR0ExVUVBd3dTY0MxeGRXbHJieTV3TFhOdlpuUXVZbWw2TVRFdw0KTHdZSktvWklodmNOQVFrQkZpSnRZWFZ5YVhwcGJ5NWpZWE56WVc1dlFITjBkV1JwYnkxallYTnpZVzV2TG1sME1JSUJJakFOQmdrcQ0KaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUE0cER6Q0pxQWxmdWVLcWhmaEFpUnA3OFpUV25yMzNUeitQQWpPV1UyMUt3Zw0KMk5qNmZaVnFOdG9qZVdPNzEyYlZoeFdzOFFCamNudnU4aUhyNzBsZUF5TzV6WVZiU3JCVi9iOHlCN0RNVURFQlkvZjFER0lJeTBaSg0KYmN2dldJeDBTK0R1ZE1xRHdrZnFZcU1wckxzcWVKSGFTZ0Z4Q3BhQ0xKV21KcFl4T3RlU2pGc1dDazFLeVpLNVFvUUJWMjJmYVNUWQ0KM3BPNGJvbXlmZXZIUkxTMEVRZkEwNGl4aFcwWHN2OUlkT2RGRHlPdDdCUXNvN1NMR3c5Ui8vUVJkOW1Pc1ZXcU9YZzhYWTB3dmFQZQ0KS0NyeDF1QWZzU3daT0NzaXJ1cDVpcVZqZWJ6VEpMWXB6ell5Y0RZUXA0bGNBNDZ4RUlHYmFKMC9rbVltbS9VYTlMZUNjUUlEQVFBQg0Kb0RJd0ZRWUpLb1pJaHZjTkFRa0hNUWdNQm14dlozSmxjekFaQmdrcWhraUc5dzBCQ1FJeERBd0tURzluY21WeklITnliREFOQmdrcQ0KaGtpRzl3MEJBUVVGQUFPQ0FRRUFKUHQ5NXdqNHBNQnlaaEx6bDJtOGphd0M2Q3dwQXVER2d6cU5MUmVweWZkUWo1MklZdXJjclk2Uw0KNUd6SDdpYUsySDBKNC8vNmpIRnZuQmtBbnlXdWRKcHlmM014V2R2UHZMZVZUUUFON0pmUEQrMTRwbVJYSVlMTTFBRUgxYnYxZHhjUQ0KSS84VENFd0x0VS84ZjlQeUpESkVLcXhKNXpBbm9tejUvUzhqcFVxR3l1NUxIRS9MdldFTkhlOFRYQ2NWaW1Jd2c2Y2hrVi82YXZTdA0KVTJ3bGoyQVpqa3pKRmR1NXBYVFlGU3hmZm9nWEdzbTEzTjI0aUZlU0NRaHZyTVB3U2dtL0lmVzdvdHBrYjUyU2V6NDNZSU55VWdVdw0KTHNiL0M3d2IwYmRDZmRkVUo5cllTeEpHb2hURTJVTWdkT1dFdEtNL2lDc3NLdnVuMWNmZmZRdDJaZz09</CSRCert>
+        </CSRServerProd>
+    </Dati>
+    <Allegati>
+        <Allegato hidden="true">
+            <NomeFile>RichiestaStyle.xsl</NomeFile>
+            <Hash>4005280972bec27f0dc1acd160b981ac5c4feaf6022c010c9719d5445480e3c8</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>TrasmissioneTypes_v1.0.xsd</NomeFile>
+            <Hash>d9c6bbdabf73aa5a1df8a5d3fde3c0030e742c59c71b2f180330806d20c6d685</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>TrasmissioneTypes_v1.1.xsd</NomeFile>
+            <Hash>e72fbcc91eae4dc497fb5ea662f2f2407187766dae72d39cacd5a5a9f877e5da</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>TrasmissioneFatture_v1.1.wsdl</NomeFile>
+            <Hash>da80f4044754c923ed9df07c1d02112f1cf69393ea4472525482da089addc125</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>SdIRiceviFile_v1.0.wsdl</NomeFile>
+            <Hash>cfe2c728b29f30d73c581e53b1b8ee3f226de7c94482e6f2b26ddfcfa52f1a36</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>SDICoop_trasmissione_v2.0.pdf</NomeFile>
+            <Hash>6b3ace616682d16ffc0aefcc44f5b8e6dc498d999597d960b2e7f152c9d7f78d</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>RicezioneTypes_v1.0.xsd</NomeFile>
+            <Hash>1c480c930403cecc92d1cd67d21ac7a1ade2c5d595ce1fdc4e7000174f2960de</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>SdIRiceviNotifica_v1.0.wsdl</NomeFile>
+            <Hash>c7e36def75c5e59af78fab5405607dab758832ceb5603b58e22d4c0cfc0971a3</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>RicezioneFatture_v1.0.wsdl</NomeFile>
+            <Hash>78c1c91957a151f9c9606dbc42a51dbaac08ac5dc823468b58ed46f926723843</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>SDICoop_ricezione_v2.0.pdf</NomeFile>
+            <Hash>25b4f7baf76beaea1075a1da93b7c36777f7178928beaab63324521a33c956f3</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>SdITrasmissioneFile_v2.0.wsdl</NomeFile>
+            <Hash>ac5309e477cdd57debccf17d114c611a9140a057e59688f4b368e77c6efdb652</Hash>
+        </Allegato>
+        <Allegato hidden="false">
+            <NomeFile>TrasmissioneFileTypes_v2.0.xsd</NomeFile>
+            <Hash>9d89846b2b61d8e6b536decb375033a36768da38ecce3756d3af170887d9ce12</Hash>
+        </Allegato>
+    </Allegati>
+    <Disconoscimento>Il presente accordo di servizio e' da ritenersi valido se correttamente firmato elettronicamente dal Sistema di Interscambio: Il presente accordo costituisce richiesta di accreditamento esclusivamente se contenuto in un archivio compresso denominato "RichiestaAccreditamento.zip" comprendente i documenti richiamati nella sezione "Allegati" l'archivio compresso deve essere firmato elettronicamente dal riferimento del sottoscrittore ed inviato tramite posta elettronica certificata al Sistema di Interscambio secondo le modalita' riportate sul sito www.fatturapa.gov.it nella sezione "Strumenti - Accreditare il canale". Con l'apposizione della firma elettronica al file "RichiestaAccreditamento.zip" il referente del sottoscrittore dichiara la veridicita' delle informazioni riportate nel presente accordo e ne accetta le condizioni e le regole, comprese le condizioni e le regole riportate nei documenti richiamati nella sezione "Allegati" e sul sito www.fatturapa.gov.it nella sezione "Strumenti - Accreditare il canale".</Disconoscimento>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="reference-document" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2002/06/xmldsig-filter2"><XPath xmlns="http://www.w3.org/2002/06/xmldsig-filter2" Filter="subtract">/descendant::ds:Signature</XPath></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>qc1/+Bw9AyFDu0zN7dDm5NbN95xV6WtXJ8dCIWBI4WE=</ds:DigestValue></ds:Reference><ds:Reference Id="reference-signedpropeties" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>epbrqOqyNDCGfaTzP8tQ0wEGM5eShygx35C5VvoY26U=</ds:DigestValue></ds:Reference><ds:Reference Id="reference-keyinfo" URI="#KeyInfoId"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>KOYoXMkzDVvL2FW5rnlHaZTYTwzoT6QdHMDIMR/iOIc=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValue1">E0vjxUYPXRbT+8/ieVDD0qTv13n7Xs3/roOC1UAcSuvDL0d5a5Ye/N3qO92l6gKMfqsrxW0qG125
+GbbgNEwZGuUTB29rOf5dJR3SrRQHeQPDk2FbgVCXNyv0E5dWHUtNsqp6uL9SJ4BqxUxfoC5xhMs6
+8+FMreA3L1/fNpFVs/qH3x0IRgjccT1QuXpWYoS8Aogj7NSetSL0b7KBHabPDreJvy51fQzQBsgO
+Fe4X30m5XEOYZroYBmrYx2ZN+kJ2gFrlYKvwIHKuac9Cy5UAElJzrS/4l4otc/mr2D4DCV79hpUF
+IQekyQMlCCT9oQzNCi7XmwI2XRNzaJdUKRQGew==</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId"><ds:X509Data><ds:X509Certificate>MIIEZTCCA02gAwIBAgIITPn9utyy2GMwDQYJKoZIhvcNAQELBQAwbTELMAkGA1UEBhMCSVQxHjAc
+BgNVBAoTFUFnZW56aWEgZGVsbGUgRW50cmF0ZTEbMBkGA1UECxMSU2Vydml6aSBUZWxlbWF0aWNp
+MSEwHwYDVQQDExhDQSBBZ2VuemlhIGRlbGxlIEVudHJhdGUwHhcNMTcwNTI0MTIzNDE3WhcNMjAw
+NTI0MTIzNDE3WjB0MQswCQYDVQQGEwJJVDEeMBwGA1UECgwVQWdlbnppYSBkZWxsZSBFbnRyYXRl
+MRswGQYDVQQLDBJTZXJ2aXppIFRlbGVtYXRpY2kxKDAmBgNVBAMMH1Npc3RlbWEgSW50ZXJzY2Ft
+YmlvIEZhdHR1cmEgUEEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCLJQZHLMe7PybW
+stb/sLv0kk8dewRdDZ4VDAWtxuE7AOCXzSeuTOj3RLW3V53jYYLnjvUFO4v/q8/Y70sG+D9/3xt7
+7E4Q+my42qfGnjDFa5CNNvmm/Bh707k/8RVQtaDmFNCu0qq+z8lk9Nqy+rwEX7fPJ5M0a3jK4alH
+1P25thEGFHsJi51swuddW2jc5TLLpDce6dMAFu7ysRQcosXEKOpY9zGimZ51m+emX1cGa2sUpuGF
+VYrRywd97trU+8qPmvJlYUlSV3h05TZW6imrvjonO3k2bHIjnk/ttkdNoO5kp0PeUN0XVAEHi+fZ
+6q8LfJQJZPJV6jYFqx6OjyehAgMBAAGjggEAMIH9MB8GA1UdIwQYMBaAFOpEPx8Z4zc+q6qUgqWf
+6/wWun+1MIGqBgNVHR8EgaIwgZ8wgZyggZmggZaGgZNsZGFwOi8vY2Fkcy5lbnRyYXRlLmZpbmFu
+emUuaXQvQ049Q0ElMjBBZ2VuemlhJTIwZGVsbGUlMjBFbnRyYXRlLE9VPVNlcnZpemklMjBUZWxl
+bWF0aWNpLE89QWdlbnppYSUyMGRlbGxlJTIwRW50cmF0ZSxDPWl0P2NlcnRpZmljYXRlUmV2b2Nh
+dGlvbkxpc3QwHQYDVR0OBBYEFPvx4ds7h8HRgUpb4YbAY/nVZ/OqMA4GA1UdDwEB/wQEAwIGQDAN
+BgkqhkiG9w0BAQsFAAOCAQEAMp2EYR25WLlVBbf2mUKxVJwN0/zkEc8Ejz0po5RTMuskjbbU1JR1
+t72PDTNVAkuouj3X6Fx8TiO6CaEG9ShGdJHosMwekj5S7Iqd0xS66KlKuQkmPyHBPguS2/WLdLiT
+IFn5J8hnKUrXzOr48s48K5iY4QcFcA6wa2PcmLmBFj/uRHqzdrwPmY0orEZkJo9Zh+W1/BCMVGL+
+Ai5j5vaTmcRU4d6z7TekrfSthjxaYY1v8PVeS6YOpYb2MwPXr9MPm/4cpP2tZqhtWFRkUhqBVQ69
+Nf+6rShNRNk9kwWgyQvuJI4y50d5tcMvca6tin4WzrHoe6I2+DtVpQxx5wtvZg==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties_1"><xades:SignedSignatureProperties><xades:SigningTime>2018-07-02T16:08:51Z</xades:SigningTime></xades:SignedSignatureProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></ns3:Richiesta>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsi="http://ws-i.org/profiles/basic/1.1/xsd"
+	xmlns:types="http://www.fatturapa.gov.it/sdi/ws/monitoraggio/v1.0/types"
+	targetNamespace="http://www.fatturapa.gov.it/sdi/ws/monitoraggio/v1.0/types"
+	version="1.0">
+
+	<!-- ELEMENT -->
+	<xsd:element name="richiestaMonitoraggio" type="types:richiestaMonitoraggio_Type"/>
+	<xsd:element name="rispostaMonitoraggio" type="types:rispostaMonitoraggio_Type"/>
+
+	<!-- COMPLEX TYPES -->
+	<xsd:complexType name="richiestaMonitoraggio_Type">
+		<xsd:sequence>
+			<xsd:element name="IdSdI" type="types:identificativoSdI_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleTrasmittente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleCedente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleEmittente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleCessionario" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="Stato" type="types:statoFile_Type" minOccurs="0" />
+			<xsd:element name="DataInizio" type="xsd:date" />
+			<xsd:element name="DataFine" type="xsd:date" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="rispostaMonitoraggio_Type">
+		<xsd:sequence>
+			<xsd:element name="Flusso" type="types:DettagliFileSdI_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="Errore" type="types:erroreMonitoraggio_Type" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="DettagliFileSdI_Type">
+		<xsd:sequence>
+			<xsd:element name="IdSdI" type="types:identificativoSdI_Type" />
+			<xsd:element name="NomeFile" type="types:nomeFile_Type" />
+			<xsd:element name="DataInvio" type="xsd:dateTime" />
+			<xsd:element name="Stato" type="types:statoFile_Type" />
+			<xsd:element name="NumeroFattura" type="types:numeroFattura_Type" minOccurs="0" />
+			<xsd:element name="DataFattura" type="xsd:date" minOccurs="0" />
+			<xsd:element name="IdFiscaleTrasmittente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleCedente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleEmittente" type="types:idFiscale_Type" minOccurs="0" />
+			<xsd:element name="IdFiscaleCessionario" type="types:idFiscale_Type" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<!-- SIMPLE TYPES -->
+	<xsd:simpleType name="identificativoSdI_Type">
+		<xsd:restriction base="xsd:integer">
+			<xsd:totalDigits value="12" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="nomeFile_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[a-zA-Z0-9_\.]{9,50}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="idFiscale_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="28"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="numeroFattura_Type">
+		<xsd:restriction base="xsd:normalizedString">
+			<xsd:pattern value="(\p{IsBasicLatin}{1,20})" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="annoFattura_Type">
+		<xsd:restriction base="xsd:nonNegativeInteger">
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="statoFile_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SF00">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF00 = FILE SCARTATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			
+			<xsd:enumeration value="SF01">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF01 = DA INOLTRARE
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			
+			<xsd:enumeration value="SF02">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF02 = INOLTRATA
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			
+			<xsd:enumeration value="SF03">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF03 = ACCETTATA
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+	
+			<xsd:enumeration value="SF04">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF04 = RIFIUTATA
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+	
+			<xsd:enumeration value="SF05">
+				<xsd:annotation>
+					<xsd:documentation>
+						SF05 = NON RECAPITABILE
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="erroreMonitoraggio_Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="EM01">
+				<xsd:annotation>
+					<xsd:documentation>
+						EM01 = UTENTE NON ABILITATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			
+			<xsd:enumeration value="EM02" >
+				<xsd:annotation>
+					<xsd:documentation>
+						EM02 = SERVIZIO NON DISPONIBILE 
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			
+			<xsd:enumeration value="EM03">
+				<xsd:annotation>
+					<xsd:documentation>
+						EM03 = INTERVALLO DATE TROPPO GRANDE: SARANNO RESTITUITI I DATI 
+						PER UN INTERVALLO MASSIMO DI 90 GIORNI A PARTIRE DALLA DATA DI INIZIO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>
