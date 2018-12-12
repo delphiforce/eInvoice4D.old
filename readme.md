@@ -6,7 +6,7 @@ Libreria per la fatturazione elettronica per Delphi
 
 
 
-Agg. 2018.12.12
+Agg. 2018.12.12 - *Release: Santa Lucia*
 
 - aggiunta cartella docs con la documentazione recuperata dai siti dell'AdE (Agenzia delle Entrate)
 - terminata la gestione esiti da intermediario per il ciclo attivo
