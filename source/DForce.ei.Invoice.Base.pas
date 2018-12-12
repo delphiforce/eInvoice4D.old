@@ -1,55 +1,54 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
 { ------------------------------------------------------------------------- }
-{ Generated on: 05/05/2015 18:58:34                                         }
-{ Generated from: fatturapa_v1.1.xsd 									    }
-{ versione 1.2.1                                                            }
-{ DA AGGIUNGERE A MANO:                                                     }
-{  - Tutte le proprietà nelle classi (copiarle dalle interfacce)            }
-{  - Attributo [ioEntity] in ogni classe                                    }
-{  - Attributo [ioBelongsTo(...)] nelle proprietà oggetto di una relazione  }
-{    con un'altra classe figlia                                             }
-{  - Direttiva {$RTTI EXPLICIT METHODS([vcProtected, vcPublic, vcPublished])}
-{    PROPERTIES([vcProtected, vcPublic, vcPublished])                       }
-{  prima dello uses di questa Unit.                                         }
-{***************************************************************************}
-
+{ Generated on: 05/05/2015 18:58:34 }
+{ Generated from: fatturapa_v1.1.xsd }
+{ versione 1.2.1 }
+{ DA AGGIUNGERE A MANO: }
+{ - Tutte le proprietà nelle classi (copiarle dalle interfacce) }
+{ - Attributo [ioEntity] in ogni classe }
+{ - Attributo [ioBelongsTo(...)] nelle proprietà oggetto di una relazione }
+{ con un'altra classe figlia }
+{ - Direttiva {$RTTI EXPLICIT METHODS([vcProtected, vcPublic, vcPublished]) }
+{ PROPERTIES([vcProtected, vcPublic, vcPublished]) }
+{ prima dello uses di questa Unit. }
+{ *************************************************************************** }
 
 unit DForce.ei.Invoice.Base;
 
@@ -1216,7 +1215,8 @@ type
     property CAB: UnicodeString read Get_CAB write Set_CAB;
     property BIC: UnicodeString read Get_BIC write Set_BIC;
     property ScontoPagamentoAnticipato: UnicodeString read Get_ScontoPagamentoAnticipato write Set_ScontoPagamentoAnticipato;
-    property DataLimitePagamentoAnticipato: UnicodeString read Get_DataLimitePagamentoAnticipato write Set_DataLimitePagamentoAnticipato;
+    property DataLimitePagamentoAnticipato: UnicodeString read Get_DataLimitePagamentoAnticipato
+      write Set_DataLimitePagamentoAnticipato;
     property PenalitaPagamentiRitardati: UnicodeString read Get_PenalitaPagamentiRitardati write Set_PenalitaPagamentiRitardati;
     property DataDecorrenzaPenale: UnicodeString read Get_DataDecorrenzaPenale write Set_DataDecorrenzaPenale;
     property CodicePagamento: UnicodeString read Get_CodicePagamento write Set_CodicePagamento;
@@ -3283,7 +3283,8 @@ end;
 
 function NewFatturaElettronica: IXMLFatturaElettronicaType;
 begin
-  Result := NewXMLDocument.GetDocBinding('FatturaElettronica', TXMLFatturaElettronicaType, TargetNamespace) as IXMLFatturaElettronicaType;
+  Result := NewXMLDocument.GetDocBinding('FatturaElettronica', TXMLFatturaElettronicaType, TargetNamespace)
+    as IXMLFatturaElettronicaType;
 end;
 
 { TXMLFatturaElettronicaType }
@@ -3293,8 +3294,8 @@ begin
   RegisterChildNode('FatturaElettronicaHeader', TXMLFatturaElettronicaHeaderType);
   RegisterChildNode('FatturaElettronicaBody', TXMLFatturaElettronicaBodyType);
   RegisterChildNode('Signature', TXMLSignatureType_ds);
-  FFatturaElettronicaBody := CreateCollection(TXMLFatturaElettronicaBodyTypeList, IXMLFatturaElettronicaBodyType, 'FatturaElettronicaBody')
-    as IXMLFatturaElettronicaBodyTypeList;
+  FFatturaElettronicaBody := CreateCollection(TXMLFatturaElettronicaBodyTypeList, IXMLFatturaElettronicaBodyType,
+    'FatturaElettronicaBody') as IXMLFatturaElettronicaBodyTypeList;
   inherited;
 end;
 
@@ -4089,8 +4090,8 @@ begin
   RegisterChildNode('DatiBollo', TXMLDatiBolloType);
   RegisterChildNode('DatiCassaPrevidenziale', TXMLDatiCassaPrevidenzialeType);
   RegisterChildNode('ScontoMaggiorazione', TXMLScontoMaggiorazioneType);
-  FDatiCassaPrevidenziale := CreateCollection(TXMLDatiCassaPrevidenzialeTypeList, IXMLDatiCassaPrevidenzialeType, 'DatiCassaPrevidenziale')
-    as IXMLDatiCassaPrevidenzialeTypeList;
+  FDatiCassaPrevidenziale := CreateCollection(TXMLDatiCassaPrevidenzialeTypeList, IXMLDatiCassaPrevidenzialeType,
+    'DatiCassaPrevidenziale') as IXMLDatiCassaPrevidenzialeTypeList;
   FScontoMaggiorazione := CreateCollection(TXMLScontoMaggiorazioneTypeList, IXMLScontoMaggiorazioneType, 'ScontoMaggiorazione')
     as IXMLScontoMaggiorazioneTypeList;
   FCausale := CreateCollection(TXMLString200LatinTypeList, IXMLNode, 'Causale') as IXMLString200LatinTypeList;
@@ -4771,7 +4772,8 @@ procedure TXMLDatiBeniServiziType.AfterConstruction;
 begin
   RegisterChildNode('DettaglioLinee', TXMLDettaglioLineeType);
   RegisterChildNode('DatiRiepilogo', TXMLDatiRiepilogoType);
-  FDettaglioLinee := CreateCollection(TXMLDettaglioLineeTypeList, IXMLDettaglioLineeType, 'DettaglioLinee') as IXMLDettaglioLineeTypeList;
+  FDettaglioLinee := CreateCollection(TXMLDettaglioLineeTypeList, IXMLDettaglioLineeType, 'DettaglioLinee')
+    as IXMLDettaglioLineeTypeList;
   FDatiRiepilogo := CreateCollection(TXMLDatiRiepilogoTypeList, IXMLDatiRiepilogoType, 'DatiRiepilogo') as IXMLDatiRiepilogoTypeList;
   inherited;
 end;
@@ -4793,7 +4795,8 @@ begin
   RegisterChildNode('CodiceArticolo', TXMLCodiceArticoloType);
   RegisterChildNode('ScontoMaggiorazione', TXMLScontoMaggiorazioneType);
   RegisterChildNode('AltriDatiGestionali', TXMLAltriDatiGestionaliType);
-  FCodiceArticolo := CreateCollection(TXMLCodiceArticoloTypeList, IXMLCodiceArticoloType, 'CodiceArticolo') as IXMLCodiceArticoloTypeList;
+  FCodiceArticolo := CreateCollection(TXMLCodiceArticoloTypeList, IXMLCodiceArticoloType, 'CodiceArticolo')
+    as IXMLCodiceArticoloTypeList;
   FScontoMaggiorazione := CreateCollection(TXMLScontoMaggiorazioneTypeList, IXMLScontoMaggiorazioneType, 'ScontoMaggiorazione')
     as IXMLScontoMaggiorazioneTypeList;
   FAltriDatiGestionali := CreateCollection(TXMLAltriDatiGestionaliTypeList, IXMLAltriDatiGestionaliType, 'AltriDatiGestionali')

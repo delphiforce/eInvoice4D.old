@@ -4,7 +4,6 @@ interface
 
 uses Winapi.Windows,
   Winapi.Messages,
-  System.SysUtils,
   System.Variants,
   System.Classes,
   Vcl.Graphics,
@@ -25,7 +24,6 @@ type
     Button2: TButton;
     btnInviaAProviderSemplice: TButton;
     btnNotifications: TButton;
-    lbl1: TLabel;
     Bevel1: TBevel;
     lblInfoArubaAPI: TLabel;
     cmbProvider: TComboBox;
@@ -39,6 +37,9 @@ type
     btnLoadFromStreamBase64: TButton;
     btnLoadFromFile: TButton;
     Button1: TButton;
+    btnNotificaNS: TButton;
+    Button4: TButton;
+    btnNotificaNE: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnNotificationsClick(Sender: TObject);
     procedure btnGeneraXMLDiProvaClick(Sender: TObject);
@@ -53,6 +54,9 @@ type
     procedure btnLoadFromFileClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure btnNotificaNSClick(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure btnNotificaNEClick(Sender: TObject);
   private
   public
     { Public declarations }
@@ -70,7 +74,10 @@ uses xmldom,
   XMLIntf,
   System.IOUtils,
   System.DateUtils,
-  System.UITypes;
+  System.UITypes,
+  DForce.ei.Notification.Interfaces,
+  DForce.ei.Notification.Factory,
+  System.SysUtils;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -131,6 +138,99 @@ begin
       Memo1.Lines.Add(LValidationResult.Code);
     end;
   end;
+end;
+
+procedure TMainForm.btnNotificaNEClick(Sender: TObject);
+var
+  LNotificaNE: IeiNotificationNEEx;
+  LXmlNotificaNE: string;
+  LFileXML: TFileStream;
+  LStringXML: TStringStream;
+  i: Integer;
+begin
+  LFileXML := TFileStream.Create(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001.xml'), fmOpenRead);
+  try
+    LStringXML := TStringStream.Create;
+    try
+      LStringXML.CopyFrom(LFileXML, 0);
+      LXmlNotificaNE := LStringXML.DataString;
+      LNotificaNE := TeiNotificationFactory.NewNotificationNEFromString(LXmlNotificaNE);
+      Memo1.Lines.Clear;
+      Memo1.Lines.Add(LNotificaNE.IdentificativoSDI);
+      Memo1.Lines.Add(LNotificaNE.NomeFile);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.IdentificativoSDI);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.RiferimentoFattura.NumeroFattura);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.RiferimentoFattura.AnnoFattura);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.RiferimentoFattura.PosizioneFattura);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.Esito);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.Descrizione);
+      Memo1.Lines.Add(LNotificaNE.EsitoCommittente.MessageIdCommittente);
+      Memo1.Lines.Add(LNotificaNE.MessageId);
+      Memo1.Lines.Add(LNotificaNE.PecMessageId);
+      Memo1.Lines.Add(LNotificaNE.Note);
+    finally
+      LStringXML.Free;
+    end;
+
+    Memo1.Lines.Add('-------------------------------------');
+    Memo1.Lines.Add('RAW XML:');
+    Memo1.Lines.Add('-------------------------------------');
+    Memo1.Lines.Add(LNotificaNE.ToString);
+  finally
+    LFileXML.Free;
+  end;
+end;
+
+procedure TMainForm.btnNotificaNSClick(Sender: TObject);
+var
+  LNotificaNS: IeiNotificationNSEx;
+  LXmlNotificaNS: string;
+  LFileXML: TFileStream;
+  LStringXML: TStringStream;
+  i: Integer;
+begin
+  LFileXML := TFileStream.Create(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NS_001.xml'), fmOpenRead);
+  try
+    LStringXML := TStringStream.Create;
+    try
+      LStringXML.CopyFrom(LFileXML, 0);
+      LXmlNotificaNS := LStringXML.DataString;
+      LNotificaNS := TeiNotificationFactory.NewNotificationNSFromString(LXmlNotificaNS);
+      Memo1.Lines.Clear;
+      Memo1.Lines.Add(LNotificaNS.IdentificativoSDI);
+      Memo1.Lines.Add(LNotificaNS.NomeFile);
+      Memo1.Lines.Add(LNotificaNS.DataOraRicezione);
+      Memo1.Lines.Add(LNotificaNS.RiferimentoArchivio.IdentificativoSDI);
+      Memo1.Lines.Add(LNotificaNS.RiferimentoArchivio.NomeFile);
+      Memo1.Lines.Add(LNotificaNS.MessageId);
+      Memo1.Lines.Add(LNotificaNS.Note);
+      for i := 0 to LNotificaNS.ListaErrori.Errore.Count - 1 do
+      begin
+        Memo1.Lines.Add('');
+        Memo1.Lines.Add(LNotificaNS.ListaErrori.Errore[i].Codice);
+        Memo1.Lines.Add(LNotificaNS.ListaErrori.Errore[i].Descrizione);
+      end;
+
+      Memo1.Lines.Add('-------------------------------------');
+      Memo1.Lines.Add('RAW XML:');
+      Memo1.Lines.Add('-------------------------------------');
+      Memo1.Lines.Add(LNotificaNS.ToString);
+    finally
+      LStringXML.Free;
+    end;
+  finally
+    LFileXML.Free;
+  end;
+end;
+
+procedure TMainForm.Button4Click(Sender: TObject);
+var
+  LInvoice: IeiInvoice;
+begin
+  Memo1.Lines.Clear;
+  LInvoice := ei.NewInvoiceFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR02.xml'));
+  Memo1.Lines.Text := LInvoice.ToString;
+  LInvoice.SaveToFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR03.xml'));
 end;
 
 procedure TMainForm.btnLoadFromFileClick(Sender: TObject);
@@ -233,7 +333,7 @@ var
 begin
   LInvoice := ei.NewInvoice;
   LInvoice.FillWithSampleData;
-  { permette di usare il provider in un unica sessione per più fatture}
+  { permette di usare il provider in un unica sessione per più fatture }
   ei.Connect;
   try
     for LResponse in ei.SendInvoice(LInvoice) do

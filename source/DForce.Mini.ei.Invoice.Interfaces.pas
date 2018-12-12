@@ -51,6 +51,7 @@ type
     function ToString: String;
     procedure SaveToFile(const AFileName: String);
     procedure SaveToStream(const AStream: TStream);
+    function IsPA: Boolean;
   end;
 
 implementation

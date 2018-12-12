@@ -14,13 +14,6 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object lbl1: TLabel
-    Left = 560
-    Top = 240
-    Width = 16
-    Height = 13
-    Caption = 'lbl1'
-  end
   object Bevel1: TBevel
     Left = 270
     Top = 8
@@ -57,9 +50,9 @@ object MainForm: TMainForm
   end
   object Memo1: TMemo
     Left = 0
-    Top = 192
+    Top = 259
     Width = 900
-    Height = 391
+    Height = 324
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
@@ -204,5 +197,35 @@ object MainForm: TMainForm
     Caption = 'Ricezione'
     TabOrder = 14
     OnClick = Button1Click
+  end
+  object btnNotificaNS: TButton
+    Left = 8
+    Top = 202
+    Width = 127
+    Height = 39
+    Cancel = True
+    Caption = 'Notifica NS'
+    TabOrder = 15
+    OnClick = btnNotificaNSClick
+  end
+  object Button4: TButton
+    Left = 727
+    Top = 96
+    Width = 127
+    Height = 39
+    Cancel = True
+    Caption = 'Load from file PROVA'
+    TabOrder = 16
+    OnClick = Button4Click
+  end
+  object btnNotificaNE: TButton
+    Left = 141
+    Top = 202
+    Width = 127
+    Height = 39
+    Cancel = True
+    Caption = 'Notifica NE'
+    TabOrder = 17
+    OnClick = btnNotificaNEClick
   end
 end

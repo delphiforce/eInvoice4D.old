@@ -42,11 +42,14 @@ unit DForce.Mini.ei;
 interface
 
 uses
-  DForce.Mini.ei.Invoice.Interfaces, System.Classes;
+  DForce.Mini.ei.Invoice.Interfaces, System.Classes,
+  DForce.Mini.ei.Notification.Interfaces;
 
 type
 
   IeiInvoice = IeiInvoiceMini;
+  IeiNotificationNS = IeiNotificationNSmini;
+  IeiNotificationNE = IeiNotificationNEmini;
 
   ei = class
   public
@@ -54,12 +57,20 @@ type
     class function NewInvoiceFromString(const AStringXML: String): IeiInvoice;
     class function NewInvoiceFromFile(const AFileName: String): IeiInvoice;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoice;
+
+    class function NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
+    class function NewNotificationNSFromFile(const AFileName: String): IeiNotificationNS;
+    class function NewNotificationNSFromStream(const AStream: TStream): IeiNotificationNS;
+
+    class function NewNotificationNEFromString(const AStringXML: String): IeiNotificationNE;
+    class function NewNotificationNEFromFile(const AFileName: String): IeiNotificationNE;
+    class function NewNotificationNEFromStream(const AStream: TStream): IeiNotificationNE;
   end;
 
 implementation
 
 uses
-  DForce.Mini.ei.Invoice.Factory;
+  DForce.Mini.ei.Invoice.Factory, DForce.Mini.ei.Notification.Factory;
 
 { ei }
 
@@ -81,6 +92,36 @@ end;
 class function ei.NewInvoiceFromString(const AStringXML: String): IeiInvoice;
 begin
   Result := TeiInvoiceMiniFactory.NewInvoiceFromString(AStringXML);
+end;
+
+class function ei.NewNotificationNEFromFile(const AFileName: String): IeiNotificationNE;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNEFromFile(AFileName);
+end;
+
+class function ei.NewNotificationNEFromStream(const AStream: TStream): IeiNotificationNE;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNEFromStream(AStream);
+end;
+
+class function ei.NewNotificationNEFromString(const AStringXML: String): IeiNotificationNE;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNEFromString(AStringXML);
+end;
+
+class function ei.NewNotificationNSFromFile(const AFileName: String): IeiNotificationNS;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNSFromFile(AFileName);
+end;
+
+class function ei.NewNotificationNSFromStream(const AStream: TStream): IeiNotificationNS;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNSFromStream(AStream);
+end;
+
+class function ei.NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
+begin
+  Result := TeiNotificationMiniFactory.NewNotificationNSFromString(AStringXML);
 end;
 
 end.

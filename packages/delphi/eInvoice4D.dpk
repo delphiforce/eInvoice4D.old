@@ -68,6 +68,12 @@ contains
   DForce.ei.Validation.ValidationResult in '..\..\source\DForce.ei.Validation.ValidationResult.pas',
   DForce.ei.Validation.Validator.Rules in '..\..\source\DForce.ei.Validation.Validator.Rules.pas',
   DForce.ei.Validation.Validator.Values in '..\..\source\DForce.ei.Validation.Validator.Values.pas',
-  DForce.ei.Validation.Validator.Custom in '..\..\source\DForce.ei.Validation.Validator.Custom.pas';
+  DForce.ei.Validation.Validator.Custom in '..\..\source\DForce.ei.Validation.Validator.Custom.pas',
+  DForce.ei.Notification.NS.Base in '..\..\source\DForce.ei.Notification.NS.Base.pas',
+  DForce.ei.Notification.Interfaces in '..\..\source\DForce.ei.Notification.Interfaces.pas',
+  DForce.ei.Notification.Factory in '..\..\source\DForce.ei.Notification.Factory.pas',
+  DForce.ei.Notification.NS.Ex in '..\..\source\DForce.ei.Notification.NS.Ex.pas',
+  DForce.ei.Notification.NE.Base in '..\..\source\DForce.ei.Notification.NE.Base.pas',
+  DForce.ei.Notification.NE.Ex in '..\..\source\DForce.ei.Notification.NE.Ex.pas';
 
 end.

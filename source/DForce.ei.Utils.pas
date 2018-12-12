@@ -41,7 +41,8 @@ unit DForce.ei.Utils;
 
 interface
 
-uses DForce.ei, DForce.ei.Response.Interfaces;
+uses DForce.ei.Response.Interfaces, System.Classes,
+  DForce.ei.Invoice.Interfaces;
 
 type
   TeiRoundMode = (rmRaise, rmRound, rmTrunc);
@@ -52,16 +53,21 @@ type
   end;
 
   TeiUtils = class
+  public
     class function DateToString(const Value: TDateTime): string;
     class function DateTimeToString(const Value: TDateTime): string;
     class function NumberToString(const Value: extended; const Decimals: integer = 2): string;
     class function DateTimeLocalFromIso8601(const Value: string): TDateTime;
     class function DateTimeUTCFromIso8601(const Value: string): TDateTime;
-    class function ResponseTypeToEnum(const AResponseType: string): TeiResponseType;
-    class function ResponseTypeForHumans(const AResponseType: TeiResponseType): string;
-    class function ResponseTypeToString(const AResponseType: TeiResponseType): string;
-    class function StringToResponseType(const AResponseType: String): TeiResponseType;
-    class procedure FillInvoiceSample(const AInvoice: IeiInvoice);
+    class function ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
+    class function ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;
+    class function ResponseTypeToString(const AResponseType: TeiResponseTypeInt): string;
+    class function StringToResponseType(const AResponseType: String): TeiResponseTypeInt;
+    class procedure FillInvoiceSample(const AInvoice: IeiInvoiceEx);
+    class procedure CopyObjectState(const ASource, ADestination: TObject); overload;
+    class procedure CopyObjectState(const ASource, ADestination: IInterface); overload;
+    class procedure StringToStream(const ADestStream: TStream; const ASourceString: String);
+    class function StreamToString(const ASourceStream: TStream): string;
   end;
 
 implementation
@@ -70,9 +76,25 @@ uses System.SysUtils,
   System.Math,
   DForce.ei.Exception,
   IdGlobalProtocols,
-  XSBuiltIns, DForce.ei.Invoice.Base, System.DateUtils, System.TypInfo;
+  XSBuiltIns, DForce.ei.Invoice.Base, System.DateUtils, System.TypInfo, System.Rtti;
 
 { TeiUtils }
+
+class procedure TeiUtils.StringToStream(const ADestStream: TStream; const ASourceString: String);
+var
+  LStringStream: TStringStream;
+begin
+  // Check the stream
+  if not Assigned(ADestStream) then
+    raise eiGenericException.Create('"AStream" parameter not assigned');
+  // Save invoice into the stream
+  LStringStream := TStringStream.Create(ASourceString);
+  try
+    ADestStream.CopyFrom(LStringStream, 0);
+  finally
+    LStringStream.Free;
+  end;
+end;
 
 class function TeiUtils.DateToString(const Value: TDateTime): string;
 var
@@ -85,7 +107,7 @@ begin
   result := FormatDateTime('yyyy-mm-dd', Value, _fs);
 end;
 
-class function TeiUtils.ResponseTypeForHumans(const AResponseType: TeiResponseType): string;
+class function TeiUtils.ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;
 begin
   case AResponseType of
     rtSDIMessageRC:
@@ -111,7 +133,7 @@ begin
   end;
 end;
 
-class function TeiUtils.ResponseTypeToEnum(const AResponseType: string): TeiResponseType;
+class function TeiUtils.ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
 begin
   if AResponseType = 'RC' then
     result := rtSDIMessageRC
@@ -135,17 +157,30 @@ begin
     result := rtUnknown;
 end;
 
-class function TeiUtils.ResponseTypeToString(const AResponseType: TeiResponseType): string;
+class function TeiUtils.ResponseTypeToString(const AResponseType: TeiResponseTypeInt): string;
 begin
-  result := GetEnumName(TypeInfo(TeiResponseType), Ord(AResponseType));
+  result := GetEnumName(TypeInfo(TeiResponseTypeInt), Ord(AResponseType));
 end;
 
-class function TeiUtils.StringToResponseType(const AResponseType: String): TeiResponseType;
+class function TeiUtils.StreamToString(const ASourceStream: TStream): string;
+var
+  LStringStream: TStringStream;
 begin
-  result := TeiResponseType(GetEnumValue(TypeInfo(TeiResponseType), AResponseType));
+  LStringStream := TStringStream.Create;
+  try
+    LStringStream.CopyFrom(ASourceStream, 0);
+    Result := LStringStream.DataString;
+  finally
+    LStringStream.Free;
+  end;
 end;
 
-class procedure TeiUtils.FillInvoiceSample(const AInvoice: IeiInvoice);
+class function TeiUtils.StringToResponseType(const AResponseType: String): TeiResponseTypeInt;
+begin
+  result := TeiResponseTypeInt(GetEnumValue(TypeInfo(TeiResponseTypeInt), AResponseType));
+end;
+
+class procedure TeiUtils.FillInvoiceSample(const AInvoice: IeiInvoiceEx);
 var
   LXMLFatturaElettronicaBody: IXMLFatturaElettronicaBodyType;
   LXMLDatiDocumentiCorrelatiOrdineAcquisto: IXMLDatiDocumentiCorrelatiType;
@@ -334,6 +369,24 @@ begin
   else
     raise eiDecimalsException.Create('TeiUtils.NumberToString: Metodo di arrotondamento in conversione non valido.');
   end;
+end;
+
+class procedure TeiUtils.CopyObjectState(const ASource, ADestination: TObject);
+var
+  LTyp: TRttiType;
+  LProp: TRttiProperty;
+begin
+  if ASource.ClassType <> ADestination.ClassType then
+    eiGenericException.Create('Source and destination objects must be of the same type.');
+  LTyp := TRttiContext.Create.GetType(ASource.ClassInfo);
+  for LProp in LTyp.GetProperties do
+    if LProp.IsReadable and LProp.IsWritable then
+      LProp.SetValue(ADestination, LProp.GetValue(ASource));
+end;
+
+class procedure TeiUtils.CopyObjectState(const ASource, ADestination: IInterface);
+begin
+  CopyObjectState(ASource as TObject, ADestination as TObject);
 end;
 
 class function TeiUtils.DateTimeLocalFromIso8601(const Value: string): TDateTime;

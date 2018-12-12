@@ -53,12 +53,13 @@ type
     function ToString: String; reintroduce;
     procedure SaveToFile(const AFileName: String);
     procedure SaveToStream(const AStream: TStream);
+    function IsPA: boolean;
   end;
 
 implementation
 
 uses
-  DForce.ei.Exception, Xml.XMLDoc, System.SysUtils;
+  DForce.ei.Exception, Xml.XMLDoc, System.SysUtils, System.StrUtils;
 
 { TeiInvoiceEx1 }
 
@@ -76,6 +77,11 @@ begin
   finally
     LStringStream.Free;
   end;
+end;
+
+function TeiInvoiceMini.IsPA: boolean;
+begin
+  Result := (LeftStr(FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione, 3) = 'FPA');
 end;
 
 procedure TeiInvoiceMini.SaveToFile(const AFileName: String);

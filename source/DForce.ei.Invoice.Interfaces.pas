@@ -57,6 +57,7 @@ type
     procedure SaveToStream(const AStream: TStream);
     procedure SaveToStreamBase64(const AStream: TStream);
     procedure FillWithSampleData;
+    function IsPA: Boolean;
     // Reference
     procedure SetReference(const AValue: string);
     function GetReference: string;

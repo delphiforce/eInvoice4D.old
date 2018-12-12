@@ -52,7 +52,7 @@ type
 
   TeiInvoiceFactory = class
   private
-    class function InternalStreamToString(const AStream: TStream): string;
+    class function InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
   public
     class function NewInvoice: IeiInvoiceEx;
     class function NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
@@ -68,21 +68,18 @@ type
 implementation
 
 uses
-  Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, System.SysUtils;
+  Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, System.SysUtils,
+  DForce.ei.Utils;
 
 { TeiInvoiceFactory }
 
-class function TeiInvoiceFactory.InternalStreamToString(const AStream: TStream): string;
+class function TeiInvoiceFactory.InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
 var
-  LStringStream: TStringStream;
+  LEpuratedStringXML: String;
 begin
-  LStringStream := TStringStream.Create;
-  try
-    LStringStream.CopyFrom(AStream, 0);
-    Result := LStringStream.DataString;
-  finally
-    LStringStream.Free;
-  end;
+  LEpuratedStringXML := StringReplace(AStringXML, '<p:', '<', [rfReplaceAll, rfIgnoreCase]);
+  LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</p:', '</', [rfReplaceAll, rfIgnoreCase]);
+  Result := LoadXMLData(LEpuratedStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
 end;
 
 class function TeiInvoiceFactory.NewInvoice: IeiInvoiceEx;
@@ -101,7 +98,7 @@ var
 begin
   LFileStream := TFileStream.Create(AFileName, fmOpenRead);
   try
-    Result := NewInvoiceFromString(InternalStreamToString(LFileStream));
+    Result := InternalNewInvoiceFromString(TeiUtils.StreamToString(LFileStream));
   finally
     LFileStream.Free;
   end;
@@ -109,22 +106,22 @@ end;
 
 class function TeiInvoiceFactory.NewInvoiceFromStream(const AStream: TStream): IeiInvoiceEx;
 begin
-  Result := NewInvoiceFromString(InternalStreamToString(AStream));
+  Result := InternalNewInvoiceFromString(TeiUtils.StreamToString(AStream));
 end;
 
 class function TeiInvoiceFactory.NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoiceEx;
 begin
-  Result := NewInvoiceFromStringBase64(InternalStreamToString(AStream));
+  Result := NewInvoiceFromStringBase64(TeiUtils.StreamToString(AStream));
 end;
 
 class function TeiInvoiceFactory.NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
 begin
-  Result := LoadXMLData(AStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
+  Result := InternalNewInvoiceFromString(AStringXML);
 end;
 
 class function TeiInvoiceFactory.NewInvoiceFromStringBase64(const ABase64StringXML: String): IeiInvoiceEx;
 begin
-  Result := NewInvoiceFromString(TNetEncoding.Base64.Decode(ABase64StringXML));
+  Result := InternalNewInvoiceFromString(TNetEncoding.Base64.Decode(ABase64StringXML));
 end;
 
 class function TeiInvoiceFactory.NewInvoiceIDCollection: IeiInvoiceIDCollectionEx;

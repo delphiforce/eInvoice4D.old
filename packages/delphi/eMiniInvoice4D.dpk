@@ -5,7 +5,7 @@ package eMiniInvoice4D;
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
@@ -35,6 +35,11 @@ contains
   DForce.Mini.ei in '..\..\source\DForce.Mini.ei.pas',
   DForce.Mini.ei.Invoice in '..\..\source\DForce.Mini.ei.Invoice.pas',
   DForce.Mini.ei.Invoice.Interfaces in '..\..\source\DForce.Mini.ei.Invoice.Interfaces.pas',
-  DForce.Mini.ei.Invoice.Factory in '..\..\source\DForce.Mini.ei.Invoice.Factory.pas';
+  DForce.Mini.ei.Invoice.Factory in '..\..\source\DForce.Mini.ei.Invoice.Factory.pas',
+  DForce.Mini.ei.Notification.Interfaces in '..\..\source\DForce.Mini.ei.Notification.Interfaces.pas',
+  DForce.Mini.ei.Notification.NS in '..\..\source\DForce.Mini.ei.Notification.NS.pas',
+  DForce.Mini.ei.Notification.NE in '..\..\source\DForce.Mini.ei.Notification.NE.pas',
+  DForce.Mini.ei.Notification.Factory in '..\..\source\DForce.Mini.ei.Notification.Factory.pas',
+  DForce.Mini.ei.Utils in '..\..\source\DForce.Mini.ei.Utils.pas';
 
 end.

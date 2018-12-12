@@ -42,7 +42,8 @@ unit DForce.ei;
 interface
 
 uses DForce.ei.Provider.Interfaces, DForce.ei.Response.Interfaces, System.Classes,
-  DForce.ei.Invoice.Interfaces, System.SysUtils, DForce.ei.Logger, DForce.ei.Validation.Interfaces;
+  DForce.ei.Invoice.Interfaces, System.SysUtils, DForce.ei.Logger, DForce.ei.Validation.Interfaces,
+  DForce.ei.Notification.Interfaces;
 
 type
 
@@ -58,6 +59,9 @@ type
 
   IeiValidationResultCollection = IeiValidationResultCollectionInt;
   IeiValidationResult = IeiValidationResultInt;
+
+  IeiNotificationNS = IeiNotificationNSEx;
+  IeiNotificationNE = IeiNotificationNEEx;
 
   ei = class
   private
@@ -77,7 +81,7 @@ type
     class procedure LogE(const E: Exception); overload; // Exception
 
     class procedure SelectProvider(const AProviderID, AUserName, APassword: String; const ABaseURL: String = '';
-      const ABaseURLAuth: String = '');
+      const ABaseURLAuth: String = ''); overload;
     class procedure Connect;
     class procedure Disconnect;
     class procedure ProvidersAsStrings(const AStrings: TStrings); overload;
@@ -92,6 +96,18 @@ type
     class function NewInvoiceFromFile(const AFileName: String): IeiInvoice;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoice;
     class function NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoice;
+
+    class function NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
+    class function NewNotificationNSFromStringBase64(const ABase64StringXML: String): IeiNotificationNS;
+    class function NewNotificationNSFromFile(const AFileName: String): IeiNotificationNS;
+    class function NewNotificationNSFromStream(const AStream: TStream): IeiNotificationNS;
+    class function NewNotificationNSFromStreamBase64(const AStream: TStream): IeiNotificationNS;
+
+    class function NewNotificationNEFromString(const AStringXML: String): IeiNotificationNE;
+    class function NewNotificationNEFromStringBase64(const ABase64StringXML: String): IeiNotificationNE;
+    class function NewNotificationNEFromFile(const AFileName: String): IeiNotificationNE;
+    class function NewNotificationNEFromStream(const AStream: TStream): IeiNotificationNE;
+    class function NewNotificationNEFromStreamBase64(const AStream: TStream): IeiNotificationNE;
 
     class function NewInvoiceCollection: IeiInvoiceCollection;
     class function NewInvoiceIDCollection: IeiInvoiceIDCollection;
@@ -116,7 +132,8 @@ type
 implementation
 
 uses DForce.ei.Exception, DForce.ei.Invoice.Factory, DForce.ei.Provider.Register,
-  DForce.ei.Utils, DForce.ei.Response.Factory, DForce.ei.Provider.Notary;
+  DForce.ei.Utils, DForce.ei.Response.Factory, DForce.ei.Provider.Notary,
+  DForce.ei.Notification.Factory;
 
 { fe }
 
@@ -280,6 +297,56 @@ end;
 class function ei.NewInvoiceIDCollection: IeiInvoiceIDCollection;
 begin
   Result := TeiInvoiceFactory.NewInvoiceIDCollection;
+end;
+
+class function ei.NewNotificationNEFromFile(const AFileName: String): IeiNotificationNE;
+begin
+ Result := TeiNotificationFactory.NewNotificationNEFromFile(AFileName);
+end;
+
+class function ei.NewNotificationNEFromStream(const AStream: TStream): IeiNotificationNE;
+begin
+ Result := TeiNotificationFactory.NewNotificationNEFromStream(AStream);
+end;
+
+class function ei.NewNotificationNEFromStreamBase64(const AStream: TStream): IeiNotificationNE;
+begin
+ Result := TeiNotificationFactory.NewNotificationNEFromStreamBase64(AStream);
+end;
+
+class function ei.NewNotificationNEFromString(const AStringXML: String): IeiNotificationNE;
+begin
+ Result := TeiNotificationFactory.NewNotificationNEFromString(AStringXML);
+end;
+
+class function ei.NewNotificationNEFromStringBase64(const ABase64StringXML: String): IeiNotificationNE;
+begin
+ Result := TeiNotificationFactory.NewNotificationNEFromStringBase64(ABase64StringXML);
+end;
+
+class function ei.NewNotificationNSFromFile(const AFileName: String): IeiNotificationNS;
+begin
+  Result := TeiNotificationFactory.NewNotificationNSFromFile(AFileName);
+end;
+
+class function ei.NewNotificationNSFromStream(const AStream: TStream): IeiNotificationNS;
+begin
+  Result := TeiNotificationFactory.NewNotificationNSFromStream(AStream);
+end;
+
+class function ei.NewNotificationNSFromStreamBase64(const AStream: TStream): IeiNotificationNS;
+begin
+  Result := TeiNotificationFactory.NewNotificationNSFromStreamBase64(AStream);
+end;
+
+class function ei.NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
+begin
+  Result := TeiNotificationFactory.NewNotificationNSFromString(AStringXML);
+end;
+
+class function ei.NewNotificationNSFromStringBase64(const ABase64StringXML: String): IeiNotificationNS;
+begin
+  Result := TeiNotificationFactory.NewNotificationNSFromStringBase64(ABase64StringXML);
 end;
 
 class function ei.NewResponse: IeiResponse;

@@ -1,42 +1,42 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
+{ *************************************************************************** }
 unit DForce.ei.Invoice.Ex;
 
 interface
@@ -51,7 +51,6 @@ type
   private
     FReference: string;
     FValidationResultCollection: IeiValidationResultCollectionInt;
-    procedure InternalSaveToStream(const AStream: TStream; const AInvoice: String);
   protected
     function ToString: String; reintroduce;
     function ToStringBase64: String;
@@ -61,6 +60,7 @@ type
     procedure SaveToStream(const AStream: TStream);
     procedure SaveToStreamBase64(const AStream: TStream);
     procedure FillWithSampleData;
+    function IsPA: boolean;
     // Reference
     procedure SetReference(const AValue: string);
     function GetReference: string;
@@ -73,7 +73,7 @@ type
 implementation
 
 uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception, System.SysUtils,
-  DForce.ei, DForce.ei.Utils, DForce.ei.Validation.Engine;
+  DForce.ei, DForce.ei.Utils, DForce.ei.Validation.Engine, System.StrUtils;
 
 { TeiInvoiceEx }
 
@@ -87,20 +87,9 @@ begin
   result := FReference;
 end;
 
-procedure TeiInvoiceEx.InternalSaveToStream(const AStream: TStream; const AInvoice: String);
-var
-  LStringStream: TStringStream;
+function TeiInvoiceEx.IsPA: boolean;
 begin
-  // Check the stream
-  if not Assigned(AStream) then
-    raise eiGenericException.Create('"AStream" parameter not assigned');
-  // Save invoice into the stream
-  LStringStream := TStringStream.Create(AInvoice);
-  try
-    AStream.CopyFrom(LStringStream, 0);
-  finally
-    LStringStream.Free;
-  end;
+  Result := (LeftStr(FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione, 3) = 'FPA');
 end;
 
 procedure TeiInvoiceEx.SaveToFile(const AFileName: String);
@@ -111,7 +100,7 @@ begin
     raise eiGenericException.Create(Format('File "%s" already exists', [AFileName]));
   LFileStream := TFileStream.Create(AFileName, fmCreate);
   try
-    InternalSaveToStream(LFileStream, ToString);
+    TeiUtils.StringToStream(LFileStream, ToString);
   finally
     LFileStream.Free;
   end;
@@ -119,12 +108,12 @@ end;
 
 procedure TeiInvoiceEx.SaveToStream(const AStream: TStream);
 begin
-  InternalSaveToStream(AStream, ToString);
+  TeiUtils.StringToStream(AStream, ToString);
 end;
 
 procedure TeiInvoiceEx.SaveToStreamBase64(const AStream: TStream);
 begin
-  InternalSaveToStream(AStream, ToStringBase64);
+  TeiUtils.StringToStream(AStream, ToStringBase64);
 end;
 
 procedure TeiInvoiceEx.SetReference(const AValue: string);
