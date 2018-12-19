@@ -68,6 +68,7 @@ uses System.UITypes,
   REST.Client,
   System.NetEncoding,
   System.SysUtils,
+  System.StrUtils,
   DForce.ei.Exception,
   System.JSON,
   DForce.ei.Utils,
@@ -172,9 +173,11 @@ begin
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     LResponse := TeiResponseFactory.NewResponse;
-    LResponse.MsgCode := JObjResponse.GetValue<TJSONString>('errorCode').Value;
-    LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').Value;
-    if LResponse.MsgCode.Trim.IsEmpty then
+    with JObjResponse.GetValue('errorCode')
+      do LResponse.MsgCode := IfThen(Null, '', Value);
+    with JObjResponse.GetValue('errorDescription')
+      do LResponse.MsgText := IfThen(Null, '', Value);
+    if (LResponse.MsgCode.Trim.IsEmpty)or(LResponse.MsgCode.Equals(StringOfChar('0', LResponse.MsgCode.Length))) then
     begin
       LResponse.ResponseType := rtAcceptedByProvider;
       LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
