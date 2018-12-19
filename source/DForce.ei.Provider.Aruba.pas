@@ -147,9 +147,7 @@ begin
   JObjResponse := nil;
 
   LBase64Invoice := TNetEncoding.Base64.Encode(AInvoice);
-  { TODO : Togliere limitazione lunghezza XML BASE 64 }
-  LBase64Invoice := LBase64Invoice.Substring(0, 75);
-  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '","credential" : "cred_firma","domain" : "dom_firma"}';
+  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '", "credential" : "", "domain" : ""}';
 
   LRESTClient := TRESTClient.Create(nil);
   LRESTRequest := TRESTRequest.Create(nil);
