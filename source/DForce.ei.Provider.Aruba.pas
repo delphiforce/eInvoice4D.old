@@ -101,7 +101,7 @@ begin
 
     LRESTRequest.Execute;
     if LRESTResponse.StatusCode <> 200 then
-      raise eiRESTAuthException.Create('Error during auth request');
+      raise eiRESTAuthException.CreateFmt('Error during auth request: %s', [LRESTResponse.Content]);
 
     LFullTokenJson := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if not LFullTokenJson.TryGetValue<string>('access_token', FAccessToken) then
