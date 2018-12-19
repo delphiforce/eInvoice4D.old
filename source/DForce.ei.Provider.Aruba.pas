@@ -176,10 +176,10 @@ begin
     LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').Value;
     if LResponse.MsgCode.Trim.IsEmpty then
     begin
-      LResponse.ResponseType := rtAcceptedByProvider
+      LResponse.ResponseType := rtAcceptedByProvider;
+      LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
     end else
     begin
-      LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
       LResponse.ResponseType := rtRejectedByProvider;
     end;
     Result.Add(LResponse);
