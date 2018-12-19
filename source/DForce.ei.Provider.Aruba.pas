@@ -174,11 +174,14 @@ begin
     LResponse := TeiResponseFactory.NewResponse;
     LResponse.MsgCode := JObjResponse.GetValue<TJSONString>('errorCode').Value;
     LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').Value;
-    LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
     if LResponse.MsgCode.Trim.IsEmpty then
+    begin
       LResponse.ResponseType := rtAcceptedByProvider
-    else
+    end else
+    begin
+      LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
       LResponse.ResponseType := rtRejectedByProvider;
+    end;
     Result.Add(LResponse);
 
   finally
