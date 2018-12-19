@@ -173,6 +173,7 @@ begin
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     LResponse := TeiResponseFactory.NewResponse;
+    LResponse.MsgRaw := JObjResponse.ToString;
     with JObjResponse.GetValue('errorCode')
       do LResponse.MsgCode := IfThen(Null, '', Value);
     with JObjResponse.GetValue('errorDescription')
