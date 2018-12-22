@@ -49,6 +49,7 @@ type
 
   TeiInvoiceEx = class(TXMLFatturaElettronicaType, IeiInvoiceEx)
   private
+    FSourceOverride: string;
     FReference: string;
     FValidationResultCollection: IeiValidationResultCollectionInt;
   protected
@@ -64,6 +65,9 @@ type
     // Reference
     procedure SetReference(const AValue: string);
     function GetReference: string;
+    // SourceOverride
+    procedure SetSourceOverride(const AValue: string);
+    function GetSourceOverride: string;
   end;
 
   TeiInvoiceCollectionEx = TeiCollection<IeiInvoiceEx>;
@@ -80,6 +84,11 @@ uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception, System.SysUtils,
 procedure TeiInvoiceEx.FillWithSampleData;
 begin
   TeiUtils.FillInvoiceSample(Self);
+end;
+
+function TeiInvoiceEx.GetSourceOverride: string;
+begin
+  Result := FSourceOverride;
 end;
 
 function TeiInvoiceEx.GetReference: string;
@@ -116,6 +125,11 @@ begin
   TeiUtils.StringToStream(AStream, ToStringBase64);
 end;
 
+procedure TeiInvoiceEx.SetSourceOverride(const AValue: string);
+begin
+  FSourceOverride := AValue;
+end;
+
 procedure TeiInvoiceEx.SetReference(const AValue: string);
 begin
   FReference := AValue;
@@ -125,6 +139,12 @@ function TeiInvoiceEx.ToString: String;
 var
   Lxml: TStringList;
 begin
+  if FSourceOverride <> '' then
+  begin
+    Result := FSourceOverride;
+    Exit;
+  end;
+
   Lxml := TStringList.Create;
   try
     Lxml.Text := FormatXMLData(Self.GetXML);

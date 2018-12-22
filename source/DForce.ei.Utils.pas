@@ -59,7 +59,7 @@ type
     class function NumberToString(const Value: extended; const Decimals: integer = 2): string;
     class function DateTimeLocalFromIso8601(const Value: string): TDateTime;
     class function DateTimeUTCFromIso8601(const Value: string): TDateTime;
-    class function ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
+    class function ResponseTypeToEnum(const AResponseType: string; const AOutcome: string = ''): TeiResponseTypeInt;
     class function ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;
     class function ResponseTypeToString(const AResponseType: TeiResponseTypeInt): string;
     class function StringToResponseType(const AResponseType: String): TeiResponseTypeInt;
@@ -116,11 +116,11 @@ begin
       result := 'Notifica di scarto';
     rtSDIMessageMC:
       result := 'Notifica di mancata consegna';
-    rtSDIMessageNE:
+    rtSDIMessageNE_EC01, rtSDIMessageNE_EC02:
       result := 'Notifica esito cedente/prestatore';
     rtSDIMessageMT:
       result := 'Notifica di metadati del file fattura';
-    rtSDIMessageEC:
+    rtSDIMessageEC_EN00, rtSDIMessageEC_EN01:
       result := 'Notifica di esito cessionario/committente';
     rtSDIMessageSE:
       result := 'Notifica di scarto esito cessionario/committente';
@@ -133,28 +133,66 @@ begin
   end;
 end;
 
-class function TeiUtils.ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
+class function TeiUtils.ResponseTypeToEnum(const AResponseType, AOutcome: string): TeiResponseTypeInt;
+var
+  LResponseType: TeiResponseTypeInt;
+const
+{
+  TeiResponseTypeInt = (
+    rtUnknown,
+    rtAcceptedByProvider,
+    rtRejectedByProvider,
+    rtSentToSDI,
+    rtSDIMessageNS,
+    rtSDIMessageMC,
+    rtSDIMessageAT,
+    rtSDIMessageRC,
+    rtSDIMessageNE_EC01,
+    rtSDIMessageNE_EC02,
+    rtSDIMessageDT,
+    rtSDIMessageMT,
+    rtSDIMessageEC_EN00,
+    rtSDIMessageEC_EN01,
+    rtSDIMessageSE,
+    rtException);
+}
+  ShortCaptions: array[TeiResponseTypeInt] of string = (
+    '', '', '', '', 'NS', 'MC', 'AT', 'RC', 'NE', 'NE', 'DT', 'MT', 'EC', 'EC', 'SE', '');
+  LongCaptions: array[TeiResponseTypeInt] of string = (
+    '',
+    'Presa in carico',
+    'Errore Elaborazione',
+    'Inviata',
+    'Scartata',
+    'Non Consegnata',
+    'Recapito Impossibile',
+    'Consegnata',
+    'Accettata',
+    'Rifiutata',
+    'Decorrenza Termini',
+    '', '', '', '', ''
+  );
 begin
-  if AResponseType = 'RC' then
-    result := rtSDIMessageRC
-  else if AResponseType = 'NS' then
-    result := rtSDIMessageNS
-  else if AResponseType = 'MC' then
-    result := rtSDIMessageMC
-  else if AResponseType = 'NE' then
-    result := rtSDIMessageNE
-  else if AResponseType = 'MT' then
-    result := rtSDIMessageMT
-  else if AResponseType = 'EC' then
-    result := rtSDIMessageEC
-  else if AResponseType = 'SE' then
-    result := rtSDIMessageSE
-  else if AResponseType = 'DT' then
-    result := rtSDIMessageDT
-  else if AResponseType = 'AT' then
-    result := rtSDIMessageAT
-  else
-    result := rtUnknown;
+  Result := rtUnknown;
+
+  for LResponseType := Succ(Low(TeiResponseTypeInt)) to Pred(High(TeiResponseTypeInt)) do
+  if (ShortCaptions[LResponseType] = AResponseType)or(LongCaptions[LResponseType] = AResponseType) then
+  begin
+    Result := LResponseType;
+    if (Result = rtSDIMessageNE_EC01)and(AOutcome <> '')and(AOutcome <> 'EC01') then
+    begin
+      if AOutcome = 'EC02'
+        then Result := rtSDIMessageNE_EC02
+        else Result := rtUnknown;
+    end else
+    if (Result = rtSDIMessageEC_EN00)and(AOutcome <> '')and(AOutcome <> 'EN00') then
+    begin
+      if AOutcome = 'EN01'
+        then Result := rtSDIMessageEC_EN01
+        else Result := rtUnknown;
+    end else
+    Break;
+  end;
 end;
 
 class function TeiUtils.ResponseTypeToString(const AResponseType: TeiResponseTypeInt): string;

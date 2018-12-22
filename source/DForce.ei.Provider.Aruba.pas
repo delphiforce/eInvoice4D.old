@@ -57,6 +57,7 @@ type
     procedure Connect; override;
     procedure Disconnect; override;
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; override;
+    function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx; override;
     function ReceiveInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
     procedure ReceivePurchaseInvoices; override;
   end;
@@ -115,6 +116,73 @@ begin
   finally
     if Assigned(LFullTokenJson) then
       LFullTokenJson.Free;
+    LRESTClient.Free;
+    LRESTRequest.Free;
+    LRESTResponse.Free;
+  end;
+end;
+
+function TeiProviderAruba.CheckSentInvoiceStatus(
+  const AInvoiceID: string): IeiResponseCollectionEx;
+var
+  LRESTClient: TRESTClient;
+  LRESTRequest: TRESTRequest;
+  LRESTResponse: TRESTResponse;
+  LResponse: IeiResponseEx;
+  LResponseDate: TDateTime;
+  LFilename: string;
+  JObjResponse: TJSONObject;
+  LJsonInvoices: TJSONArray;
+  LJsonInvoice: TJSONValue;
+begin
+  inherited;
+  JObjResponse := nil;
+
+  LRESTClient := TRESTClient.Create(nil);
+  LRESTRequest := TRESTRequest.Create(nil);
+  LRESTResponse := TRESTResponse.Create(nil);
+  try
+    LRESTClient.BaseURL := BaseURLWS;
+    LRESTClient.AllowCookies := True;
+    LRESTClient.ContentType := 'application/json';
+
+    LRESTRequest.Resource := '/services/invoice/out/getByFilename';
+    LRESTRequest.Client := LRESTClient;
+    LRESTRequest.Response := LRESTResponse;
+    LRESTRequest.Method := rmGET;
+
+    LRESTRequest.AddParameter('filename', AInvoiceID);
+    LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
+      [poDoNotEncode]);
+
+    LRESTRequest.Execute;
+    if LRESTResponse.StatusCode <> 200 then
+      raise eiGenericException.Create(Format('getByFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+
+    Result := TeiResponseFactory.NewResponseCollection;
+    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    if Assigned(JObjResponse) then
+    begin
+      //Solleva un'eccezione se il filename non è stato trovato
+      LFilename := JObjResponse.GetValue<TJSONString>('filename').Value;
+      LResponseDate := TeiUtils.DateTimeUTCFromIso8601(JObjResponse.GetValue<TJSONString>('lastUpdate').Value);
+      LJsonInvoices := JObjResponse.GetValue<TJSONArray>('invoices');
+      for LJsonInvoice in LJsonInvoices do
+      begin
+        LResponse := TeiResponseFactory.NewResponse;
+        LResponse.FileName := LFilename;
+        LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonInvoice.GetValue<TJSONString>('status').Value);
+        LResponse.ResponseDate := LResponseDate;
+        LResponse.NotificationDate := TeiUtils.DateTimeUTCFromIso8601(LJsonInvoice.GetValue<TJSONString>('invoiceDate').Value);
+        LResponse.MsgCode := '';
+        LResponse.MsgText := '';
+        LResponse.MsgRaw := LJsonInvoice.ToString;
+        Result.Add(LResponse);
+      end;
+    end;
+  finally
+    if Assigned(JObjResponse) then
+      JObjResponse.Free;
     LRESTClient.Free;
     LRESTRequest.Free;
     LRESTResponse.Free;
@@ -207,6 +275,7 @@ var
   JObjResponse: TJSONObject;
   LJsonNotifications: TJSONArray;
   LJsonNotification: TJSONValue;
+  LJsonNotificationOutcome: string;
 begin
   inherited;
   JObjResponse := nil;
@@ -240,7 +309,11 @@ begin
       for LJsonNotification in LJsonNotifications do
       begin
         LResponse := TeiResponseFactory.NewResponse;
-        LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value);
+        try
+          LJsonNotificationOutcome := LJsonNotification.GetValue<TJSONString>('esito').Value;
+        except
+        end;
+        LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value, LJsonNotificationOutcome);
         LResponse.FileName := LJsonNotification.GetValue<TJSONString>('filename').Value;
         LResponse.ResponseDate := TeiUtils.DateTimeUTCFromIso8601(LJsonNotification.GetValue<TJSONString>('date').Value);
         LResponse.NotificationDate := TeiUtils.DateTimeUTCFromIso8601(LJsonNotification.GetValue<TJSONString>('notificationDate').Value);

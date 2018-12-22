@@ -119,7 +119,13 @@ type
       const AAfterEachMethod: TProc<IeiResponseCollection>;
       const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
 
-    class function ReceiveInvoiceNotifications(const AInvoiceID: String): IeiResponseCollection;
+    class function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
+    class function CheckSentInvoiceStatusCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection)
+      : IeiResponseCollection; overload;
+    class procedure CheckSentInvoiceStatusCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
+      const AAfterEachMethod: TProc<IeiResponseCollection>;
+      const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
+    class function ReceiveInvoiceNotifications(const AInvoiceID: string): IeiResponseCollection;
     class function ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection)
       : IeiResponseCollection; overload;
     class procedure ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
@@ -201,6 +207,74 @@ begin
         // Type here the code to be executed...
         Result := FProvider.ReceiveInvoiceNotifications(AInvoiceID);
         LogI(Format('Got notifications for invoice "%s"', [AInvoiceID]));
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          raise;
+        end;
+      end;
+    end);
+end;
+
+class procedure ei.CheckSentInvoiceStatusCollection(
+  const AInvoiceIDCollection: IeiInvoiceIDCollection;
+  const AAfterEachMethod: TProc<IeiResponseCollection>;
+  const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception>);
+begin
+  InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
+    function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
+    var
+      LInvoiceID: string;
+      LResponseCollection: IeiResponseCollection;
+    begin
+      Result := TeiResponseFactory.NewResponseCollection;
+      for LInvoiceID in AInvoiceIDCollection do
+      begin
+        try
+          LResponseCollection := nil; // Azzera la response perchè se ci sono degli errori potrebbe rimanere quella precedente
+          LResponseCollection := ei.CheckSentInvoiceStatus(LInvoiceID);
+          if Assigned(AAfterEachMethod) then
+            AAfterEachMethod(LResponseCollection);
+        except
+          on E: Exception do
+          begin
+            LogE(E);
+            if Assigned(AOnEachErrorMethod) then
+              AOnEachErrorMethod(LResponseCollection, E)
+            else
+              raise;
+          end;
+        end;
+      end;
+    end);
+end;
+
+class function ei.CheckSentInvoiceStatusCollection(
+  const AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection;
+begin
+  Result := InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
+    function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
+    var
+      LInvoiceID: string;
+    begin
+      Result := TeiResponseFactory.NewResponseCollection;
+      for LInvoiceID in AInvoiceIDCollection do
+        Result.AddRange(ei.CheckSentInvoiceStatus(LInvoiceID));
+    end);
+end;
+
+class function ei.CheckSentInvoiceStatus(
+  const AInvoiceID: string): IeiResponseCollectionEx;
+begin
+  Result := InternalExecute<String, IeiResponseCollection>(AInvoiceID,
+    function(Invoice: String): IeiResponseCollection
+    begin
+      LogI(Format('Getting status for invoice "%s"', [AInvoiceID]));
+      try
+        // Type here the code to be executed...
+        Result := FProvider.CheckSentInvoiceStatus(AInvoiceID);
+        LogI(Format('Got status for invoice "%s"', [AInvoiceID]));
       except
         on E: Exception do
         begin

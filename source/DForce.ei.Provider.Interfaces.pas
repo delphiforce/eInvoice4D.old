@@ -51,6 +51,7 @@ type
     procedure Connect;
     procedure Disconnect;
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx;
+    function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx;
     procedure ReceivePurchaseInvoices;
   end;

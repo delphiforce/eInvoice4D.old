@@ -62,6 +62,10 @@ type
     procedure SetReference(const AValue: string);
     function GetReference: string;
     property Reference: string read GetReference write SetReference;
+    // SourceOverride
+    procedure SetSourceOverride(const AValue: string);
+    function GetSourceOverride: string;
+    property SourceOverride: string read GetSourceOverride write SetSourceOverride;
   end;
 
   IeiInvoiceCollectionEx = IeiCollection<IeiInvoiceEx>;

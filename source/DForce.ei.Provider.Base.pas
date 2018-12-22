@@ -64,6 +64,7 @@ type
     procedure Connect; virtual; abstract;
     procedure Disconnect; virtual; abstract;
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; virtual; abstract;
+    function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx; virtual; abstract;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx; virtual; abstract;
     procedure ReceivePurchaseInvoices; virtual; abstract;
   public
