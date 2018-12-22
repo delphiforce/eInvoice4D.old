@@ -163,7 +163,9 @@ begin
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
-      //Solleva un'eccezione se il filename non è stato trovato
+      if not JObjResponse.GetValue<TJSONString>('errorCode').Value.Equals('0000')
+        then raise eiGenericException.CreateFmt('%s: %s', [JObjResponse.GetValue<TJSONString>('errorCode').Value, JObjResponse.GetValue<TJSONString>('errorDescription').Value]);
+
       LFilename := JObjResponse.GetValue<TJSONString>('filename').Value;
       LResponseDate := TeiUtils.DateTimeUTCFromIso8601(JObjResponse.GetValue<TJSONString>('lastUpdate').Value);
       LJsonInvoices := JObjResponse.GetValue<TJSONArray>('invoices');
