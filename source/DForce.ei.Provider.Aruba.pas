@@ -68,6 +68,7 @@ uses System.UITypes,
   REST.Client,
   System.NetEncoding,
   System.SysUtils,
+  System.StrUtils,
   DForce.ei.Exception,
   System.JSON,
   DForce.ei.Utils,
@@ -101,7 +102,7 @@ begin
 
     LRESTRequest.Execute;
     if LRESTResponse.StatusCode <> 200 then
-      raise eiRESTAuthException.Create('Error during auth request');
+      raise eiRESTAuthException.CreateFmt('Error during auth request: %s', [LRESTResponse.Content]);
 
     LFullTokenJson := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if not LFullTokenJson.TryGetValue<string>('access_token', FAccessToken) then
@@ -147,9 +148,7 @@ begin
   JObjResponse := nil;
 
   LBase64Invoice := TNetEncoding.Base64.Encode(AInvoice);
-  { TODO : Togliere limitazione lunghezza XML BASE 64 }
-  LBase64Invoice := LBase64Invoice.Substring(0, 75);
-  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '","credential" : "cred_firma","domain" : "dom_firma"}';
+  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '", "credential" : "", "domain" : ""}';
 
   LRESTClient := TRESTClient.Create(nil);
   LRESTRequest := TRESTRequest.Create(nil);
@@ -174,13 +173,19 @@ begin
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     LResponse := TeiResponseFactory.NewResponse;
-    LResponse.MsgCode := JObjResponse.GetValue<TJSONString>('errorCode').Value;
-    LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').Value;
-    LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
-    if LResponse.MsgCode.Trim.IsEmpty then
-      LResponse.ResponseType := rtAcceptedByProvider
-    else
+    LResponse.MsgRaw := JObjResponse.ToString;
+    with JObjResponse.GetValue('errorCode')
+      do LResponse.MsgCode := IfThen(Null, '', Value);
+    with JObjResponse.GetValue('errorDescription')
+      do LResponse.MsgText := IfThen(Null, '', Value);
+    if (LResponse.MsgCode.Trim.IsEmpty)or(LResponse.MsgCode.Equals(StringOfChar('0', LResponse.MsgCode.Length))) then
+    begin
+      LResponse.ResponseType := rtAcceptedByProvider;
+      LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
+    end else
+    begin
       LResponse.ResponseType := rtRejectedByProvider;
+    end;
     Result.Add(LResponse);
 
   finally
