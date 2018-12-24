@@ -41,7 +41,9 @@ unit DForce.ei.Provider.Interfaces;
 
 interface
 
-uses DForce.ei.Response.Interfaces;
+uses
+  DForce.ei.Response.Interfaces,
+  DForce.ei.Invoice.Interfaces;
 
 type
   TeiRouteType = (rtDirect, rtProxyfied);
@@ -53,7 +55,8 @@ type
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx;
     function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx;
-    procedure ReceivePurchaseInvoices;
+    function ReceivePurchaseInvoicesList(const AStartDate: TDateTime = 0): IeiResponseCollectionEx;
+    function ReceivePurchaseInvoice(const AInvoiceID: string): IeiInvoiceEx;
   end;
 
 implementation

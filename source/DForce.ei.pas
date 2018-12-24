@@ -119,6 +119,13 @@ type
       const AAfterEachMethod: TProc<IeiResponseCollection>;
       const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
 
+    class function ReceivePurchaseInvoice(const AInvoiceID: String): IeiInvoice;
+    class function ReceivePurchaseInvoicesList(const AStartDate: TDateTime): IeiResponseCollection;
+    class function ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime; const AIgnoreList: TStrings): IeiInvoiceCollection; overload;
+    class procedure ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime; const AIgnoreList: TStrings;
+      const AAfterEachMethod: TProc<IeiInvoice>;
+      const AOnEachErrorMethod: TProc<IeiResponse, Exception> = nil); overload;
+
     class function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
     class function CheckSentInvoiceStatusCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection)
       : IeiResponseCollection; overload;
@@ -131,8 +138,6 @@ type
     class procedure ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
       const AAfterEachMethod: TProc<IeiResponseCollection>;
       const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
-
-    class procedure ReceivePurchaseInvoices;
   end;
 
 implementation
@@ -467,7 +472,7 @@ end;
 class function ei.SendInvoice(const AInvoice: IeiInvoice): IeiResponseCollection;
 begin
   Result := InternalExecute<IeiInvoice, IeiResponseCollection>(AInvoice,
-    function(Invoice: IeiInvoice): IeiResponseCollection
+    function(AInvoice: IeiInvoice): IeiResponseCollection
     var
       LDocNum: string;
     begin
@@ -537,6 +542,99 @@ begin
   Result := TeiUtils.StringToResponseType(AResponseType);
 end;
 
+class function ei.ReceivePurchaseInvoice(const AInvoiceID: String): IeiInvoice;
+begin
+  Result := InternalExecute<string, IeiInvoice>(AInvoiceID,
+    function(AInvoiceID: string): IeiInvoice
+    begin
+      LogI(Format('Receiving invoice "%s"', [AInvoiceID]));
+      try
+        Result := FProvider.ReceivePurchaseInvoice(AInvoiceID);
+        LogI(Format('Invoice "%s" received', [AInvoiceID]));
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          raise;
+        end;
+      end;
+    end);
+end;
+
+class function ei.ReceivePurchaseInvoicesList(const AStartDate: TDateTime): IeiResponseCollection;
+begin
+  Result := InternalExecute<TDateTime, IeiResponseCollection>(AStartDate,
+    function(AStartDate: TDateTime): IeiResponseCollection
+    begin
+      LogI(Format('Receiving invoices list from date %s', [TeiUtils.DateToString(AStartDate)]));
+      try
+        Result := FProvider.ReceivePurchaseInvoicesList(AStartDate);
+        LogI(Format('Invoices list from %s received', [TeiUtils.DateToString(AStartDate)]));
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          raise;
+        end;
+      end;
+    end);
+end;
+
+class function ei.ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime;
+  const AIgnoreList: TStrings): IeiInvoiceCollection;
+begin
+  Result := InternalExecute<TDateTime, IeiInvoiceCollection>(AStartDate,
+    function(AStartDate: TDateTime): IeiInvoiceCollection
+    var
+      LInvoice: IeiInvoice;
+      LResponse: IeiResponse;
+      LResponseCollection: IeiResponseCollection;
+    begin
+      Result := TeiInvoiceFactory.NewInvoiceCollection;
+      LResponseCollection := ReceivePurchaseInvoicesList(AStartDate);
+      for LResponse in LResponseCollection do
+      try
+        if (Assigned(AIgnoreList))and(AIgnoreList.IndexOf(LResponse.FileName) >= 0)
+          then Continue;
+        Result.Add(ei.ReceivePurchaseInvoice(LResponse.FileName));
+      except
+      end;
+    end);
+end;
+
+class procedure ei.ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime;
+  const AIgnoreList: TStrings; const AAfterEachMethod: TProc<IeiInvoice>;
+  const AOnEachErrorMethod: TProc<IeiResponse, Exception>);
+begin
+  InternalExecute<TDateTime, IeiInvoiceCollection>(AStartDate,
+    function(AStartDate: TDateTIme): IeiInvoiceCollection
+    var
+      LInvoice: IeiInvoice;
+      LResponse: IeiResponse;
+      LResponseCollection: IeiResponseCollection;
+    begin
+      Result := TeiInvoiceFactory.NewInvoiceCollection;
+      LResponseCollection := ReceivePurchaseInvoicesList(AStartDate);
+      for LResponse in LResponseCollection do
+      try
+        if (Assigned(AIgnoreList))and(AIgnoreList.IndexOf(LResponse.FileName) >= 0)
+          then Continue;
+        LInvoice := ei.ReceivePurchaseInvoice(LResponse.FileName);
+        if Assigned(AAfterEachMethod) then
+          AAfterEachMethod(LInvoice);
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          if Assigned(AOnEachErrorMethod) then
+            AOnEachErrorMethod(LResponse, E)
+          else
+            raise;
+        end;
+      end;
+    end);
+end;
+
 class procedure ei.ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
 const AAfterEachMethod: TProc<IeiResponseCollection>; const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception>);
 begin
@@ -563,25 +661,6 @@ begin
             else
               raise;
           end;
-        end;
-      end;
-    end);
-end;
-
-class procedure ei.ReceivePurchaseInvoices;
-begin
-  InternalExecute<string, string>('aaa',
-    function(dummy: string): string
-    begin
-      // LogI(Format('Sending invoice "%s"', [LDocNum]));
-      try
-        FProvider.ReceivePurchaseInvoices;
-        // LogI(Format('Invoice "%s" sent', [LDocNum]));
-      except
-        on E: Exception do
-        begin
-          LogE(E);
-          raise;
         end;
       end;
     end);
