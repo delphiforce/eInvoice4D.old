@@ -55,7 +55,7 @@ type
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx;
     function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx;
-    function ReceivePurchaseInvoicesList(const AStartDate: TDateTime = 0): IeiResponseCollectionEx;
+    function ReceivePurchaseInvoicesList(const AParams: TeiPurchaseSearchParamsEx): IeiResponseCollectionEx;
     function ReceivePurchaseInvoice(const AInvoiceID: string): IeiInvoiceEx;
   end;
 

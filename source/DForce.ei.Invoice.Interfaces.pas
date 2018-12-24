@@ -47,6 +47,28 @@ uses DForce.ei.Invoice.Base, System.Classes,
 
 type
 
+  TeiPurchaseSearchParamTypeEx = (spUsername, spPage, spSize, spStartDate, spEndDate,
+    spCountrySender, spVatcodeSender, spFiscalcodeSender, spCountryReceiver,
+    spVatcodeReceiver, spFiscalcodeReceiver, spIgnoreList);
+
+  TeiPurchaseSearchParamTypesEx = set of TeiPurchaseSearchParamTypeEx;
+
+  TeiPurchaseSearchParamsEx = record
+    username: string;
+    page: Integer;
+    size: Integer;
+    startDate: TDate;
+    endDate: TDate;
+    countrySender: string;
+    vatcodeSender: string;
+    fiscalcodeSender: string;
+    countryReceiver: string;
+    vatcodeReceiver: string;
+    fiscalcodeReceiver: string;
+    ignoreList: string;
+    usedValues: TeiPurchaseSearchParamTypesEx;
+  end;
+
   IeiInvoiceEx = interface(IXMLFatturaElettronicaType)
     ['{CF5D3661-D454-40F7-A358-F81E8FD4CD55}']
     function ToString: String;

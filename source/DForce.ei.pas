@@ -47,6 +47,10 @@ uses DForce.ei.Provider.Interfaces, DForce.ei.Response.Interfaces, System.Classe
 
 type
 
+  TeiPurchaseSearchParamType = TeiPurchaseSearchParamTypeEx;
+  TeiPurchaseSearchParamTypes = TeiPurchaseSearchParamTypesEx;
+  TeiPurchaseSearchParams = TeiPurchaseSearchParamsEx;
+
   TeiResponseType = TeiResponseTypeInt;
 
   IeiInvoice = IeiInvoiceEx;
@@ -120,11 +124,10 @@ type
       const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
 
     class function ReceivePurchaseInvoice(const AInvoiceID: String): IeiInvoice;
-    class function ReceivePurchaseInvoicesList(const AStartDate: TDateTime): IeiResponseCollection;
-    class function ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime; const AIgnoreList: TStrings): IeiInvoiceCollection; overload;
-    class procedure ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime; const AIgnoreList: TStrings;
-      const AAfterEachMethod: TProc<IeiInvoice>;
-      const AOnEachErrorMethod: TProc<IeiResponse, Exception> = nil); overload;
+    class function ReceivePurchaseInvoicesList(const AParams: TeiPurchaseSearchParams): IeiResponseCollection;
+    class function ReceivePurchaseInvoicesCollection(const AParams: TeiPurchaseSearchParams): IeiInvoiceCollection; overload;
+    class procedure ReceivePurchaseInvoicesCollection(const AParams: TeiPurchaseSearchParams;
+      const AAfterEachMethod: TProc<IeiInvoice>; const AOnEachErrorMethod: TProc<IeiResponse, Exception> = nil); overload;
 
     class function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx;
     class function CheckSentInvoiceStatusCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection)
@@ -561,15 +564,15 @@ begin
     end);
 end;
 
-class function ei.ReceivePurchaseInvoicesList(const AStartDate: TDateTime): IeiResponseCollection;
+class function ei.ReceivePurchaseInvoicesList(const AParams: TeiPurchaseSearchParams): IeiResponseCollection;
 begin
-  Result := InternalExecute<TDateTime, IeiResponseCollection>(AStartDate,
-    function(AStartDate: TDateTime): IeiResponseCollection
+  Result := InternalExecute<TeiPurchaseSearchParams, IeiResponseCollection>(AParams,
+    function(AParams: TeiPurchaseSearchParams): IeiResponseCollection
     begin
-      LogI(Format('Receiving invoices list from date %s', [TeiUtils.DateToString(AStartDate)]));
+      LogI('Receiving invoices list');
       try
-        Result := FProvider.ReceivePurchaseInvoicesList(AStartDate);
-        LogI(Format('Invoices list from %s received', [TeiUtils.DateToString(AStartDate)]));
+        Result := FProvider.ReceivePurchaseInvoicesList(AParams);
+        LogI('Invoices list received');
       except
         on E: Exception do
         begin
@@ -580,57 +583,85 @@ begin
     end);
 end;
 
-class function ei.ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime;
-  const AIgnoreList: TStrings): IeiInvoiceCollection;
+class function ei.ReceivePurchaseInvoicesCollection(
+  const AParams: TeiPurchaseSearchParams): IeiInvoiceCollection;
+var
+  LIgnoreList: TStrings;
 begin
-  Result := InternalExecute<TDateTime, IeiInvoiceCollection>(AStartDate,
-    function(AStartDate: TDateTime): IeiInvoiceCollection
+  Result := InternalExecute<TeiPurchaseSearchParams, IeiInvoiceCollection>(AParams,
+    function(AParams: TeiPurchaseSearchParams): IeiInvoiceCollection
     var
-      LInvoice: IeiInvoice;
       LResponse: IeiResponse;
       LResponseCollection: IeiResponseCollection;
     begin
       Result := TeiInvoiceFactory.NewInvoiceCollection;
-      LResponseCollection := ReceivePurchaseInvoicesList(AStartDate);
-      for LResponse in LResponseCollection do
+      LResponseCollection := ReceivePurchaseInvoicesList(AParams);
+
+      LIgnoreList := nil;
       try
-        if (Assigned(AIgnoreList))and(AIgnoreList.IndexOf(LResponse.FileName) >= 0)
-          then Continue;
-        Result.Add(ei.ReceivePurchaseInvoice(LResponse.FileName));
-      except
+        if AParams.ignoreList <> '' then
+        begin
+          LIgnoreList := TStringList.Create;
+          LIgnoreList.CommaText := AParams.ignoreList;
+        end;
+
+        for LResponse in LResponseCollection do
+        try
+          if (Assigned(LIgnoreList))and(LIgnoreList.IndexOf(LResponse.FileName) >= 0)
+            then Continue;
+          Result.Add(ei.ReceivePurchaseInvoice(LResponse.FileName));
+        except
+        end;
+      finally
+        LIgnoreList.Free;
       end;
     end);
 end;
 
-class procedure ei.ReceivePurchaseInvoicesCollection(const AStartDate: TDateTime;
-  const AIgnoreList: TStrings; const AAfterEachMethod: TProc<IeiInvoice>;
+class procedure ei.ReceivePurchaseInvoicesCollection(
+  const AParams: TeiPurchaseSearchParams;
+  const AAfterEachMethod: TProc<IeiInvoice>;
   const AOnEachErrorMethod: TProc<IeiResponse, Exception>);
+var
+  LIgnoreList: TStrings;
 begin
-  InternalExecute<TDateTime, IeiInvoiceCollection>(AStartDate,
-    function(AStartDate: TDateTIme): IeiInvoiceCollection
+  InternalExecute<TeiPurchaseSearchParams, IeiInvoiceCollection>(AParams,
+    function(AParams: TeiPurchaseSearchParams): IeiInvoiceCollection
     var
       LInvoice: IeiInvoice;
       LResponse: IeiResponse;
       LResponseCollection: IeiResponseCollection;
     begin
       Result := TeiInvoiceFactory.NewInvoiceCollection;
-      LResponseCollection := ReceivePurchaseInvoicesList(AStartDate);
-      for LResponse in LResponseCollection do
+      LResponseCollection := ReceivePurchaseInvoicesList(AParams);
+      LIgnoreList := nil;
       try
-        if (Assigned(AIgnoreList))and(AIgnoreList.IndexOf(LResponse.FileName) >= 0)
-          then Continue;
-        LInvoice := ei.ReceivePurchaseInvoice(LResponse.FileName);
-        if Assigned(AAfterEachMethod) then
-          AAfterEachMethod(LInvoice);
-      except
-        on E: Exception do
+        if AParams.ignoreList <> '' then
         begin
-          LogE(E);
-          if Assigned(AOnEachErrorMethod) then
-            AOnEachErrorMethod(LResponse, E)
-          else
-            raise;
+          LIgnoreList := TStringList.Create;
+          LIgnoreList.CommaText := AParams.ignoreList;
         end;
+
+        for LResponse in LResponseCollection do
+        try
+          if (Assigned(LIgnoreList))and(LIgnoreList.IndexOf(LResponse.FileName) >= 0)
+            then Continue;
+          LInvoice := ei.ReceivePurchaseInvoice(LResponse.FileName);
+          LInvoice.Reference := LResponse.FileName;
+          if Assigned(AAfterEachMethod) then
+            AAfterEachMethod(LInvoice);
+        except
+          on E: Exception do
+          begin
+            LogE(E);
+            if Assigned(AOnEachErrorMethod) then
+              AOnEachErrorMethod(LResponse, E)
+            else
+              raise;
+          end;
+        end;
+      finally
+        LIgnoreList.Free;
       end;
     end);
 end;

@@ -68,6 +68,7 @@ type
     class procedure CopyObjectState(const ASource, ADestination: IInterface); overload;
     class procedure StringToStream(const ADestStream: TStream; const ASourceString: String);
     class function StreamToString(const ASourceStream: TStream): string;
+    class function DocumentTypeForHumans(const ADocumentType: string): string;
   end;
 
 implementation
@@ -105,6 +106,32 @@ begin
   // https://it.wikipedia.org/wiki/ISO_8601#Data_completa
   // YYYY-MM-DD
   result := FormatDateTime('yyyy-mm-dd', Value, _fs);
+end;
+
+class function TeiUtils.DocumentTypeForHumans(
+  const ADocumentType: string): string;
+begin
+  if ADocumentType = 'TD01'
+    then Result := 'Fattura'
+    else
+  if ADocumentType = 'TD02'
+    then Result := 'Acconto/anticipo su fattura'
+    else
+  if ADocumentType = 'TD03'
+    then Result := 'Acconto/anticipo su parcella'
+    else
+  if ADocumentType = 'TD04'
+    then Result := 'Nota di credito'
+    else
+  if ADocumentType = 'TD05'
+    then Result := 'Nota di debito'
+    else
+  if ADocumentType = 'TD06'
+    then Result := 'Parcella'
+    else
+  if ADocumentType = 'TD20'
+    then Result := 'Autofattura'
+    else Result := 'Documento';
 end;
 
 class function TeiUtils.ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;

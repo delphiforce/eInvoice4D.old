@@ -70,7 +70,7 @@ type
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; virtual; abstract;
     function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx; virtual; abstract;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx; virtual; abstract;
-    function ReceivePurchaseInvoicesList(const AStartDate: TDateTime = 0): IeiResponseCollectionEx; virtual; abstract;
+    function ReceivePurchaseInvoicesList(const AParams: TeiPurchaseSearchParamsEx): IeiResponseCollectionEx; virtual; abstract;
     function ReceivePurchaseInvoice(const AInvoiceID: string): IeiInvoiceEx; virtual; abstract;
   public
     constructor Create(const AUserName, APassword, ABaseURLWS, ABaseURLAuth: string); virtual;

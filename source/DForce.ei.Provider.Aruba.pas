@@ -61,7 +61,7 @@ type
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; override;
     function CheckSentInvoiceStatus(const AInvoiceID: string): IeiResponseCollectionEx; override;
     function ReceiveInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
-    function ReceivePurchaseInvoicesList(const AStartDate: TDateTime = 0): IeiResponseCollectionEx; override;
+    function ReceivePurchaseInvoicesList(const AParams: TeiPurchaseSearchParamsEx): IeiResponseCollectionEx; override;
     function ReceivePurchaseInvoice(const AInvoiceID: string): IeiInvoiceEx; override;
     //function ReceivePurchaseInvoices(const AStartDate: TDateTime = 0; const AIgnoreList: TStrings = nil): IeiInvoiceCollectionEx; override;
   end;
@@ -373,8 +373,16 @@ begin
         [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
-    if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
-      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);
+    //TODO: ripristinare in produzione!
+    {if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
+      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);}
+
+    if Assigned(JObjResponse) then
+    begin
+      if JObjResponse.GetValue('file').Null
+        then Result := ei.NewInvoiceFromFile('X:\' + JObjResponse.GetValue('filename').Value)
+        else Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);
+    end;
   finally
     if Assigned(JObjResponse) then
       JObjResponse.Free;
@@ -385,7 +393,7 @@ begin
 end;
 
 function TeiProviderAruba.ReceivePurchaseInvoicesList(
-  const AStartDate: TDateTime): IeiResponseCollectionEx;
+  const AParams: TeiPurchaseSearchParams): IeiResponseCollectionEx;
 var
   LRESTClient: TRESTClient;
   LRESTRequest: TRESTRequest;
@@ -411,8 +419,10 @@ begin
     LRESTRequest.Response := LRESTResponse;
     LRESTRequest.Method := rmGET;
     LRESTRequest.AddParameter('username', UserName);
-    if AStartDate <> 0
-      then LRESTRequest.AddParameter('startDate', TeiUtils.DateToString(AStartDate));
+    //TODO: completare con gli altri parametri supportati
+    if (spStartDate in AParams.usedValues)
+      then LRESTRequest.AddParameter('startDate', TeiUtils.DateToString(AParams.startDate));
+
     LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
       [poDoNotEncode]);
 
