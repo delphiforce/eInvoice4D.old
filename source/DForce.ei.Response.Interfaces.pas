@@ -60,8 +60,7 @@ type
     rtSDIMessageNE_EC02,
     rtSDIMessageDT,
     rtSDIMessageMT,
-    rtSDIMessageEC_EN00,
-    rtSDIMessageEC_EN01,
+    rtSDIMessageEC,
     rtSDIMessageSE,
     rtException);
 
@@ -77,7 +76,7 @@ type
     procedure SetFileName(const Value: string);
     property FileName: string read GetFileName write SetFileName;
     // ResponseDate
-    // TODO: responseDate to identificate excatly
+    // TODO: responseDate to identificate exactly
     function GetResponseDate: TDateTime;
     procedure SetResponseDate(const AValue: TDateTime);
     property ResponseDate: TDateTime read GetResponseDate write SetResponseDate;

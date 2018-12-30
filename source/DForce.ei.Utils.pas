@@ -147,7 +147,7 @@ begin
       result := 'Notifica esito cedente/prestatore';
     rtSDIMessageMT:
       result := 'Notifica di metadati del file fattura';
-    rtSDIMessageEC_EN00, rtSDIMessageEC_EN01:
+    rtSDIMessageEC:
       result := 'Notifica di esito cessionario/committente';
     rtSDIMessageSE:
       result := 'Notifica di scarto esito cessionario/committente';
@@ -178,13 +178,12 @@ const
     rtSDIMessageNE_EC02,
     rtSDIMessageDT,
     rtSDIMessageMT,
-    rtSDIMessageEC_EN00,
-    rtSDIMessageEC_EN01,
+    rtSDIMessageEC,
     rtSDIMessageSE,
     rtException);
 }
   ShortCaptions: array[TeiResponseTypeInt] of string = (
-    '', '', '', '', 'NS', 'MC', 'AT', 'RC', 'NE', 'NE', 'DT', 'MT', 'EC', 'EC', 'SE', '');
+    '', '', '', '', 'NS', 'MC', 'AT', 'RC', 'NE', 'NE', 'DT', 'MT', 'EC', 'SE', '');
   LongCaptions: array[TeiResponseTypeInt] of string = (
     '',
     'Presa in carico',
@@ -197,27 +196,29 @@ const
     'Accettata',
     'Rifiutata',
     'Decorrenza Termini',
-    '', '', '', '', ''
+    '', '', '', ''
   );
 begin
+  if AResponseType = '' then
+  begin
+    Result := rtException;
+    Exit;
+  end;
+
   Result := rtUnknown;
 
   for LResponseType := Succ(Low(TeiResponseTypeInt)) to Pred(High(TeiResponseTypeInt)) do
   if (ShortCaptions[LResponseType] = AResponseType)or(LongCaptions[LResponseType] = AResponseType) then
   begin
     Result := LResponseType;
-    if (Result = rtSDIMessageNE_EC01)and(AOutcome <> '')and(AOutcome <> 'EC01') then
+    if Result = rtSDIMessageNE_EC01 then
     begin
       if AOutcome = 'EC02'
         then Result := rtSDIMessageNE_EC02
-        else Result := rtUnknown;
-    end else
-    if (Result = rtSDIMessageEC_EN00)and(AOutcome <> '')and(AOutcome <> 'EN00') then
-    begin
-      if AOutcome = 'EN01'
-        then Result := rtSDIMessageEC_EN01
-        else Result := rtUnknown;
-    end else
+        else
+      if (AOutcome <> 'EC01')and(AOutcome <> '')
+        then Result := rtUnknown;
+    end;
     Break;
   end;
 end;

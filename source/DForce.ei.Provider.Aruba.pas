@@ -317,7 +317,7 @@ begin
       begin
         LResponse := TeiResponseFactory.NewResponse;
         try
-          LJsonNotificationOutcome := LJsonNotification.GetValue<TJSONString>('esito').Value;
+          LJsonNotificationOutcome := LJsonNotification.GetValue<TJSONString>('result').Value;
         except
         end;
         LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value, LJsonNotificationOutcome);

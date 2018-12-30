@@ -65,7 +65,7 @@ type
     function GetFileName: string;
     procedure SetFileName(const Value: string);
     // ResponseDate
-    // TODO: responseDate to identificate excatly
+    // TODO: responseDate to identificate exactly
     function GetResponseDate: TDateTime;
     procedure SetResponseDate(const AValue: TDateTime);
     // Status: stato dell'azione sulla fattura
