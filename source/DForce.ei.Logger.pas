@@ -61,13 +61,14 @@ type
 implementation
 
 uses
-  Winapi.Windows;
+  Winapi.Windows, Dialogs;
 
 { TeiLogger }
 
 class procedure TeiLogger.Log(const ALogType: TeiLogType; const ALogMessage: string);
 begin
   OutputDebugString(PChar(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', Now) + ': ' + ALogMessage));
+  //ShowMessage(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', Now) + ': ' + ALogMessage);
 end;
 
 class procedure TeiLogger.LogE(const ALogMessage: string);

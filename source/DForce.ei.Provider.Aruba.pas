@@ -373,16 +373,8 @@ begin
         [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
-    //TODO: ripristinare in produzione!
-    {if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
-      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);}
-
-    if Assigned(JObjResponse) then
-    begin
-      if JObjResponse.GetValue('file').Null
-        then Result := ei.NewInvoiceFromFile('X:\' + JObjResponse.GetValue('filename').Value)
-        else Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);
-    end;
+    if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
+      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);
   finally
     if Assigned(JObjResponse) then
       JObjResponse.Free;
