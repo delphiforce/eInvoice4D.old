@@ -374,7 +374,7 @@ begin
 
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
-      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value);
+      then Result := ei.NewInvoiceFromStringBase64(JObjResponse.GetValue('file').Value, ExtractFileExt(AInvoiceID).ToLower = '.p7m');
   finally
     if Assigned(JObjResponse) then
       JObjResponse.Free;

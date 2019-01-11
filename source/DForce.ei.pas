@@ -96,10 +96,10 @@ type
 
     class function NewInvoice: IeiInvoice;
     class function NewInvoiceFromString(const AStringXML: String): IeiInvoice;
-    class function NewInvoiceFromStringBase64(const ABase64StringXML: String): IeiInvoice;
+    class function NewInvoiceFromStringBase64(const ABase64StringXML: String; const isP7M: Boolean = False): IeiInvoice;
     class function NewInvoiceFromFile(const AFileName: String): IeiInvoice;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoice;
-    class function NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoice;
+    class function NewInvoiceFromStreamBase64(const AStream: TStream; const isP7M: Boolean = False): IeiInvoice;
 
     class function NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
     class function NewNotificationNSFromStringBase64(const ABase64StringXML: String): IeiNotificationNS;
@@ -361,9 +361,10 @@ begin
   Result := TeiInvoiceFactory.NewInvoiceFromStream(AStream);
 end;
 
-class function ei.NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoice;
+class function ei.NewInvoiceFromStreamBase64(const AStream: TStream;
+  const isP7M: Boolean): IeiInvoice;
 begin
-  Result := TeiInvoiceFactory.NewInvoiceFromStreamBase64(AStream);
+  Result := TeiInvoiceFactory.NewInvoiceFromStreamBase64(AStream, isP7M);
 end;
 
 class function ei.NewInvoiceFromString(const AStringXML: String): IeiInvoice;
@@ -371,9 +372,10 @@ begin
   Result := TeiInvoiceFactory.NewInvoiceFromString(AStringXML);
 end;
 
-class function ei.NewInvoiceFromStringBase64(const ABase64StringXML: String): IeiInvoice;
+class function ei.NewInvoiceFromStringBase64(const ABase64StringXML: String;
+  const isP7M: Boolean): IeiInvoice;
 begin
-  Result := TeiInvoiceFactory.NewInvoiceFromStringBase64(ABase64StringXML);
+  Result := TeiInvoiceFactory.NewInvoiceFromStringBase64(ABase64StringXML, isP7M);
 end;
 
 class function ei.NewInvoiceIDCollection: IeiInvoiceIDCollection;
