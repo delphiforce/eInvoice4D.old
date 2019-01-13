@@ -101,7 +101,7 @@ var
 begin
   LEpuratedStringXML := StringReplace(AStringXML, '<p:', '<', [rfReplaceAll, rfIgnoreCase]);
   LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</p:', '</', [rfReplaceAll, rfIgnoreCase]);
-  LEpuratedStringXML := StringReplace(AStringXML, '<ns3:', '<', [rfReplaceAll, rfIgnoreCase]);
+  LEpuratedStringXML := StringReplace(LEpuratedStringXML, '<ns3:', '<', [rfReplaceAll, rfIgnoreCase]);
   LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</ns3:', '</', [rfReplaceAll, rfIgnoreCase]);
   DeleteXMLData(LEpuratedStringXML, '</FatturaElettronicaBody>', '</FatturaElettronica>');
   Result := LoadXMLData(LEpuratedStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
