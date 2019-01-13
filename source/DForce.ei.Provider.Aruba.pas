@@ -394,6 +394,7 @@ var
   LJsonContentArray: TJSONArray;
   LJsonContent: TJSONValue;
   LResponse: IeiResponseEx;
+  LPage: Integer;
 begin
   inherited;
   JObjResponse := nil;
@@ -412,35 +413,44 @@ begin
     LRESTRequest.Method := rmGET;
     LRESTRequest.AddParameter('username', UserName);
     //TODO: completare con gli altri parametri supportati
+    {if (spSize in AParams.usedValues)
+      then LRESTRequest.AddParameter('size', AParams.size.ToString); //TODO: non sembra funzionare affatto}
     if (spStartDate in AParams.usedValues)
       then LRESTRequest.AddParameter('startDate', TeiUtils.DateToString(AParams.startDate));
 
     LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
       [poDoNotEncode]);
 
-    LRESTRequest.Execute;
-    if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('ReceivePurchaseInvoicesList error: %d - %s',
-        [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
-
-
+    //DONE: sembra un errore nella documentazione, le pagine sono numerate in base 1 (passando zero ritorna sempre pagina uno)
+    LPage := 1;
+    LRESTRequest.AddParameter('page', LPage.ToString);
     Result := TeiResponseFactory.NewResponseCollection;
-    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    repeat
+      LRESTRequest.Params.ParameterByName('page').Value := LPage.ToString;
+      Inc(LPage);
+      LRESTRequest.Response.ResetToDefaults;
+      LRESTRequest.Execute;
+      if LRESTResponse.StatusCode <> 200 then
+        raise eiGenericException.Create(Format('ReceivePurchaseInvoicesList error: %d - %s',
+          [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
-    if Assigned(JObjResponse) then
-    begin
-      LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
-      for LJsonContent in LJsonContentArray do
-      try
-        LResponse := TeiResponseFactory.NewResponse;
-        LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
-        LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
+      JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
 
-        LResponse.MsgRaw := LJsonContent.ToString;
-        Result.Add(LResponse);
-      except
+      if Assigned(JObjResponse) then
+      begin
+        LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
+        for LJsonContent in LJsonContentArray do
+        try
+          LResponse := TeiResponseFactory.NewResponse;
+          LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
+          LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
+
+          LResponse.MsgRaw := LJsonContent.ToString;
+          Result.Add(LResponse);
+        except
+        end;
       end;
-    end;
+    until JObjResponse.GetValue<TJSONBool>('last').AsBoolean;
   finally
     if Assigned(JObjResponse) then
       JObjResponse.Free;
