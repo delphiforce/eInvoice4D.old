@@ -436,19 +436,18 @@ begin
 
       JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
 
-      if Assigned(JObjResponse) then
-      begin
-        LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
-        for LJsonContent in LJsonContentArray do
-        try
-          LResponse := TeiResponseFactory.NewResponse;
-          LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
-          LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
+      if not Assigned(JObjResponse)
+        then raise eiGenericException.Create('ReceivePurchaseInvoicesList error: empty response');
 
-          LResponse.MsgRaw := LJsonContent.ToString;
-          Result.Add(LResponse);
-        except
-        end;
+      LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
+      for LJsonContent in LJsonContentArray do
+      begin
+        LResponse := TeiResponseFactory.NewResponse;
+        LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
+        LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
+
+        LResponse.MsgRaw := LJsonContent.ToString;
+        Result.Add(LResponse);
       end;
     until JObjResponse.GetValue<TJSONBool>('last').AsBoolean;
   finally
