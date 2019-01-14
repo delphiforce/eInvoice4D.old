@@ -41,7 +41,7 @@ unit DForce.ei.Invoice.Interfaces;
 
 interface
 
-uses DForce.ei.Invoice.Base, System.Classes,
+uses DForce.ei.Invoice.Base, System.Classes, System.SysUtils,
   System.Generics.Collections, DForce.ei.GenericCollection.Interfaces,
   DForce.ei.Validation.Interfaces;
 
@@ -84,10 +84,9 @@ type
     procedure SetReference(const AValue: string);
     function GetReference: string;
     property Reference: string read GetReference write SetReference;
-    // SourceOverride
-    procedure SetSourceOverride(const AValue: string);
-    function GetSourceOverride: string;
-    property SourceOverride: string read GetSourceOverride write SetSourceOverride;
+    function GetRawInvoice: TBytes;
+    procedure SetRawInvoice(const AValue: TBytes);
+    property RawInvoice: TBytes read GetRawInvoice write SetRawInvoice;
   end;
 
   IeiInvoiceCollectionEx = IeiCollection<IeiInvoiceEx>;

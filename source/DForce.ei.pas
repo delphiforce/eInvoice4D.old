@@ -95,11 +95,11 @@ type
     class function NewResponseCollection: IeiResponseCollection;
 
     class function NewInvoice: IeiInvoice;
-    class function NewInvoiceFromString(const AStringXML: String): IeiInvoice;
-    class function NewInvoiceFromStringBase64(const ABase64StringXML: String; const isP7M: Boolean = False): IeiInvoice;
-    class function NewInvoiceFromFile(const AFileName: String): IeiInvoice;
+    class function NewInvoiceFromString(const AStringXML: string): IeiInvoice;
+    class function NewInvoiceFromStringBase64(const ABase64StringXML: string): IeiInvoice;
+    class function NewInvoiceFromFile(const AFileName: string): IeiInvoice;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoice;
-    class function NewInvoiceFromStreamBase64(const AStream: TStream; const isP7M: Boolean = False): IeiInvoice;
+    class function NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoice;
 
     class function NewNotificationNSFromString(const AStringXML: String): IeiNotificationNS;
     class function NewNotificationNSFromStringBase64(const ABase64StringXML: String): IeiNotificationNS;
@@ -361,21 +361,19 @@ begin
   Result := TeiInvoiceFactory.NewInvoiceFromStream(AStream);
 end;
 
-class function ei.NewInvoiceFromStreamBase64(const AStream: TStream;
-  const isP7M: Boolean): IeiInvoice;
+class function ei.NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoice;
 begin
-  Result := TeiInvoiceFactory.NewInvoiceFromStreamBase64(AStream, isP7M);
+  Result := TeiInvoiceFactory.NewInvoiceFromStreamBase64(AStream);
 end;
 
-class function ei.NewInvoiceFromString(const AStringXML: String): IeiInvoice;
+class function ei.NewInvoiceFromString(const AStringXML: string): IeiInvoice;
 begin
   Result := TeiInvoiceFactory.NewInvoiceFromString(AStringXML);
 end;
 
-class function ei.NewInvoiceFromStringBase64(const ABase64StringXML: String;
-  const isP7M: Boolean): IeiInvoice;
+class function ei.NewInvoiceFromStringBase64(const ABase64StringXML: string): IeiInvoice;
 begin
-  Result := TeiInvoiceFactory.NewInvoiceFromStringBase64(ABase64StringXML, isP7M);
+  Result := TeiInvoiceFactory.NewInvoiceFromStringBase64(ABase64StringXML);
 end;
 
 class function ei.NewInvoiceIDCollection: IeiInvoiceIDCollection;

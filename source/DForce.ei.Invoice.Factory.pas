@@ -49,23 +49,16 @@ const
   TargetNamespace = '';
 
 type
-
-  TUTF8WeakEncoding = class(TUTF8Encoding)
-  public
-    constructor Create; override;
-    function Clone: TEncoding; override;
-  end;
-
   TeiInvoiceFactory = class
   private
-    class function InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
+    class function InternalNewInvoiceFromBytes(const AXMLBytes: TBytes): IeiInvoiceEx;
   public
     class function NewInvoice: IeiInvoiceEx;
-    class function NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
-    class function NewInvoiceFromStringBase64(const ABase64StringXML: String; const isP7M: Boolean = False): IeiInvoiceEx;
-    class function NewInvoiceFromFile(const AFileName: String): IeiInvoiceEx;
+    class function NewInvoiceFromString(const AStringXML: string): IeiInvoiceEx;
+    class function NewInvoiceFromStringBase64(const ABase64StringXML: string): IeiInvoiceEx;
+    class function NewInvoiceFromFile(const AFileName: string): IeiInvoiceEx;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoiceEx;
-    class function NewInvoiceFromStreamBase64(const AStream: TStream; const isP7M: Boolean = False): IeiInvoiceEx;
+    class function NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoiceEx;
 
     class function NewInvoiceCollection: IeiInvoiceCollectionEx;
     class function NewInvoiceIDCollection: IeiInvoiceIDCollectionEx;
@@ -74,11 +67,13 @@ type
 implementation
 
 uses
-  Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, DForce.ei.Utils, System.StrUtils, PKCS7Extractor;
+  Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, DForce.ei.Utils,
+  DForce.ei.Exception, System.StrUtils, PKCS7Extractor;
 
 { TeiInvoiceFactory }
 
-class function TeiInvoiceFactory.InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
+class function TeiInvoiceFactory.InternalNewInvoiceFromBytes(
+  const AXMLBytes: TBytes): IeiInvoiceEx;
 
   procedure DeleteXMLData(var AXML: string; const AFromTag, AToTag: string);
   var
@@ -97,19 +92,51 @@ class function TeiInvoiceFactory.InternalNewInvoiceFromString(const AStringXML: 
   end;
 
 var
+  LP7M: TPKCS7Message;
+  LInStream: TBytesStream;
+  LOutStream: TBytesStream;
+  LInnerXML: string;
   LEpuratedStringXML: String;
 begin
-  LEpuratedStringXML := StringReplace(AStringXML, '<p:', '<', [rfReplaceAll, rfIgnoreCase]);
+  LInStream := nil;
+  LP7M := nil;
+  LInnerXML := '';
+  try
+    LInStream := TBytesStream.Create(AXMLBytes);
+
+    if not PKCS7Extractor.Loaded
+      then PKCS7Extractor.Load();
+
+    LP7M := TPKCS7Message.Create;
+    if LP7M.LoadFromStream(LInStream) then
+    begin
+      if not LP7M.Verify
+        then raise eiGenericException.Create('PKCS7 verification failed');
+
+      LOutStream := nil;
+      try
+        LOutStream := TBytesStream.Create;
+        LP7M.SaveToStream(LOutStream);
+        LInnerXML := TEncoding.UTF8.GetString(LOutStream.Bytes);
+      finally
+        LOutStream.Free;
+      end;
+    end else
+    begin
+      LInnerXML := TEncoding.UTF8.GetString(AXMLBytes);
+    end;
+  finally
+    LP7M.Free;
+    LInStream.Free;
+  end;
+
+  LEpuratedStringXML := StringReplace(LInnerXML, '<p:', '<', [rfReplaceAll, rfIgnoreCase]);
   LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</p:', '</', [rfReplaceAll, rfIgnoreCase]);
   LEpuratedStringXML := StringReplace(LEpuratedStringXML, '<ns3:', '<', [rfReplaceAll, rfIgnoreCase]);
   LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</ns3:', '</', [rfReplaceAll, rfIgnoreCase]);
   DeleteXMLData(LEpuratedStringXML, '</FatturaElettronicaBody>', '</FatturaElettronica>');
   Result := LoadXMLData(LEpuratedStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
-end;
-
-class function TeiInvoiceFactory.NewInvoice: IeiInvoiceEx;
-begin
-  Result := NewXMLDocument.GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
+  Result.RawInvoice := AXMLBytes;
 end;
 
 class function TeiInvoiceFactory.NewInvoiceCollection: IeiInvoiceCollectionEx;
@@ -117,77 +144,58 @@ begin
   Result := TeiInvoiceCollectionEx.Create;
 end;
 
-class function TeiInvoiceFactory.NewInvoiceFromFile(const AFileName: String): IeiInvoiceEx;
-var
-  LFileStream: TFileStream;
-begin
-  LFileStream := TFileStream.Create(AFileName, fmOpenRead);
-  try
-    Result := InternalNewInvoiceFromString(TeiUtils.StreamToString(LFileStream));
-  finally
-    LFileStream.Free;
-  end;
-end;
-
-class function TeiInvoiceFactory.NewInvoiceFromStream(const AStream: TStream): IeiInvoiceEx;
-begin
-  Result := InternalNewInvoiceFromString(TeiUtils.StreamToString(AStream));
-end;
-
-class function TeiInvoiceFactory.NewInvoiceFromStreamBase64(const AStream: TStream;
-  const isP7M: Boolean): IeiInvoiceEx;
-begin
-  Result := NewInvoiceFromStringBase64(TeiUtils.StreamToString(AStream), isP7M);
-end;
-
-class function TeiInvoiceFactory.NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
-begin
-  Result := InternalNewInvoiceFromString(AStringXML);
-end;
-
-class function TeiInvoiceFactory.NewInvoiceFromStringBase64(const ABase64StringXML: String;
-  const isP7M: Boolean): IeiInvoiceEx;
-var
-  LBytesIn: TBytes;
-  LStreamIn: TBytesStream;
-  LStreamOut: TBytesStream;
-begin
-  if isP7M then
-  begin
-    LStreamIn := nil;
-    LStreamOut := nil;
-    try
-      LBytesIn := TNetEncoding.Base64.DecodeStringToBytes(ABase64StringXML);
-      LStreamIn := TBytesStream.Create(LBytesIn);
-      LStreamOut := TBytesStream.Create;
-      Extract(LStreamIn, LStreamOut);
-      Result := InternalNewInvoiceFromString(TEncoding.UTF8.GetString(LStreamOut.Bytes));
-    finally
-      LStreamIn.Free;
-      LStreamOut.Free;
-    end;
-  end else
-  begin
-    Result := InternalNewInvoiceFromString(TNetEncoding.Base64.Decode(ABase64StringXML));
-  end;
-end;
-
 class function TeiInvoiceFactory.NewInvoiceIDCollection: IeiInvoiceIDCollectionEx;
 begin
   Result := TeiInvoiceIDCollectionEx.Create;
 end;
 
-{ TUTF8WeakEncoding }
-
-constructor TUTF8WeakEncoding.Create;
+class function TeiInvoiceFactory.NewInvoice: IeiInvoiceEx;
 begin
-  inherited Create(CP_UTF8, 0, 0);
-  FIsSingleByte := False;
+  Result := NewXMLDocument.GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
 end;
 
-function TUTF8WeakEncoding.Clone: TEncoding;
+class function TeiInvoiceFactory.NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
 begin
-  Result := TUTF8WeakEncoding.Create;
+  //DONE: da qui non mi aspetto p7m che probabilmente avrebbero già dato errori nella conserversione in UTF8
+  Result := InternalNewInvoiceFromBytes(TEncoding.UTF8.GetBytes(AStringXML));
+end;
+
+class function TeiInvoiceFactory.NewInvoiceFromStringBase64(const ABase64StringXML: string): IeiInvoiceEx;
+begin
+  Result := InternalNewInvoiceFromBytes(TNetEncoding.Base64.DecodeStringToBytes(ABase64StringXML));
+end;
+
+class function TeiInvoiceFactory.NewInvoiceFromFile(const AFileName: String): IeiInvoiceEx;
+var
+  LStreamIn: TBytesStream;
+begin
+  LStreamIn := nil;
+  try
+    LStreamIn := TBytesStream.Create;
+    LStreamIn.LoadFromFile(AFileName);
+    Result := InternalNewInvoiceFromBytes(LStreamIn.Bytes);
+  finally
+    LStreamIn.Free;
+  end;
+end;
+
+class function TeiInvoiceFactory.NewInvoiceFromStream(const AStream: TStream): IeiInvoiceEx;
+var
+  LStreamIn: TBytesStream;
+begin
+  LStreamIn := nil;
+  try
+    LStreamIn := TBytesStream.Create;
+    LStreamIn.LoadFromStream(AStream);
+    Result := InternalNewInvoiceFromBytes(LStreamIn.Bytes);
+  finally
+    LStreamIn.Free;
+  end;
+end;
+
+class function TeiInvoiceFactory.NewInvoiceFromStreamBase64(const AStream: TStream): IeiInvoiceEx;
+begin
+  Result := NewInvoiceFromStringBase64(TeiUtils.StreamToString(AStream));
 end;
 
 end.

@@ -43,15 +43,15 @@ interface
 
 uses DForce.ei.Invoice.Base, DForce.ei.Invoice.Interfaces, System.Classes,
   DForce.ei.Response.Interfaces, DForce.ei.GenericCollection,
-  DForce.ei.Validation.Interfaces;
+  DForce.ei.Validation.Interfaces, System.SysUtils;
 
 type
 
   TeiInvoiceEx = class(TXMLFatturaElettronicaType, IeiInvoiceEx)
   private
-    FSourceOverride: string;
     FReference: string;
     FValidationResultCollection: IeiValidationResultCollectionInt;
+    FRawInvoice: TBytes;
   protected
     function ToString: String; reintroduce;
     function ToStringBase64: String;
@@ -65,9 +65,8 @@ type
     // Reference
     procedure SetReference(const AValue: string);
     function GetReference: string;
-    // SourceOverride
-    procedure SetSourceOverride(const AValue: string);
-    function GetSourceOverride: string;
+    function GetRawInvoice: TBytes;
+    procedure SetRawInvoice(const AValue: TBytes);
   end;
 
   TeiInvoiceCollectionEx = TeiCollection<IeiInvoiceEx>;
@@ -76,7 +75,7 @@ type
 
 implementation
 
-uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception, System.SysUtils,
+uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception,
   DForce.ei, DForce.ei.Utils, DForce.ei.Validation.Engine, System.StrUtils;
 
 { TeiInvoiceEx }
@@ -86,9 +85,9 @@ begin
   TeiUtils.FillInvoiceSample(Self);
 end;
 
-function TeiInvoiceEx.GetSourceOverride: string;
+function TeiInvoiceEx.GetRawInvoice: TBytes;
 begin
-  Result := FSourceOverride;
+  Result := FRawInvoice;
 end;
 
 function TeiInvoiceEx.GetReference: string;
@@ -125,9 +124,9 @@ begin
   TeiUtils.StringToStream(AStream, ToStringBase64);
 end;
 
-procedure TeiInvoiceEx.SetSourceOverride(const AValue: string);
+procedure TeiInvoiceEx.SetRawInvoice(const AValue: TBytes);
 begin
-  FSourceOverride := AValue;
+  FRawInvoice := Copy(AValue);
 end;
 
 procedure TeiInvoiceEx.SetReference(const AValue: string);
@@ -139,12 +138,6 @@ function TeiInvoiceEx.ToString: String;
 var
   Lxml: TStringList;
 begin
-  if FSourceOverride <> '' then
-  begin
-    Result := FSourceOverride;
-    Exit;
-  end;
-
   Lxml := TStringList.Create;
   try
     Lxml.Text := FormatXMLData(Self.GetXML);
