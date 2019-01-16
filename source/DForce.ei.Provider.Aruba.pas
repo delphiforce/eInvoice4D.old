@@ -168,6 +168,21 @@ begin
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
+      //DONE: la fattura indicata non esiste sul sdi -> la segno come stato sconosciuto
+      if JObjResponse.GetValue<TJSONString>('errorCode').Value.Equals('0002') then
+      begin
+        LResponse := TeiResponseFactory.NewResponse;
+        LResponse.FileName := AInvoiceID;
+        LResponse.ResponseType := TeiResponseTypeInt.rtUnknown;
+        LResponse.ResponseDate := Now;
+        LResponse.NotificationDate := Now;
+        LResponse.MsgCode := '0002';
+        LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').ToString;
+        LResponse.MsgRaw := LRESTResponse.JSONText;
+        Result.Add(LResponse);
+        Exit;
+      end;
+
       if not JObjResponse.GetValue<TJSONString>('errorCode').Value.Equals('0000')
         then raise eiGenericException.CreateFmt('%s: %s', [JObjResponse.GetValue<TJSONString>('errorCode').Value, JObjResponse.GetValue<TJSONString>('errorDescription').Value]);
 
@@ -438,6 +453,11 @@ begin
 
       if not Assigned(JObjResponse)
         then raise eiGenericException.Create('ReceivePurchaseInvoicesList error: empty response');
+
+      //DONE: in demo content è null, ma last è false, comodo...
+      if JObjResponse.GetValue('content').Null
+        then Break;
+
 
       LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
       for LJsonContent in LJsonContentArray do
