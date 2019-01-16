@@ -647,9 +647,13 @@ begin
           if (Assigned(LIgnoreList))and(LIgnoreList.IndexOf(LResponse.FileName) >= 0)
             then Continue;
           LInvoice := ei.ReceivePurchaseInvoice(LResponse.FileName);
-          LInvoice.Reference := LResponse.FileName;
-          if Assigned(AAfterEachMethod) then
-            AAfterEachMethod(LInvoice);
+          //TODO: questo serve per l'ambiente di TEST, ma sarebbe utile verificare anche in produzione
+          if Assigned(LInvoice) then
+          begin
+            LInvoice.Reference := LResponse.FileName;
+            if Assigned(AAfterEachMethod) then
+              AAfterEachMethod(LInvoice);
+          end;
         except
           on E: Exception do
           begin
