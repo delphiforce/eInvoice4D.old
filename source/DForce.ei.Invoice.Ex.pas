@@ -138,12 +138,6 @@ function TeiInvoiceEx.ToString: String;
 var
   Lxml: TStringList;
 begin
-  if Length(FRawInvoice) > 0 then
-  begin
-    Result := TEncoding.UTF8.GetString(FRawInvoice);
-    Exit;
-  end;
-
   Lxml := TStringList.Create;
   try
     Lxml.Text := FormatXMLData(Self.GetXML);

@@ -482,7 +482,7 @@ begin
       LDocNum := AInvoice.FatturaElettronicaBody.Items[0].DatiGenerali.DatiGeneraliDocumento.Numero;
       LogI(Format('Sending invoice "%s"', [LDocNum]));
       try
-        Result := FProvider.SendInvoice(AInvoice.ToString);
+        Result := FProvider.SendInvoice(TEncoding.UTF8.GetString(AInvoice.RawInvoice));
         Result[0].Invoice := AInvoice; // Inject the Invoice itself in the first (and only) response
         LogI(Format('Invoice "%s" sent', [LDocNum]));
       except
