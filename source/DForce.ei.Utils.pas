@@ -208,7 +208,7 @@ begin
   Result := rtUnknown;
 
   for LResponseType := Succ(Low(TeiResponseTypeInt)) to Pred(High(TeiResponseTypeInt)) do
-  if (ShortCaptions[LResponseType] = AResponseType)or(LongCaptions[LResponseType] = AResponseType) then
+  if SameText(AResponseType, ShortCaptions[LResponseType]) or SameText(AResponseType, LongCaptions[LResponseType]) then
   begin
     Result := LResponseType;
     if Result = rtSDIMessageNE_EC01 then
