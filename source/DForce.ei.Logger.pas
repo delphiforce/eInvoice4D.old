@@ -42,9 +42,14 @@ unit DForce.ei.Logger;
 interface
 
 uses
-  System.SysUtils;
+  System.SysUtils, Messages;
 
 type
+  PeiLogRecord = ^TeiLogRecord;
+  TeiLogRecord = record
+    MsgTime: TDateTime;
+    MsgText: string;
+  end;
 
   TeiLogType = (ltInformation, ltWarning, ltError);
 
@@ -58,16 +63,26 @@ type
     class procedure LogE(const E: Exception); overload; // Exception
   end;
 
+const
+  UM_EILOG = WM_USER + 42;
+
 implementation
 
 uses
-  Winapi.Windows, Dialogs;
+  Winapi.Windows, Vcl.Forms;
 
 { TeiLogger }
 
 class procedure TeiLogger.Log(const ALogType: TeiLogType; const ALogMessage: string);
+var
+  LRecord: PeiLogRecord;
 begin
-  OutputDebugString(PChar(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', Now) + ': ' + ALogMessage));
+  New(LRecord);
+  LRecord^.MsgTime := Now;
+  LRecord^.MsgText := ALogMessage;
+  OutputDebugString(PChar(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', LRecord^.MsgTime) + ': ' + LRecord^.MsgText));
+  if (Application.Terminated)or(not PostMessage(Application.MainFormHandle, UM_EILOG, 0, LPARAM(LRecord)))
+    then Dispose(LRecord);
   //ShowMessage(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', Now) + ': ' + ALogMessage);
 end;
 
