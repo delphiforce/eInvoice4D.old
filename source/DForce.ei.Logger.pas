@@ -45,13 +45,14 @@ uses
   System.SysUtils, Messages;
 
 type
+  TeiLogType = (ltInformation, ltWarning, ltError);
+
   PeiLogRecord = ^TeiLogRecord;
   TeiLogRecord = record
+    MsgType: TeiLogType;
     MsgTime: TDateTime;
     MsgText: string;
   end;
-
-  TeiLogType = (ltInformation, ltWarning, ltError);
 
   TeiLogger = class
   protected
@@ -78,6 +79,7 @@ var
   LRecord: PeiLogRecord;
 begin
   New(LRecord);
+  LRecord^.MsgType := ALogType;
   LRecord^.MsgTime := Now;
   LRecord^.MsgText := ALogMessage;
   OutputDebugString(PChar(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', LRecord^.MsgTime) + ': ' + LRecord^.MsgText));
