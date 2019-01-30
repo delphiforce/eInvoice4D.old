@@ -408,8 +408,11 @@ var
   JObjResponse: TJSONObject;
   LJsonContentArray: TJSONArray;
   LJsonContent: TJSONValue;
+  LJsonInvoicesArray: TJSONArray;
+  LJsonInvoice: TJSONValue;
   LResponse: IeiResponseEx;
   LPage: Integer;
+  LMustSkipDate: Boolean;
 begin
   inherited;
   JObjResponse := nil;
@@ -458,10 +461,26 @@ begin
       if JObjResponse.GetValue('content').Null
         then Break;
 
-
       LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
       for LJsonContent in LJsonContentArray do
       begin
+        //DONE: purtroppo la documentazione di Aruba è errata; startDate non identifica la data di creazione della fattura,
+        //bensì la data di ultimo aggiornamento (ad esempio la data di consegna)
+        //devo quindi escludere manualmente le fatture create prima di startDate
+        LJsonInvoicesArray := LJsonContent.GetValue<TJSONArray>('invoices');
+        LMustSkipDate := True;
+        for LJsonInvoice in LJsonInvoicesArray do
+        begin
+          if TeiUtils.DateTimeLocalFromIso8601(LJsonInvoice.GetValue<TJSONString>('invoiceDate').Value) >= AParams.startDate then
+          begin
+            LMustSkipDate := False;
+            Break;
+          end;
+        end;
+
+        if LMustSkipDate
+          then Continue;
+
         LResponse := TeiResponseFactory.NewResponse;
         LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
         LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
