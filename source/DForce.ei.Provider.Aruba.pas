@@ -410,7 +410,7 @@ var
   LRESTClient: TRESTClient;
   LRESTRequest: TRESTRequest;
   LRESTResponse: TRESTResponse;
-  JObjResponse: TJSONObject;
+  LJsonObjResponse: TJSONObject;
   LJsonContentArray: TJSONArray;
   LJsonContent: TJSONValue;
   LJsonInvoicesArray: TJSONArray;
@@ -418,10 +418,9 @@ var
   LResponse: IeiResponseEx;
   LPage: Integer;
   LMustSkipDate: Boolean;
+  LLastPage: Boolean;
 begin
   inherited;
-  JObjResponse := nil;
-
   LRESTClient := TRESTClient.Create(nil);
   LRESTRequest := TRESTRequest.Create(nil);
   LRESTResponse := TRESTResponse.Create(nil);
@@ -448,7 +447,10 @@ begin
     LPage := 1;
     LRESTRequest.AddParameter('page', LPage.ToString);
     Result := TeiResponseFactory.NewResponseCollection;
-    repeat
+
+    LLastPage := False;
+    while not LLastPage do
+    begin
       LRESTRequest.Params.ParameterByName('page').Value := LPage.ToString;
       Inc(LPage);
       LRESTRequest.Response.ResetToDefaults;
@@ -458,46 +460,52 @@ begin
         raise eiGenericException.CreateFmtHelp('ReceivePurchaseInvoicesList error: %d - %s',
           [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
-      JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+      LJsonObjResponse := nil;
+      try
+        LJsonObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
 
-      if not Assigned(JObjResponse)
-        then raise eiGenericException.Create('ReceivePurchaseInvoicesList error: empty response');
+        if not Assigned(LJsonObjResponse)
+          then raise eiGenericException.Create('ReceivePurchaseInvoicesList error: empty response');
 
-      //DONE: in demo content è null, ma last è false, comodo...
-      if JObjResponse.GetValue('content').Null
-        then Break;
+        //DONE: in demo content è null, ma last è false, comodo...
+        if LJsonObjResponse.GetValue('content').Null
+          then Break;
 
-      LJsonContentArray := JObjResponse.GetValue<TJSONArray>('content');
-      for LJsonContent in LJsonContentArray do
-      begin
-        //DONE: purtroppo la documentazione di Aruba è errata; startDate non identifica la data di creazione della fattura,
-        //bensì la data di ultimo aggiornamento (ad esempio la data di consegna)
-        //devo quindi escludere manualmente le fatture create prima di startDate
-        LJsonInvoicesArray := LJsonContent.GetValue<TJSONArray>('invoices');
-        LMustSkipDate := True;
-        for LJsonInvoice in LJsonInvoicesArray do
+        //DONE: LJsonContentArray non va distrutto, ci pensa il Free di LJsonObjResponse
+        LJsonContentArray := LJsonObjResponse.GetValue<TJSONArray>('content');
+        for LJsonContent in LJsonContentArray do
         begin
-          if TeiUtils.DateTimeLocalFromIso8601(LJsonInvoice.GetValue<TJSONString>('invoiceDate').Value) >= AParams.startDate then
+          //DONE: purtroppo la documentazione di Aruba è errata; startDate non identifica la data di creazione della fattura,
+          //bensì la data di ultimo aggiornamento (ad esempio la data di consegna)
+          //devo quindi escludere manualmente le fatture create prima di startDate
+          LJsonInvoicesArray := LJsonContent.GetValue<TJSONArray>('invoices');
+          LMustSkipDate := True;
+          for LJsonInvoice in LJsonInvoicesArray do
           begin
-            LMustSkipDate := False;
-            Break;
+            if TeiUtils.DateTimeLocalFromIso8601(LJsonInvoice.GetValue<TJSONString>('invoiceDate').Value) >= AParams.startDate then
+            begin
+              LMustSkipDate := False;
+              Break;
+            end;
           end;
+
+          if LMustSkipDate
+            then Continue;
+
+          LResponse := TeiResponseFactory.NewResponse;
+          LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
+          LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
+
+          LResponse.MsgRaw := LJsonContent.ToString;
+          Result.Add(LResponse);
         end;
 
-        if LMustSkipDate
-          then Continue;
-
-        LResponse := TeiResponseFactory.NewResponse;
-        LResponse.FileName := LJsonContent.GetValue<TJSONString>('filename').Value;
-        LResponse.MsgCode := LJsonContent.GetValue<TJSONString>('invoiceType').Value;
-
-        LResponse.MsgRaw := LJsonContent.ToString;
-        Result.Add(LResponse);
+        LLastPage := LJsonObjResponse.GetValue<TJSONBool>('last').AsBoolean;
+      finally
+        LJsonObjResponse.Free;
       end;
-    until JObjResponse.GetValue<TJSONBool>('last').AsBoolean;
+    end;
   finally
-    if Assigned(JObjResponse) then
-      JObjResponse.Free;
     LRESTClient.Free;
     LRESTRequest.Free;
     LRESTResponse.Free;
