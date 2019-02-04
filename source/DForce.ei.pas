@@ -611,6 +611,11 @@ begin
             then Continue;
           Result.Add(ei.ReceivePurchaseInvoice(LResponse.FileName));
         except
+          on E: Exception do
+          begin
+            LogE(E);
+            raise;
+          end;
         end;
       finally
         LIgnoreList.Free;

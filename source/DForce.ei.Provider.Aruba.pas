@@ -107,8 +107,9 @@ begin
     LRESTRequest.AddParameter('password', Password);
 
     LRESTRequest.Execute;
+    //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiRESTAuthException.CreateFmt('Error during auth request: %s', [LRESTResponse.Content]);
+      raise eiRESTAuthException.CreateFmtHelp('Error during auth request: %s', [LRESTResponse.Content], LRESTResponse.StatusCode);
 
     LFullTokenJson := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if not LFullTokenJson.TryGetValue<string>('access_token', FAccessToken) then
@@ -161,8 +162,9 @@ begin
       [poDoNotEncode]);
 
     LRESTRequest.Execute;
+    //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('getByFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.CreateFmtHelp('getByFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
@@ -257,8 +259,9 @@ begin
     LRESTRequest.Body.Add(LJSONBody, TRESTContentType.ctAPPLICATION_JSON);
 
     LRESTRequest.Execute;
+    //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('Sending invoice error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.CreateFmtHelp('Sending invoice error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
@@ -320,8 +323,9 @@ begin
       [poDoNotEncode]);
 
     LRESTRequest.Execute;
+    //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('getByInvoiceFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.CreateFmtHelp('getByInvoiceFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
@@ -383,9 +387,10 @@ begin
       [poDoNotEncode]);
 
     LRESTRequest.Execute;
+    //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('ReceivePurchaseInvoice error: %d - %s',
-        [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.CreateFmtHelp('ReceivePurchaseInvoice error: %d - %s',
+        [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if (Assigned(JObjResponse))and(not JObjResponse.GetValue('file').Null)
@@ -448,9 +453,10 @@ begin
       Inc(LPage);
       LRESTRequest.Response.ResetToDefaults;
       LRESTRequest.Execute;
+      //DONE: uso l'HelpContext per passare avanti il codice errore
       if LRESTResponse.StatusCode <> 200 then
-        raise eiGenericException.Create(Format('ReceivePurchaseInvoicesList error: %d - %s',
-          [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+        raise eiGenericException.CreateFmtHelp('ReceivePurchaseInvoicesList error: %d - %s',
+          [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
 
       JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
 
