@@ -43,7 +43,13 @@ interface
 
 uses DForce.ei.Provider.Interfaces, DForce.ei.Response.Interfaces, System.Classes,
   DForce.ei.Invoice.Interfaces, System.SysUtils, DForce.ei.Logger, DForce.ei.Validation.Interfaces,
-  DForce.ei.Notification.Interfaces;
+  DForce.ei.Notification.Interfaces, DForce.ei.Utils.Sanitizer,
+  DForce.ei.Utils.P7mExtractor;
+
+const
+  // Delay time in millisec between every provider API call
+  // You can set your custom value by calling ei.SetDelay method
+  CONST_DELAY = 500;
 
 type
 
@@ -67,10 +73,13 @@ type
   private
     class var FProviderID: String; // Current selected provider ID
     class var FProvider: IeiProvider;
+    class var FDelay: integer;
   protected
     class function InternalExecute<T, TResult>(const AParam: T; const AMethod: TFunc<T, TResult>): TResult;
     class function ProviderExists: Boolean;
   public
+    class constructor Create;
+
     class function ResponseTypeForHumans(const AResponseType: TeiResponseType): string;
     class function ResponseTypeToString(const AResponseType: TeiResponseType): string;
     class function StringToResponseType(const AResponseType: String): TeiResponseType;
@@ -79,6 +88,8 @@ type
     class procedure LogW(const ALogMessage: string);
     class procedure LogE(const ALogMessage: string); overload; // Error
     class procedure LogE(const E: Exception); overload; // Exception
+    class procedure LogBlank;
+    class procedure LogSeparator;
 
     class procedure SelectProvider(const AProviderID, AUserName, APassword: String; const ABaseURL: String = '';
       const ABaseURLAuth: String = ''); overload;
@@ -123,10 +134,16 @@ type
     class function ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection)
       : IeiResponseCollection; overload;
     class procedure ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
-      const AAfterEachMethod: TProc<IeiResponseCollection>;
-      const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception> = nil); overload;
+      const AAfterEachMethod: TProc<IeiResponseCollection, String>;
+      const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String> = nil); overload;
 
-    class procedure ReceivePurchaseInvoices;
+    class function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
+      AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx;
+    class function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponse;
+    class function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollection;
+
+    class procedure SetCustomExtractP7mMethod(const AMethod: TeiExtractP7mMethod);
+    class procedure SetDelay(const ADelayMilliSec: integer);
   end;
 
 implementation
@@ -144,6 +161,7 @@ end;
 
 class procedure ei.Connect;
 begin
+  LogSeparator;
   LogI(Format('Trying to connect to %S', [FProviderID]));
   try
     if ProviderExists then
@@ -159,6 +177,11 @@ begin
       raise;
     end;
   end;
+end;
+
+class constructor ei.Create;
+begin
+  FDelay := CONST_DELAY;
 end;
 
 class procedure ei.Disconnect;
@@ -193,6 +216,7 @@ end;
 
 class function ei.ReceiveInvoiceNotifications(const AInvoiceID: String): IeiResponseCollection;
 begin
+  Sleep(FDelay);
   Result := InternalExecute<String, IeiResponseCollection>(AInvoiceID,
     function(Invoice: String): IeiResponseCollection
     begin
@@ -244,6 +268,11 @@ begin
   TeiLogger.LogE(ALogMessage);
 end;
 
+class procedure ei.LogBlank;
+begin
+  TeiLogger.LogBlank;
+end;
+
 class procedure ei.LogE(const E: Exception);
 begin
   TeiLogger.LogE(E);
@@ -252,6 +281,11 @@ end;
 class procedure ei.LogI(const ALogMessage: string);
 begin
   TeiLogger.LogI(ALogMessage);
+end;
+
+class procedure ei.LogSeparator;
+begin
+  TeiLogger.LogSeparator;
 end;
 
 class procedure ei.LogW(const ALogMessage: string);
@@ -301,27 +335,27 @@ end;
 
 class function ei.NewNotificationNEFromFile(const AFileName: String): IeiNotificationNE;
 begin
- Result := TeiNotificationFactory.NewNotificationNEFromFile(AFileName);
+  Result := TeiNotificationFactory.NewNotificationNEFromFile(AFileName);
 end;
 
 class function ei.NewNotificationNEFromStream(const AStream: TStream): IeiNotificationNE;
 begin
- Result := TeiNotificationFactory.NewNotificationNEFromStream(AStream);
+  Result := TeiNotificationFactory.NewNotificationNEFromStream(AStream);
 end;
 
 class function ei.NewNotificationNEFromStreamBase64(const AStream: TStream): IeiNotificationNE;
 begin
- Result := TeiNotificationFactory.NewNotificationNEFromStreamBase64(AStream);
+  Result := TeiNotificationFactory.NewNotificationNEFromStreamBase64(AStream);
 end;
 
 class function ei.NewNotificationNEFromString(const AStringXML: String): IeiNotificationNE;
 begin
- Result := TeiNotificationFactory.NewNotificationNEFromString(AStringXML);
+  Result := TeiNotificationFactory.NewNotificationNEFromString(AStringXML);
 end;
 
 class function ei.NewNotificationNEFromStringBase64(const ABase64StringXML: String): IeiNotificationNE;
 begin
- Result := TeiNotificationFactory.NewNotificationNEFromStringBase64(ABase64StringXML);
+  Result := TeiNotificationFactory.NewNotificationNEFromStringBase64(ABase64StringXML);
 end;
 
 class function ei.NewNotificationNSFromFile(const AFileName: String): IeiNotificationNS;
@@ -392,6 +426,7 @@ end;
 
 class function ei.SendInvoice(const AInvoice: IeiInvoice): IeiResponseCollection;
 begin
+  Sleep(FDelay);
   Result := InternalExecute<IeiInvoice, IeiResponseCollection>(AInvoice,
     function(Invoice: IeiInvoice): IeiResponseCollection
     var
@@ -458,13 +493,23 @@ begin
     end);
 end;
 
+class procedure ei.SetCustomExtractP7mMethod(const AMethod: TeiExtractP7mMethod);
+begin
+  TExtractP7m.SetCustomExtractP7mMethod(AMethod);
+end;
+
+class procedure ei.SetDelay(const ADelayMilliSec: integer);
+begin
+  FDelay := ADelayMilliSec;
+end;
+
 class function ei.StringToResponseType(const AResponseType: String): TeiResponseType;
 begin
   Result := TeiUtils.StringToResponseType(AResponseType);
 end;
 
 class procedure ei.ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
-const AAfterEachMethod: TProc<IeiResponseCollection>; const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception>);
+const AAfterEachMethod: TProc<IeiResponseCollection, String>; const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String>);
 begin
   InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
     function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
@@ -479,13 +524,13 @@ begin
           LResponseCollection := nil; // Azzera la response perchè se ci sono degli errori potrebbe rimanere quella precedente
           LResponseCollection := ei.ReceiveInvoiceNotifications(LInvoiceID);
           if Assigned(AAfterEachMethod) then
-            AAfterEachMethod(LResponseCollection);
+            AAfterEachMethod(LResponseCollection, LInvoiceID);
         except
           on E: Exception do
           begin
             LogE(E);
             if Assigned(AOnEachErrorMethod) then
-              AOnEachErrorMethod(LResponseCollection, E)
+              AOnEachErrorMethod(LResponseCollection, E, LInvoiceID)
             else
               raise;
           end;
@@ -494,15 +539,54 @@ begin
     end);
 end;
 
-class procedure ei.ReceivePurchaseInvoices;
+class function ei.ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
+AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx;
 begin
-  InternalExecute<string, string>('aaa',
-    function(dummy: string): string
+  Sleep(FDelay);
+  Result := InternalExecute<string, IeiInvoiceIDCollectionEx>('aaa',
+    function(dummy: string): IeiInvoiceIDCollectionEx
     begin
-      // LogI(Format('Sending invoice "%s"', [LDocNum]));
       try
-        FProvider.ReceivePurchaseInvoices;
-        // LogI(Format('Invoice "%s" sent', [LDocNum]));
+        Result := FProvider.ReceivePurchaseInvoiceFileNameCollection(AVatCodeReceiver, AStartDate, AEndDate);
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          raise;
+        end;
+      end;
+    end);
+end;
+
+class function ei.ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollection;
+begin
+  Sleep(FDelay);
+  Result := InternalExecute<String, IeiResponseCollection>(AInvoiceID,
+    function(Invoice: String): IeiResponseCollection
+    begin
+      LogI(Format('Getting notifications for purchase invoice "%s"', [AInvoiceID]));
+      try
+        // Type here the code to be executed...
+        Result := FProvider.ReceivePurchaseInvoiceNotifications(AInvoiceID);
+        LogI(Format('Got notifications for purchase invoice "%s"', [AInvoiceID]));
+      except
+        on E: Exception do
+        begin
+          LogE(E);
+          raise;
+        end;
+      end;
+    end);
+end;
+
+class function ei.ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx;
+begin
+  Sleep(FDelay);
+  Result := InternalExecute<string, IeiResponse>('aaa',
+    function(dummy: string): IeiResponse
+    begin
+      try
+        Result := FProvider.ReceivePurchaseInvoiceAsXML(AInvoiceID);
       except
         on E: Exception do
         begin

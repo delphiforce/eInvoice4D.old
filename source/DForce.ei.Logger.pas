@@ -41,8 +41,7 @@ unit DForce.ei.Logger;
 
 interface
 
-uses
-  System.SysUtils;
+uses System.SysUtils, DForce.ei.Logger.Interfaces;
 
 type
 
@@ -50,44 +49,55 @@ type
 
   TeiLogger = class
   protected
-    class procedure Log(const ALogType: TeiLogType; const ALogMessage: string);
+    class function GetLogger: TeiLoggerAbstractRef;
   public
     class procedure LogI(const ALogMessage: string);
     class procedure LogW(const ALogMessage: string);
     class procedure LogE(const ALogMessage: string); overload; // Error
     class procedure LogE(const E: Exception); overload; // Exception
+    class procedure LogBlank;
+    class procedure LogSeparator;
   end;
 
 implementation
 
-uses
-  Winapi.Windows;
+uses Winapi.Windows, DForce.ei.Logger.pfLogger.Adapter;
 
 { TeiLogger }
 
-class procedure TeiLogger.Log(const ALogType: TeiLogType; const ALogMessage: string);
-begin
-  OutputDebugString(PChar(FormatDateTime('dd/mm/yy hh:nn:ss.zzz', Now) + ': ' + ALogMessage));
-end;
-
 class procedure TeiLogger.LogE(const ALogMessage: string);
 begin
-  Log(TeiLogType.ltError, ALogMessage);
+  GetLogger.LogE(ALogMessage);
+end;
+
+class function TeiLogger.GetLogger: TeiLoggerAbstractRef;
+begin
+  result := TeiPfLoggerAdapter;
+end;
+
+class procedure TeiLogger.LogBlank;
+begin
+  GetLogger.LogI('');
 end;
 
 class procedure TeiLogger.LogE(const E: Exception);
 begin
-  Log(TeiLogType.ltError, Format('%s: %s', [E.ClassName, E.Message]));
+  GetLogger.LogE(E.Message);
 end;
 
 class procedure TeiLogger.LogI(const ALogMessage: string);
 begin
-  Log(TeiLogType.ltInformation, ALogMessage);
+  GetLogger.LogI(ALogMessage);
+end;
+
+class procedure TeiLogger.LogSeparator;
+begin
+  GetLogger.LogI('--------------------------------------------------');
 end;
 
 class procedure TeiLogger.LogW(const ALogMessage: string);
 begin
-  Log(TeiLogType.ltWarning, ALogMessage);
+  GetLogger.LogW(ALogMessage);
 end;
 
 end.

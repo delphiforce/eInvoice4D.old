@@ -60,9 +60,9 @@ uses
 class procedure TeiNotary.BuildProviderRegister;
 begin
   // ARUBA
-  TeiProviderRegister.RegisterProviderClass<TeiProviderAruba>('ARUBA_WS', 'https://auth.fatturazioneelettronica.aruba.it/',
+  TeiProviderRegister.RegisterProviderClass<TeiProviderAruba>('ARUBA_WS', 'https://ws.fatturazioneelettronica.aruba.it/',
     'https://auth.fatturazioneelettronica.aruba.it/');
-  TeiProviderRegister.RegisterProviderClass<TeiProviderAruba>('ARUBA_WS_DEMO', 'https://demoauth.fatturazioneelettronica.aruba.it/',
+  TeiProviderRegister.RegisterProviderClass<TeiProviderAruba>('ARUBA_WS_DEMO', 'https://demows.fatturazioneelettronica.aruba.it/',
     'https://demoauth.fatturazioneelettronica.aruba.it/');
   TeiProviderRegister.RegisterProviderClass<TeiProviderAruba>('ARUBA_WS_TEST', 'https://testws.fatturazioneelettronica.aruba.it',
     'https://testws.fatturazioneelettronica.aruba.it');

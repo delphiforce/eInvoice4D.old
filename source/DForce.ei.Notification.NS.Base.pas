@@ -1,54 +1,54 @@
-{ *************************************************************************** }
-{ }
-{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
-{ }
-{ Copyright (C) 2018  Delphi Force }
-{ }
-{ info@delphiforce.it }
-{ https://github.com/delphiforce/eInvoice4D.git }
-{ }
-{ Delphi Force Team }
-{ Antonio Polito }
-{ Carlo Narcisi }
-{ Fabio Codebue }
-{ Marco Mottadelli }
-{ Maurizio del Magno }
-{ Omar Bossoni }
-{ Thomas Ranzetti }
-{ }
-{ *************************************************************************** }
-{ }
-{ This file is part of eInvoice4D }
-{ }
-{ Licensed under the GNU Lesser General Public License, Version 3; }
-{ you may not use this file except in compliance with the License. }
-{ }
-{ eInvoice4D is free software: you can redistribute it and/or modify }
-{ it under the terms of the GNU Lesser General Public License as published }
-{ by the Free Software Foundation, either version 3 of the License, or }
-{ (at your option) any later version. }
-{ }
-{ eInvoice4D is distributed in the hope that it will be useful, }
-{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
-{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
-{ GNU Lesser General Public License for more details. }
-{ }
-{ You should have received a copy of the GNU Lesser General Public License }
-{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
-{ }
-{ ------------------------------------------------------------------------- }
-{ Generated on: 05/05/2015 18:58:34 }
-{ Generated from: fatturapa_v1.1.xsd }
-{ versione 1.2.1 }
-{ DA AGGIUNGERE A MANO: }
-{ - Tutte le proprietà nelle classi (copiarle dalle interfacce) }
-{ - Attributo [ioEntity] in ogni classe }
-{ - Attributo [ioBelongsTo(...)] nelle proprietà oggetto di una relazione }
-{ con un'altra classe figlia }
+{***************************************************************************}
+{                                                                           }
+{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
+{                                                                           }
+{           Copyright (C) 2018  Delphi Force                                }
+{                                                                           }
+{           info@delphiforce.it                                             }
+{           https://github.com/delphiforce/eInvoice4D.git                   }
+{                                                                  	        }
+{           Delphi Force Team                                      	        }
+{             Antonio Polito                                                }
+{             Carlo Narcisi                                                 }
+{             Fabio Codebue                                                 }
+{             Marco Mottadelli                                              }
+{             Maurizio del Magno                                            }
+{             Omar Bossoni                                                  }
+{             Thomas Ranzetti                                               }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  This file is part of eInvoice4D                                          }
+{                                                                           }
+{  Licensed under the GNU Lesser General Public License, Version 3;         }
+{  you may not use this file except in compliance with the License.         }
+{                                                                           }
+{  eInvoice4D is free software: you can redistribute it and/or modify       }
+{  it under the terms of the GNU Lesser General Public License as published }
+{  by the Free Software Foundation, either version 3 of the License, or     }
+{  (at your option) any later version.                                      }
+{                                                                           }
+{  eInvoice4D is distributed in the hope that it will be useful,            }
+{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
+{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
+{  GNU Lesser General Public License for more details.                      }
+{                                                                           }
+{  You should have received a copy of the GNU Lesser General Public License }
+{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
+{                                                                           }
+{***************************************************************************}
+{ Generated on: 05/05/2015 18:58:34                                         }
+{ Generated from: fatturapa_v1.1.xsd                                        }
+{ versione 1.2.1                                                            }
+{ DA AGGIUNGERE A MANO:                                                     }
+{ - Tutte le proprietà nelle classi (copiarle dalle interfacce)             }
+{ - Attributo [ioEntity] in ogni classe                                     }
+{ - Attributo [ioBelongsTo(...)] nelle proprietà oggetto di una relazione   }
+{ con un'altra classe figlia                                                }
 { - Direttiva {$RTTI EXPLICIT METHODS([vcProtected, vcPublic, vcPublished]) }
-{ PROPERTIES([vcProtected, vcPublic, vcPublished]) }
-{ prima dello uses di questa Unit. }
-{ *************************************************************************** }
+{ PROPERTIES([vcProtected, vcPublic, vcPublished])                          }
+{ prima dello uses di questa Unit.                                          }
+{ **************************************************************************}
 unit DForce.ei.Notification.NS.Base;
 // PER ATTRIBUTI IOrm
 {$WARN UNSUPPORTED_CONSTRUCT OFF}
@@ -131,11 +131,14 @@ type
     ['{C4E4533D-7F1D-42A2-A04F-3F22D497F740}']
     function Get_Codice: UnicodeString;
     function Get_Descrizione: UnicodeString;
+    function Get_Suggerimento: UnicodeString;
     procedure Set_Codice(Value: UnicodeString);
     procedure Set_Descrizione(Value: UnicodeString);
+    procedure Set_Suggerimento(Value: UnicodeString);
     { Methods & Properties }
     property Codice: UnicodeString read Get_Codice write Set_Codice;
     property Descrizione: UnicodeString read Get_Descrizione write Set_Descrizione;
+    property Suggerimento: UnicodeString read Get_Suggerimento write Set_Suggerimento;
   end;
 
   { TXMLNotificaNSType }
@@ -213,12 +216,15 @@ type
   protected
     function Get_Codice: UnicodeString;
     function Get_Descrizione: UnicodeString;
+    function Get_Suggerimento: UnicodeString;
     procedure Set_Codice(Value: UnicodeString);
     procedure Set_Descrizione(Value: UnicodeString);
+    procedure Set_Suggerimento(Value: UnicodeString);
   public
     { Methods & Properties }
     property Codice: UnicodeString read Get_Codice write Set_Codice;
     property Descrizione: UnicodeString read Get_Descrizione write Set_Descrizione;
+    property Suggerimento: UnicodeString read Get_Suggerimento write Set_Suggerimento;
   end;
 
   { Global Functions }
@@ -379,6 +385,11 @@ begin
   Result := ChildNodes['Descrizione'].Text;
 end;
 
+function TXMLErroreType.Get_Suggerimento: UnicodeString;
+begin
+  Result := ChildNodes['Suggerimento'].Text;
+end;
+
 procedure TXMLErroreType.Set_Codice(Value: UnicodeString);
 begin
   ChildNodes['Codice'].NodeValue := Value;
@@ -387,6 +398,11 @@ end;
 procedure TXMLErroreType.Set_Descrizione(Value: UnicodeString);
 begin
   ChildNodes['Descrizione'].NodeValue := Value;
+end;
+
+procedure TXMLErroreType.Set_Suggerimento(Value: UnicodeString);
+begin
+  ChildNodes['Suggerimento'].NodeValue := Value;
 end;
 
 { TXMLListaErroriType }

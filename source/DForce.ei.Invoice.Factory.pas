@@ -41,8 +41,7 @@ unit DForce.ei.Invoice.Factory;
 
 interface
 
-uses
-  DForce.ei.Invoice.Interfaces, System.Classes;
+uses DForce.ei.Invoice.Interfaces, System.Classes;
 
 const
   // TargetNamespace = 'http://www.fatturapa.gov.it/sdi/fatturapa/v1.1';
@@ -67,19 +66,17 @@ type
 
 implementation
 
-uses
-  Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, System.SysUtils,
+uses Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, System.SysUtils,
   DForce.ei.Utils;
 
 { TeiInvoiceFactory }
 
 class function TeiInvoiceFactory.InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
 var
-  LEpuratedStringXML: String;
+  LRootTagName: string;
 begin
-  LEpuratedStringXML := StringReplace(AStringXML, '<p:', '<', [rfReplaceAll, rfIgnoreCase]);
-  LEpuratedStringXML := StringReplace(LEpuratedStringXML, '</p:', '</', [rfReplaceAll, rfIgnoreCase]);
-  Result := LoadXMLData(LEpuratedStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
+  LRootTagName := TeiUtils.ExtractRootTagName(AStringXML);
+  result := LoadXMLData(TeiUtils.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
 end;
 
 class function TeiInvoiceFactory.NewInvoice: IeiInvoiceEx;

@@ -48,7 +48,8 @@ uses
 type
 
   TeiResponseTypeInt = (rtUnknown, rtException, rtAcceptedByProvider, rtRejectedByProvider, rtSDIMessageRC, rtSDIMessageNS,
-    rtSDIMessageMC, rtSDIMessageNE, rtSDIMessageMT, rtSDIMessageEC, rtSDIMessageSE, rtSDIMessageDT, rtSDIMessageAT);
+    rtSDIMessageMC, rtSDIMessageNEAccepted, rtSDIMessageNERejected, rtSDIMessageMT, rtSDIMessageEC, rtSDIMessageSE, rtSDIMessageDT,
+    rtSDIMessageAT);
 
   IeiResponseBase = interface
     ['{7614F698-78A6-4A29-A189-00E798DC4C26}']

@@ -63,7 +63,7 @@ type
 implementation
 
 uses
-  Xml.XMLDoc, DForce.Mini.ei.Invoice, System.SysUtils;
+  Xml.XMLDoc, DForce.Mini.ei.Invoice, System.SysUtils, DForce.Mini.ei.Utils;
 
 { TeiInvoiceFactory }
 
@@ -103,8 +103,11 @@ begin
 end;
 
 class function TeiInvoiceMiniFactory.NewInvoiceFromString(const AStringXML: String): IeiInvoiceMini;
+var
+  LRootTagName: string;
 begin
-  Result := LoadXMLData(AStringXML).GetDocBinding('FatturaElettronica', TeiInvoiceMini, TargetNamespace) as IeiInvoiceMini;
+  LRootTagName := TeiUtilsMini.ExtractRootTagName(AStringXML);
+  result := LoadXMLData(TeiUtilsMini.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiInvoiceMini, TargetNamespace) as IeiInvoiceMini;
 end;
 
 end.

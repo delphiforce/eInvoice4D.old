@@ -43,7 +43,10 @@ interface
 
 uses DForce.ei.Provider.Base,
   DForce.ei.Provider.Interfaces,
-  DForce.ei.Response.Interfaces;
+  DForce.ei.Response.Interfaces,
+  System.JSON,
+  DForce.ei.Invoice.Interfaces,
+  DForce.ei.Invoice.Factory;
 
 type
 
@@ -51,14 +54,23 @@ type
   private
     FAccessToken: string;
     { TODO : Implementare sistema di refresh del token in base a lavore expires_in }
-    // FStopWatch: TStopWatch;
     procedure Authenticate;
+    function JValueToDateTimeDefault(const AValue, ADefaultValue: TJSONValue): TDateTime;
+    function JValueToString(const AJSONValue: TJSONValue): String;
+    function JValueToInteger(const AJSONValue: TJSONValue): Integer;
+    function JValueToBoolean(const AJSONValue: TJSONValue): boolean;
+    function PurgeP7mSignature(const AString: string): string;
+    function InternalReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate, AEndDate: TDateTime;
+      const APage: Integer; AResult: IeiInvoiceIDCollectionEx): boolean;
   protected
     procedure Connect; override;
     procedure Disconnect; override;
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; override;
     function ReceiveInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
-    procedure ReceivePurchaseInvoices; override;
+    function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
+      AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx; override;
+    function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx; override;
+    function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
   end;
 
 implementation
@@ -69,9 +81,10 @@ uses System.UITypes,
   System.NetEncoding,
   System.SysUtils,
   DForce.ei.Exception,
-  System.JSON,
   DForce.ei.Utils,
-  DForce.ei.Response.Factory;
+  DForce.ei.Response.Factory,
+  System.Math,
+  DateUtils, DForce.ei.Utils.P7mExtractor;
 
 procedure TeiProviderAruba.Authenticate;
 var
@@ -132,6 +145,116 @@ begin
   // Nothing
 end;
 
+function TeiProviderAruba.InternalReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string;
+  const AStartDate, AEndDate: TDateTime; const APage: Integer; AResult: IeiInvoiceIDCollectionEx): boolean;
+var
+  LRESTClient: TRESTClient;
+  LRESTRequest: TRESTRequest;
+  LRESTResponse: TRESTResponse;
+  JObjResponse: TJSONObject;
+  LJsonNotifications: TJSONArray;
+  LJsonNotification: TJSONObject;
+  I: Integer;
+  LJValue: TJSONValue;
+begin
+  Result := True;
+  JObjResponse := nil;
+
+  LRESTClient := TRESTClient.Create(nil);
+  LRESTRequest := TRESTRequest.Create(nil);
+  LRESTResponse := TRESTResponse.Create(nil);
+  try
+    LRESTClient.BaseURL := BaseURLWS;
+    LRESTClient.AllowCookies := True;
+    LRESTClient.ContentType := 'application/json';
+
+    LRESTRequest.Resource := '/services/invoice/in/findByUsername';
+    LRESTRequest.Client := LRESTClient;
+    LRESTRequest.Response := LRESTResponse;
+    LRESTRequest.Method := rmGET;
+
+    LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
+      [poDoNotEncode]);
+
+    // selection parameters
+    LRESTRequest.AddParameter('username', UserName);
+    LRESTRequest.AddParameter('page', APage.ToString);
+    LRESTRequest.AddParameter('startDate', TeiUtils.DateTimeToUrlParam(AStartDate), TRESTRequestParameterKind.pkGETorPOST,
+      [poDoNotEncode]);
+    LRESTRequest.AddParameter('endDate', TeiUtils.DateTimeToUrlParam(AEndDate), TRESTRequestParameterKind.pkGETorPOST, [poDoNotEncode]);
+    if not AVatCodeReceiver.Trim.IsEmpty then
+    begin
+      LRESTRequest.AddParameter('countryReceiver', 'IT');
+      LRESTRequest.AddParameter('vatcodeReceiver', AVatCodeReceiver);
+    end;
+
+    // call
+    LRESTRequest.Execute;
+    if LRESTResponse.StatusCode <> 200 then
+      raise eiGenericException.Create(Format('ReceivePurchaseInvoices error: %d - %s',
+        [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+
+    // response
+    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    if Assigned(JObjResponse) then
+    begin
+      LJValue := JObjResponse.Values['content'];
+      if (LJValue is TJSONArray) then
+      begin
+        LJsonNotifications := LJValue as TJSONArray;
+        for I := 0 to LJsonNotifications.Count - 1 do
+        begin
+          LJsonNotification := LJsonNotifications.Items[I] as TJSONObject;
+          AResult.Add(JValueToString(LJsonNotification.Values['filename']));
+        end;
+        Result := JValueToBoolean(JObjResponse.GetValue('last'));
+      end;
+    end;
+
+  finally
+    if Assigned(JObjResponse) then
+      JObjResponse.Free;
+    LRESTClient.Free;
+    LRESTRequest.Free;
+    LRESTResponse.Free;
+  end;
+end;
+
+function TeiProviderAruba.JValueToDateTimeDefault(const AValue, ADefaultValue: TJSONValue): TDateTime;
+begin
+  // Value
+  if Assigned(AValue) and (not AValue.Null) and not AValue.Value.Trim.IsEmpty then
+    Result := TeiUtils.DateTimeUTCFromIso8601(AValue.Value)
+  else
+    // Default value
+    if Assigned(ADefaultValue) and (not ADefaultValue.Null) and not ADefaultValue.Value.Trim.IsEmpty then
+      Result := TeiUtils.DateTimeUTCFromIso8601(ADefaultValue.Value)
+    else
+      Result := 0;
+end;
+
+function TeiProviderAruba.JValueToInteger(const AJSONValue: TJSONValue): Integer;
+begin
+  if Assigned(AJSONValue) and (not AJSONValue.Null) and (not AJSONValue.Value.Trim.IsEmpty) and (AJSONValue is TJSONNumber) then
+    Result := (AJSONValue as TJSONNumber).AsInt
+  else
+    Result := 0;
+end;
+
+function TeiProviderAruba.JValueToBoolean(const AJSONValue: TJSONValue): boolean;
+begin
+  if Assigned(AJSONValue) and (not AJSONValue.Null) and (not AJSONValue.Value.Trim.IsEmpty) and (AJSONValue is TJSONBool) then
+    Result := (AJSONValue as TJSONBool).AsBoolean
+  else
+    Result := False;
+end;
+
+function TeiProviderAruba.JValueToString(const AJSONValue: TJSONValue): String;
+begin
+  if Assigned(AJSONValue) and (not AJSONValue.Null) and (not AJSONValue.Value.Trim.IsEmpty) then
+    Result := AJSONValue.Value;
+end;
+
 function TeiProviderAruba.SendInvoice(const AInvoice: string): IeiResponseCollectionEx;
 var
   LRESTClient: TRESTClient;
@@ -147,9 +270,14 @@ begin
   JObjResponse := nil;
 
   LBase64Invoice := TNetEncoding.Base64.Encode(AInvoice);
-  { TODO : Togliere limitazione lunghezza XML BASE 64 }
-  LBase64Invoice := LBase64Invoice.Substring(0, 75);
-  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '","credential" : "cred_firma","domain" : "dom_firma"}';
+
+  LJSONBody := '{"dataFile" : "' + LBase64Invoice + '","credential" : "","domain" : ""}';
+  // Correzione per ambiente TEST Aruba: non accetta fatture con lunghezza > 75 caratteri
+  if SameText(BaseURLWS, 'https://testws.fatturazioneelettronica.aruba.it') then
+  begin
+    LBase64Invoice := LBase64Invoice.Substring(0, 75);
+    LJSONBody := '{"dataFile" : "' + LBase64Invoice + '","credential" : "cred_firma","domain" : "dom_firma"}';
+  end;
 
   LRESTClient := TRESTClient.Create(nil);
   LRESTRequest := TRESTRequest.Create(nil);
@@ -157,7 +285,7 @@ begin
   try
     LRESTClient.BaseURL := BaseURLWS;
     LRESTClient.AllowCookies := True;
-    LRESTClient.ContentType := 'application/json';
+    LRESTClient.ContentType := 'application/json;charset=UTF-8';
 
     LRESTRequest.Resource := '/services/invoice/upload';
     LRESTRequest.Client := LRESTClient;
@@ -174,10 +302,14 @@ begin
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     LResponse := TeiResponseFactory.NewResponse;
-    LResponse.MsgCode := JObjResponse.GetValue<TJSONString>('errorCode').Value;
-    LResponse.MsgText := JObjResponse.GetValue<TJSONString>('errorDescription').Value;
-    LResponse.FileName := JObjResponse.GetValue<TJSONString>('uploadFileName').Value;
-    if LResponse.MsgCode.Trim.IsEmpty then
+
+    LResponse.MsgCode := JValueToString(JObjResponse.Values['errorCode']);
+    LResponse.MsgText := JValueToString(JObjResponse.Values['errorDescription']);
+    LResponse.FileName := JValueToString(JObjResponse.Values['uploadFileName']);
+    LResponse.ResponseDate := Now;
+    LResponse.NotificationDate := LResponse.ResponseDate;
+
+    if LResponse.MsgCode.Trim.IsEmpty or (LResponse.MsgCode.Trim = '0000') then
       LResponse.ResponseType := rtAcceptedByProvider
     else
       LResponse.ResponseType := rtRejectedByProvider;
@@ -201,7 +333,9 @@ var
   LResponse: IeiResponseEx;
   JObjResponse: TJSONObject;
   LJsonNotifications: TJSONArray;
-  LJsonNotification: TJSONValue;
+  LJsonNotification: TJSONObject;
+  LJValue: TJSONValue;
+  I: Integer;
 begin
   inherited;
   JObjResponse := nil;
@@ -212,7 +346,7 @@ begin
   try
     LRESTClient.BaseURL := BaseURLWS;
     LRESTClient.AllowCookies := True;
-    LRESTClient.ContentType := 'application/json';
+    LRESTClient.ContentType := 'application/json;charset=UTF-8';
 
     LRESTRequest.Resource := '/services/notification/out/getByInvoiceFilename';
     LRESTRequest.Client := LRESTClient;
@@ -225,24 +359,36 @@ begin
 
     LRESTRequest.Execute;
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('getByInvoiceFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.Create(Format('out/getByInvoiceFilename error: %d - %s', [LRESTResponse.StatusCode,
+        LRESTResponse.StatusText]));
 
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
-      LJsonNotifications := JObjResponse.GetValue<TJSONArray>('notifications');
-      for LJsonNotification in LJsonNotifications do
+      LJValue := JObjResponse.GetValue('notifications');
+      if not(LJValue is TJSONNull) then
       begin
-        LResponse := TeiResponseFactory.NewResponse;
-        LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value);
-        LResponse.FileName := LJsonNotification.GetValue<TJSONString>('filename').Value;
-        LResponse.ResponseDate := TeiUtils.DateTimeUTCFromIso8601(LJsonNotification.GetValue<TJSONString>('date').Value);
-        LResponse.NotificationDate := TeiUtils.DateTimeUTCFromIso8601(LJsonNotification.GetValue<TJSONString>('notificationDate').Value);
-        LResponse.MsgCode := '';
-        LResponse.MsgText := '';
-        LResponse.MsgRaw := LJsonNotification.ToString;
-        Result.Add(LResponse);
+        LJsonNotifications := JObjResponse.GetValue<TJSONArray>('notifications');
+
+        for I := 0 to LJsonNotifications.Count - 1 do
+        begin
+          LJsonNotification := LJsonNotifications.Items[I] as TJSONObject;
+          LResponse := TeiResponseFactory.NewResponse;
+          LResponse.MsgCode := '';
+          LResponse.MsgText := '';
+          LResponse.MsgRaw := JValueToString(LJsonNotification.Values['file']);
+          if not LResponse.MsgRaw.IsEmpty then
+            LResponse.MsgRaw := TNetEncoding.Base64.Decode(LResponse.MsgRaw);
+          LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value,
+            LResponse.MsgRaw);
+          LResponse.FileName := JValueToString(LJsonNotification.Values['filename']);
+          LResponse.ResponseDate := JValueToDateTimeDefault(LJsonNotification.Values['date'],
+            LJsonNotification.Values['notificationDate']);
+          LResponse.NotificationDate := JValueToDateTimeDefault(LJsonNotification.Values['notificationDate'],
+            LJsonNotification.Values['date']);
+          Result.Add(LResponse);
+        end;
       end;
     end;
 
@@ -255,12 +401,29 @@ begin
   end;
 end;
 
-procedure TeiProviderAruba.ReceivePurchaseInvoices;
+function TeiProviderAruba.ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
+  AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx;
+var
+  LastPage: boolean;
+  LCurrentPage: Integer;
+begin
+  Result := TeiInvoiceFactory.NewInvoiceIDCollection;
+  if IsZero(AEndDate) then
+    AEndDate := EndOfTheDay(Date);
+  LCurrentPage := 1;
+  repeat
+    LastPage := InternalReceivePurchaseInvoiceFileNameCollection(AVatCodeReceiver, AStartDate, AEndDate, LCurrentPage, Result);
+    Inc(LCurrentPage);
+  until LastPage;
+end;
+
+function TeiProviderAruba.ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx;
 var
   LRESTClient: TRESTClient;
   LRESTRequest: TRESTRequest;
   LRESTResponse: TRESTResponse;
   JObjResponse: TJSONObject;
+  LXml: string;
 begin
   inherited;
   JObjResponse := nil;
@@ -273,23 +436,41 @@ begin
     LRESTClient.AllowCookies := True;
     LRESTClient.ContentType := 'application/json';
 
-    LRESTRequest.Resource := '/services/invoice/in/findByUsername';
+    LRESTRequest.Resource := '/services/invoice/in/getByFilename';
     LRESTRequest.Client := LRESTClient;
     LRESTRequest.Response := LRESTResponse;
     LRESTRequest.Method := rmGET;
-    LRESTRequest.AddParameter('username', UserName);
+
+    LRESTClient.ContentType := 'application/json;charset=UTF-8';
+    LRESTRequest.AddParameter('filename', AInvoiceID);
     LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
       [poDoNotEncode]);
 
     LRESTRequest.Execute;
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('ReceivePurchaseInvoices error: %d - %s',
-        [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
+      raise eiGenericException.Create(Format('getByFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
+    Result := TeiResponseFactory.NewResponse;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
-      // to implement...
+      Result.ResponseType := TeiUtils.ResponseTypeToEnum(JObjResponse.GetValue<TJSONString>('docType').Value);
+      Result.FileName := JValueToString(JObjResponse.Values['filename']);
+      LXml := JValueToString(JObjResponse.Values['file']);
+      if pos('.p7m', LowerCase(Result.FileName)) > 0 then
+      begin
+        // estrazione xml da file p7m
+        Result.MsgRaw := TExtractP7m.Extract(LXml);
+        // Result.MsgRaw := TeiUtils.DecodeFromBase64WithPurge(LXml);
+        // Result.MsgRaw := PurgeP7mSignature(Result.MsgRaw);
+      end
+      else
+      begin
+        // estrazione xml senza p7m
+        Result.MsgRaw := LXml;
+        if not Result.MsgRaw.IsEmpty then
+          Result.MsgRaw := TNetEncoding.Base64.Decode(Result.MsgRaw);
+      end;
     end;
 
   finally
@@ -299,6 +480,95 @@ begin
     LRESTRequest.Free;
     LRESTResponse.Free;
   end;
+
+end;
+
+function TeiProviderAruba.ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx;
+var
+  LRESTClient: TRESTClient;
+  LRESTRequest: TRESTRequest;
+  LRESTResponse: TRESTResponse;
+  LResponse: IeiResponseEx;
+  JObjResponse: TJSONObject;
+  LJsonNotifications: TJSONArray;
+  LJsonNotification: TJSONObject;
+  LJValue: TJSONValue;
+  I: Integer;
+begin
+  inherited;
+  JObjResponse := nil;
+
+  LRESTClient := TRESTClient.Create(nil);
+  LRESTRequest := TRESTRequest.Create(nil);
+  LRESTResponse := TRESTResponse.Create(nil);
+  try
+    LRESTClient.BaseURL := BaseURLWS;
+    LRESTClient.AllowCookies := True;
+    LRESTClient.ContentType := 'application/json;charset=UTF-8';
+
+    LRESTRequest.Resource := '/services/notification/in/getByInvoiceFilename';
+    LRESTRequest.Client := LRESTClient;
+    LRESTRequest.Response := LRESTResponse;
+    LRESTRequest.Method := rmGET;
+
+    LRESTRequest.AddParameter('invoiceFilename', AInvoiceID);
+    LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
+      [poDoNotEncode]);
+
+    LRESTRequest.Execute;
+    if LRESTResponse.StatusCode <> 200 then
+      raise eiGenericException.Create(Format('in/getByInvoiceFilename error: %d - %s', [LRESTResponse.StatusCode,
+        LRESTResponse.StatusText]));
+
+    Result := TeiResponseFactory.NewResponseCollection;
+    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    if Assigned(JObjResponse) then
+    begin
+      LJValue := JObjResponse.GetValue('notifications');
+      if not(LJValue is TJSONNull) then
+      begin
+        LJsonNotifications := JObjResponse.GetValue<TJSONArray>('notifications');
+
+        for I := 0 to LJsonNotifications.Count - 1 do
+        begin
+          LJsonNotification := LJsonNotifications.Items[I] as TJSONObject;
+          LResponse := TeiResponseFactory.NewResponse;
+          LResponse.MsgCode := '';
+          LResponse.MsgText := '';
+          LResponse.MsgRaw := JValueToString(LJsonNotification.Values['file']);
+          if not LResponse.MsgRaw.IsEmpty then
+            LResponse.MsgRaw := TNetEncoding.Base64.Decode(LResponse.MsgRaw);
+          LResponse.ResponseType := TeiUtils.ResponseTypeToEnum(LJsonNotification.GetValue<TJSONString>('docType').Value,
+            LResponse.MsgRaw);
+          LResponse.FileName := JValueToString(LJsonNotification.Values['filename']);
+          LResponse.ResponseDate := JValueToDateTimeDefault(LJsonNotification.Values['date'],
+            LJsonNotification.Values['notificationDate']);
+          LResponse.NotificationDate := JValueToDateTimeDefault(LJsonNotification.Values['notificationDate'],
+            LJsonNotification.Values['date']);
+          Result.Add(LResponse);
+        end;
+      end;
+    end;
+
+  finally
+    if Assigned(JObjResponse) then
+      JObjResponse.Free;
+    LRESTClient.Free;
+    LRESTRequest.Free;
+    LRESTResponse.Free;
+  end;
+end;
+
+function TeiProviderAruba.PurgeP7mSignature(const AString: string): string;
+var
+  LStartPos: Integer;
+  LEndPos: Integer;
+begin
+  // rimuovo tutti i caratteri antecedenti "<?xml" e oltre "FatturaElettronica>"
+  LStartPos := pos('?xml', AString);
+  Result := AString.Substring(LStartPos - 1);
+  LEndPos := pos('FatturaElettronica>', Result);
+  Result := '<' + Result.Substring(0, LEndPos + 18);
 end;
 
 end.

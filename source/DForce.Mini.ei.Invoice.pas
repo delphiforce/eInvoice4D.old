@@ -59,19 +59,22 @@ type
 implementation
 
 uses
-  DForce.ei.Exception, Xml.XMLDoc, System.SysUtils, System.StrUtils;
+  DForce.ei.Exception, Xml.XMLDoc, System.SysUtils, System.StrUtils,
+  DForce.Mini.ei.Utils, DForce.ei.Utils.Sanitizer, DForce.ei.Encoding;
 
 { TeiInvoiceEx1 }
 
 procedure TeiInvoiceMini.InternalSaveToStream(const AStream: TStream; const AInvoice: String);
 var
   LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
   // Check the stream
   if not Assigned(AStream) then
     raise eiGenericException.Create('"AStream" parameter not assigned');
   // Save invoice into the stream
-  LStringStream := TStringStream.Create(AInvoice);
+  LEncoding := TeiUTFEncodingWithoutBOM.Create;
+  LStringStream := TStringStream.Create(AInvoice, LEncoding);
   try
     AStream.CopyFrom(LStringStream, 0);
   finally
@@ -105,11 +108,19 @@ end;
 
 function TeiInvoiceMini.ToString: String;
 var
+  LxmlText: string;
   Lxml: TStringList;
+  LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
+  // Extract the XML text and sanitize it
+  TeiSanitizer.SanitizeInvoice(Self);
+  LxmlText := Self.GetXML;
+  TeiSanitizer.SanitizeXMLText(LxmlText);
+
   Lxml := TStringList.Create;
   try
-    Lxml.Text := FormatXMLData(Self.GetXML);
+    Lxml.Text := FormatXMLData(LxmlText);
 
     // AGGIUNTO V 1.2 - INIZIO
     Lxml[0] := '<?xml version="1.0" encoding="UTF-8"?>';
@@ -124,9 +135,20 @@ begin
     // Se abilitato aggiunge il riferimento al file XSL
     // if AggiungiXSL then
     // Lxml.Insert(1, '<?Lxml-stylesheet type="text/xsl" href="fatturapa_v1.2.xsl"?>');
+
     // Aggiunge "p:" alla fine nel Tag di chiusura
     Lxml[Lxml.Count - 1] := '</p:FatturaElettronica>';
-    result := Trim(String(Lxml.Text));
+
+    // Salva tutto (UTF8)
+    LEncoding := TeiUTFEncodingWithoutBOM.Create;
+    LStringStream := TStringStream.Create('', LEncoding);
+    try
+      Lxml.SaveToStream(LStringStream, LEncoding);
+      result := LStringStream.DataString;
+    finally
+      LStringStream.Free;
+    end;
+
   finally
     Lxml.Free;
   end;

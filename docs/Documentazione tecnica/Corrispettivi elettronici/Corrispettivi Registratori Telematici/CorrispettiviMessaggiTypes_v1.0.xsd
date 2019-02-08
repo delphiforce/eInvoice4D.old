@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/corrispettivi/v1.0"
+	targetNamespace="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/corrispettivi/v1.0"
+	version="1.0">
+
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="./xmldsig-core-schema.xsd" />
+
+	<!-- =================================================================== -->
+	<!-- ELEMENTI PER MESSAGGI DEI DISPOSITIVI								 -->
+	<!-- =================================================================== -->	
+	<xs:element name="RichiestaCertificatoDispositivo" type="RichiestaCertificatoDispositivoType">
+		<xs:annotation>
+			<xs:documentation>Elemento per la richiesta del certificato di un dispositivo</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="EsitoRichiestaCertificatoDispositivo" type="EsitoRichiestaCertificatoDispositivoType">
+		<xs:annotation>
+			<xs:documentation>Elemento di risposta relativo alla richiesta di certificato del dispositivo</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="AttivaDispositivo" type="AttivaDispositivoType">
+		<xs:annotation>
+			<xs:documentation>Elemento per attivare un dispositivo</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="EventoDispositivo" type="EventoDispositivoType">
+		<xs:annotation>
+			<xs:documentation>Elemento per segnalare un evento dal dispositivo</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="EsitoOperazione" type="EsitoOperazioneType">
+		<xs:annotation>
+			<xs:documentation>Elemento di esito per l'attivazione di un dispositivo, la trasmissione dei corrispettivi o la segnalzione di un evento</xs:documentation>
+		</xs:annotation>
+	</xs:element> 
+	
+	<!-- =================================================================== -->
+	<!-- TIPI 										 						 -->
+	<!-- =================================================================== -->
+	<xs:complexType name="RichiestaCertificatoDispositivoType">
+		<xs:sequence>
+			<xs:element name="Csr" type="xs:base64Binary"/>
+			<xs:element name="Dispositivo" type="CensimentoDispositivoType" />
+			<xs:element name="TecnicoVerificatore" type="TecnicoVerificatoreType" />
+			<xs:element ref="ds:Signature" />
+		</xs:sequence>
+		<xs:attribute name="versione" type="VersioneType" use="required" fixed="1.0" />
+	</xs:complexType>
+
+	<xs:complexType name="EsitoRichiestaCertificatoDispositivoType">
+		<xs:sequence>
+			<xs:element name="IdOperazione" type="xs:string" />
+			<xs:choice>
+				<xs:element name="Certificato" type="xs:base64Binary" />
+				<xs:element name="Errori" type="ErroriType" />
+			</xs:choice>
+			<xs:element ref="ds:Signature" />
+		</xs:sequence>
+		<xs:attribute name="versione" type="VersioneType" use="required" fixed="1.0" />
+	</xs:complexType>
+	
+	<xs:complexType name="AttivaDispositivoType">
+		<xs:sequence>
+			<xs:element name="Gestore" type="IdFiscaleType" />
+			<xs:element name="TecnicoVerificatore" type="TecnicoVerificatoreType" />
+			<xs:element name="GeoLocalizzazione" type="GeoLocType" minOccurs="0" />
+			<xs:element name="InformazioniAddizionali" type="InformazioniAddizionaliType" minOccurs="0" />
+			<xs:element ref="ds:Signature" />
+		</xs:sequence>
+		<xs:attribute name="versione" type="VersioneType" use="required" fixed="1.0" />
+	</xs:complexType>
+
+	<xs:complexType name="EsitoOperazioneType">
+		<xs:sequence>
+			<xs:element name="IdOperazione" type="xs:string" />
+			<xs:element name="Errori" type="ErroriType" minOccurs="0" />
+			<xs:element ref="ds:Signature" />
+		</xs:sequence>
+		<xs:attribute name="versione" type="VersioneType" use="required" fixed="1.0" />
+	</xs:complexType>
+	
+	<xs:complexType name="EventoDispositivoType">
+		<xs:sequence>
+			<xs:element name="Evento" type="xs:string" />
+			<xs:element name="DataOra" type="xs:dateTime" />
+			<xs:element name="Dettaglio" type="DettaglioEventoDispositivoType" />
+			<xs:element ref="ds:Signature" />
+		</xs:sequence>
+		<xs:attribute name="versione" type="VersioneType" use="required" fixed="1.0" />
+	</xs:complexType>
+	
+	<xs:complexType name="DettaglioEventoDispositivoType">
+		<xs:sequence>
+			<xs:element name="Codice" type="CodiceType" />
+			<xs:element name="Descrizione" type="xs:string" minOccurs="0" />	
+		</xs:sequence>
+	</xs:complexType>	
+	
+	<xs:complexType name="CensimentoDispositivoType">
+		<xs:sequence>
+			<xs:element name="Tipo" type="TipoDispositivoType" />
+			<xs:element name="MarchioFabbricante" type="xs:string" minOccurs="0" />
+			<xs:element name="Modello" type="xs:string" minOccurs="0" />
+			<xs:element name="RifApprovazioneDispositivo" type="RifApprovazioneType" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="RifApprovazioneType">
+		<xs:annotation>
+			<xs:documentation>Blocco da valorizzare se il tipo dispositivo è RT</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Numero" type="xs:string" />
+			<xs:element name="Data" type="xs:date" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="IdFiscaleType">
+		<xs:sequence>
+			<xs:element name="IdPaese" type="NazioneType" />
+			<xs:element name="IdCodice" type="IdCodiceType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="NazioneType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z]{2}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="IdCodiceType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+			<xs:maxLength value="28" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="CodiceFiscaleType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z0-9]{11,16}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="ErroriType">
+		<xs:sequence>
+			<xs:element name="Errore" type="ErroreType" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="ErroreType">
+		<xs:sequence>
+			<xs:element name="Codice" type="CodiceType" />
+			<xs:element name="Descrizione" type="String500LatinType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="TipoDispositivoType">
+		<xs:restriction base="xs:string">
+			<xs:length value="2" />
+			<xs:enumeration value="RT">
+				<xs:annotation>
+					<xs:documentation>RT = Registratore Telematico</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			
+			<xs:enumeration value="DA">
+				<xs:annotation>
+					<xs:documentation>DA = Distributore Automatico</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+	
+			<xs:enumeration value="MC">
+				<xs:annotation>
+					<xs:documentation>MC = Multi Cassa</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+
+			<xs:enumeration value="DM">
+				<xs:annotation>
+					<xs:documentation>DM = Dispositivo Mobile</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="GeoLocType">
+		<xs:sequence>
+			<xs:element name="Lat" type="Amount9DecimalType" />
+			<xs:element name="Long" type="Amount9DecimalType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="CodiceType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="5" />
+			<xs:maxLength value="5" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="TecnicoVerificatoreType">
+		<xs:sequence>
+			<xs:element name="CodiceFiscale" type="CodiceFiscaleType" />
+			<xs:element name="PIvaSocieta" type="IdFiscaleType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="InformazioniAddizionaliType">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="DA" type="InformazioniAddizionaliDAType" />
+				<xs:element name="RT" type="InformazioniAddizionaliRTType" />
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="InformazioniAddizionaliDAType">
+		<xs:sequence>
+			<xs:element name="ProtocolloComunicazione" type="xs:string" />
+			<xs:element name="TipoDistributore" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="InformazioniAddizionaliRTType">
+		<xs:sequence>
+			<xs:element name="MatricolaRegistratoreDiCassa" type="xs:string" minOccurs="0" />
+			<xs:element name="DataMessaInServizio" type="xs:date" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="String100LatinType">
+		<xs:restriction base="xs:normalizedString">
+			<xs:pattern value="[\p{IsBasicLatin}\p{IsLatin-1Supplement}]{1,100}" />
+		</xs:restriction>
+	 </xs:simpleType>
+	
+	<xs:simpleType name="String500LatinType">
+		<xs:restriction base="xs:normalizedString">
+			<xs:pattern value="[\p{IsBasicLatin}\p{IsLatin-1Supplement}]{1,500}" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="Amount2DecimalType">
+		<xs:restriction base="xs:decimal">
+			<xs:pattern value="[\-]?[0-9]{1,11}\.[0-9]{2}" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="Amount9DecimalType">
+		<xs:restriction base="xs:decimal">
+			<xs:pattern value="[0-9]{1,2}\.[0-9]{2,9}" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="VersioneType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="5" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

@@ -74,6 +74,12 @@ contains
   DForce.ei.Notification.Factory in '..\..\source\DForce.ei.Notification.Factory.pas',
   DForce.ei.Notification.NS.Ex in '..\..\source\DForce.ei.Notification.NS.Ex.pas',
   DForce.ei.Notification.NE.Base in '..\..\source\DForce.ei.Notification.NE.Base.pas',
-  DForce.ei.Notification.NE.Ex in '..\..\source\DForce.ei.Notification.NE.Ex.pas';
+  DForce.ei.Notification.NE.Ex in '..\..\source\DForce.ei.Notification.NE.Ex.pas',
+  DForce.ei.Logger.Interfaces in '..\..\source\DForce.ei.Logger.Interfaces.pas',
+  DForce.ei.Logger.pfLogger.Adapter in '..\..\source\DForce.ei.Logger.pfLogger.Adapter.pas',
+  DForce.ei.Logger.pfLogger in '..\..\source\DForce.ei.Logger.pfLogger.pas',
+  DForce.ei.Utils.Sanitizer in '..\..\source\DForce.ei.Utils.Sanitizer.pas',
+  DForce.ei.Encoding in '..\..\source\DForce.ei.Encoding.pas',
+  DForce.ei.Utils.P7mExtractor in '..\..\source\DForce.ei.Utils.P7mExtractor.pas';
 
 end.

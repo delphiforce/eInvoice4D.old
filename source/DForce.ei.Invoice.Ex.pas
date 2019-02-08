@@ -1,42 +1,42 @@
-{ *************************************************************************** }
-{ }
-{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
-{ }
-{ Copyright (C) 2018  Delphi Force }
-{ }
-{ info@delphiforce.it }
-{ https://github.com/delphiforce/eInvoice4D.git }
-{ }
-{ Delphi Force Team }
-{ Antonio Polito }
-{ Carlo Narcisi }
-{ Fabio Codebue }
-{ Marco Mottadelli }
-{ Maurizio del Magno }
-{ Omar Bossoni }
-{ Thomas Ranzetti }
-{ }
-{ *************************************************************************** }
-{ }
-{ This file is part of eInvoice4D }
-{ }
-{ Licensed under the GNU Lesser General Public License, Version 3; }
-{ you may not use this file except in compliance with the License. }
-{ }
-{ eInvoice4D is free software: you can redistribute it and/or modify }
-{ it under the terms of the GNU Lesser General Public License as published }
-{ by the Free Software Foundation, either version 3 of the License, or }
-{ (at your option) any later version. }
-{ }
-{ eInvoice4D is distributed in the hope that it will be useful, }
-{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
-{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
-{ GNU Lesser General Public License for more details. }
-{ }
-{ You should have received a copy of the GNU Lesser General Public License }
-{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
-{ }
-{ *************************************************************************** }
+{***************************************************************************}
+{                                                                           }
+{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
+{                                                                           }
+{           Copyright (C) 2018  Delphi Force                                }
+{                                                                           }
+{           info@delphiforce.it                                             }
+{           https://github.com/delphiforce/eInvoice4D.git                   }
+{                                                                  	        }
+{           Delphi Force Team                                      	        }
+{             Antonio Polito                                                }
+{             Carlo Narcisi                                                 }
+{             Fabio Codebue                                                 }
+{             Marco Mottadelli                                              }
+{             Maurizio del Magno                                            }
+{             Omar Bossoni                                                  }
+{             Thomas Ranzetti                                               }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  This file is part of eInvoice4D                                          }
+{                                                                           }
+{  Licensed under the GNU Lesser General Public License, Version 3;         }
+{  you may not use this file except in compliance with the License.         }
+{                                                                           }
+{  eInvoice4D is free software: you can redistribute it and/or modify       }
+{  it under the terms of the GNU Lesser General Public License as published }
+{  by the Free Software Foundation, either version 3 of the License, or     }
+{  (at your option) any later version.                                      }
+{                                                                           }
+{  eInvoice4D is distributed in the hope that it will be useful,            }
+{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
+{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
+{  GNU Lesser General Public License for more details.                      }
+{                                                                           }
+{  You should have received a copy of the GNU Lesser General Public License }
+{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
+{                                                                           }
+{***************************************************************************}
 unit DForce.ei.Invoice.Ex;
 
 interface
@@ -73,7 +73,8 @@ type
 implementation
 
 uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception, System.SysUtils,
-  DForce.ei, DForce.ei.Utils, DForce.ei.Validation.Engine, System.StrUtils;
+  DForce.ei, DForce.ei.Utils, DForce.ei.Validation.Engine, System.StrUtils,
+  DForce.ei.Utils.Sanitizer, DForce.ei.Encoding;
 
 { TeiInvoiceEx }
 
@@ -89,7 +90,7 @@ end;
 
 function TeiInvoiceEx.IsPA: boolean;
 begin
-  Result := (LeftStr(FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione, 3) = 'FPA');
+  result := (LeftStr(FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione, 3) = 'FPA');
 end;
 
 procedure TeiInvoiceEx.SaveToFile(const AFileName: String);
@@ -123,11 +124,19 @@ end;
 
 function TeiInvoiceEx.ToString: String;
 var
+  LxmlText: string;
   Lxml: TStringList;
+  LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
+  // Extract the XML text and sanitize it
+  TeiSanitizer.SanitizeInvoice(Self);
+  LxmlText := Self.GetXML;
+  TeiSanitizer.SanitizeXMLText(LxmlText);
+
   Lxml := TStringList.Create;
   try
-    Lxml.Text := FormatXMLData(Self.GetXML);
+    Lxml.Text := FormatXMLData(LxmlText);
 
     // AGGIUNTO V 1.2 - INIZIO
     Lxml[0] := '<?xml version="1.0" encoding="UTF-8"?>';
@@ -144,7 +153,17 @@ begin
     // Lxml.Insert(1, '<?Lxml-stylesheet type="text/xsl" href="fatturapa_v1.2.xsl"?>');
     // Aggiunge "p:" alla fine nel Tag di chiusura
     Lxml[Lxml.Count - 1] := '</p:FatturaElettronica>';
-    result := String(Lxml.Text).Trim;
+
+    // Salva tutto (UTF8)
+    LEncoding := TeiUTFEncodingWithoutBOM.Create;
+    LStringStream := TStringStream.Create('', LEncoding);
+    try
+      Lxml.SaveToStream(LStringStream, LEncoding);
+      result := LStringStream.DataString;
+    finally
+      LStringStream.Free;
+    end;
+
   finally
     Lxml.Free;
   end;

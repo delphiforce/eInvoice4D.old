@@ -1,3 +1,42 @@
+{***************************************************************************}
+{                                                                           }
+{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
+{                                                                           }
+{           Copyright (C) 2018  Delphi Force                                }
+{                                                                           }
+{           info@delphiforce.it                                             }
+{           https://github.com/delphiforce/eInvoice4D.git                   }
+{                                                                  	        }
+{           Delphi Force Team                                      	        }
+{             Antonio Polito                                                }
+{             Carlo Narcisi                                                 }
+{             Fabio Codebue                                                 }
+{             Marco Mottadelli                                              }
+{             Maurizio del Magno                                            }
+{             Omar Bossoni                                                  }
+{             Thomas Ranzetti                                               }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  This file is part of eInvoice4D                                          }
+{                                                                           }
+{  Licensed under the GNU Lesser General Public License, Version 3;         }
+{  you may not use this file except in compliance with the License.         }
+{                                                                           }
+{  eInvoice4D is free software: you can redistribute it and/or modify       }
+{  it under the terms of the GNU Lesser General Public License as published }
+{  by the Free Software Foundation, either version 3 of the License, or     }
+{  (at your option) any later version.                                      }
+{                                                                           }
+{  eInvoice4D is distributed in the hope that it will be useful,            }
+{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
+{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
+{  GNU Lesser General Public License for more details.                      }
+{                                                                           }
+{  You should have received a copy of the GNU Lesser General Public License }
+{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
+{                                                                           }
+{***************************************************************************}
 unit DForce.ei.Notification.Factory;
 
 interface
@@ -7,8 +46,6 @@ uses DForce.ei.Notification.Interfaces, DForce.ei.Notification.NS.Ex,
 
 type
   TeiNotificationFactory = class
-  private
-    class function Epurate(const AStringXML: String): string;
   public
     // NS notification
     class function NewNotificationNSFromString(const AStringXML: String): IeiNotificationNSEx;
@@ -32,11 +69,6 @@ implementation
 uses System.SysUtils, Xml.XMLDoc, System.NetEncoding, DForce.ei.Utils;
 
 { TeiNotificationFactory }
-
-class function TeiNotificationFactory.Epurate(const AStringXML: String): string;
-begin
-  result := StringReplace(AStringXML, 'types:', '', [rfReplaceAll, rfIgnoreCase]);
-end;
 
 class function TeiNotificationFactory.NewNotificationNSFromFile(const AFileName: String): IeiNotificationNSEx;
 var
@@ -62,9 +94,11 @@ end;
 
 class function TeiNotificationFactory.NewNotificationNSFromString(const AStringXML: String): IeiNotificationNSEx;
 var
+  LRootTagName: string;
   LNotificationCommon: IeiNotificationCommon;
 begin
-  result := LoadXMLData(Epurate(AStringXML)).GetDocBinding('NotificaScarto', TeiNotificationNSEx, TargetNamespace) as IeiNotificationNSEx;
+  LRootTagName := TeiUtils.ExtractRootTagName(AStringXML);
+  result := LoadXMLData(TeiUtils.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiNotificationNSEx, TargetNamespace) as IeiNotificationNSEx;
   if Supports(result, IeiNotificationCommon, LNotificationCommon) then
     LNotificationCommon.RawXML := AStringXML;
 end;
@@ -98,9 +132,11 @@ end;
 
 class function TeiNotificationFactory.NewNotificationNEFromString(const AStringXML: String): IeiNotificationNEEx;
 var
+  LRootTagName: string;
   LNotificationCommon: IeiNotificationCommon;
 begin
-  result := LoadXMLData(Epurate(AStringXML)).GetDocBinding('NotificaEsito', TeiNotificationNEEx, TargetNamespace) as IeiNotificationNEEx;
+  LRootTagName := TeiUtils.ExtractRootTagName(AStringXML);
+  result := LoadXMLData(TeiUtils.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiNotificationNEEx, TargetNamespace) as IeiNotificationNEEx;
   if Supports(result, IeiNotificationCommon, LNotificationCommon) then
     LNotificationCommon.RawXML := AStringXML;
 end;

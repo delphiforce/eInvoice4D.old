@@ -56,10 +56,11 @@ type
   public
     class function DateToString(const Value: TDateTime): string;
     class function DateTimeToString(const Value: TDateTime): string;
+    class function DateTimeToUrlParam(const Value: TDateTime): string;
     class function NumberToString(const Value: extended; const Decimals: integer = 2): string;
     class function DateTimeLocalFromIso8601(const Value: string): TDateTime;
     class function DateTimeUTCFromIso8601(const Value: string): TDateTime;
-    class function ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
+    class function ResponseTypeToEnum(const AResponseType: string; const ANotificationXML: String = ''): TeiResponseTypeInt;
     class function ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;
     class function ResponseTypeToString(const AResponseType: TeiResponseTypeInt): string;
     class function StringToResponseType(const AResponseType: String): TeiResponseTypeInt;
@@ -68,6 +69,10 @@ type
     class procedure CopyObjectState(const ASource, ADestination: IInterface); overload;
     class procedure StringToStream(const ADestStream: TStream; const ASourceString: String);
     class function StreamToString(const ASourceStream: TStream): string;
+    class function ExtractInvoiceIDFromNotification(const ANotificationXML: string): string; // Deprecated??? // To test???
+    class function PurgeXML(const AStringXML, ARootTag: String): string;
+    class function ExtractRootTagName(XMLText: string): string;
+    class function DecodeFromBase64WithPurge(const ABase64Value: String): string; deprecated;
   end;
 
 implementation
@@ -76,19 +81,24 @@ uses System.SysUtils,
   System.Math,
   DForce.ei.Exception,
   IdGlobalProtocols,
-  XSBuiltIns, DForce.ei.Invoice.Base, System.DateUtils, System.TypInfo, System.Rtti;
+  XSBuiltIns, DForce.ei.Invoice.Base, System.DateUtils, System.TypInfo, System.Rtti,
+  DForce.ei.Notification.Interfaces, DForce.ei.Notification.Factory,
+  DForce.ei.Encoding,
+  System.NetEncoding;
 
 { TeiUtils }
 
 class procedure TeiUtils.StringToStream(const ADestStream: TStream; const ASourceString: String);
 var
   LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
   // Check the stream
   if not Assigned(ADestStream) then
     raise eiGenericException.Create('"AStream" parameter not assigned');
   // Save invoice into the stream
-  LStringStream := TStringStream.Create(ASourceString);
+  LEncoding := TeiUTFEncodingWithoutBOM.Create;
+  LStringStream := TStringStream.Create(ASourceString, LEncoding);
   try
     ADestStream.CopyFrom(LStringStream, 0);
   finally
@@ -107,6 +117,56 @@ begin
   result := FormatDateTime('yyyy-mm-dd', Value, _fs);
 end;
 
+class function TeiUtils.ExtractInvoiceIDFromNotification(const ANotificationXML: string): string;
+var
+  LStartPos, LEndPos, LCount: integer;
+begin
+  LCount := 0;
+  // get the start pos
+  LStartPos := Pos('<NomeFile>', ANotificationXML);
+  if LStartPos > 0 then
+    LStartPos := LStartPos + Length('<NomeFile>')
+  else
+    eiGenericException.Create('TeiUtils.ExtractInvoiceIDFromNotification: Tag "<NomeFile>" not found');
+  // get the end pos
+  LEndPos := Pos('/<NomeFile>', ANotificationXML);
+  if LEndPos = 0 then
+    LCount := LEndPos - LStartPos
+  else
+    eiGenericException.Create('TeiUtils.ExtractInvoiceIDFromNotification: Tag "/<NomeFile>" not found');
+  // Return the FileName
+  result := Copy(ANotificationXML, LStartPos, LCount);
+end;
+
+class function TeiUtils.ExtractRootTagName(XMLText: string): string;
+var
+  LEndXmlVersionPos: integer;
+  LStartRootTagPos, LDoublePointPos, LEndRootTagPos, LFirstSpacePos: integer;
+begin
+  LEndXmlVersionPos := Pos('?>', XMLText);
+  // Remove the XML version line
+  if LEndXmlVersionPos > 0 then
+    XMLText := Copy(XMLText, LEndXmlVersionPos + 2, Length(XMLText));
+  // Detect the "<" for the root  tag
+  LStartRootTagPos := Pos('<', XMLText);
+  if LStartRootTagPos = 0 then
+    raise eiGenericException.Create('StartRootTagPos not found');
+  // Detect the ">" for the root  tag
+  LEndRootTagPos := Pos('>', XMLText);
+  if LEndRootTagPos = 0 then
+    raise eiGenericException.Create('EndRootTagPos not found');
+  // Detect the first space char after the root name
+  LFirstSpacePos := Pos(' ', XMLText);
+  if (LFirstSpacePos <> 0) and (LFirstSpacePos < LEndRootTagPos) then
+    LEndRootTagPos := LFirstSpacePos;
+  // Detect the ":" between the NameSpace and the root tag (if exists)
+  LDoublePointPos := Pos(':', XMLText);
+  if (LDoublePointPos <> 0) and (LDoublePointPos < LEndRootTagPos) then
+    LStartRootTagPos := LDoublePointPos;
+  // Extract the root tag name
+  result := Copy(XMLText, LStartRootTagPos + 1, (LEndRootTagPos - LStartRootTagPos - 1));
+end;
+
 class function TeiUtils.ResponseTypeForHumans(const AResponseType: TeiResponseTypeInt): string;
 begin
   case AResponseType of
@@ -116,8 +176,10 @@ begin
       result := 'Notifica di scarto';
     rtSDIMessageMC:
       result := 'Notifica di mancata consegna';
-    rtSDIMessageNE:
-      result := 'Notifica esito cedente/prestatore';
+    rtSDIMessageNEAccepted:
+      result := 'Notifica esito fattura accettata';
+    rtSDIMessageNERejected:
+      result := 'Notifica esito fattura rifiutata';
     rtSDIMessageMT:
       result := 'Notifica di metadati del file fattura';
     rtSDIMessageEC:
@@ -133,7 +195,9 @@ begin
   end;
 end;
 
-class function TeiUtils.ResponseTypeToEnum(const AResponseType: string): TeiResponseTypeInt;
+class function TeiUtils.ResponseTypeToEnum(const AResponseType: string; const ANotificationXML: String): TeiResponseTypeInt;
+var
+  LNotificationNE: IeiNotificationNEEx;
 begin
   if AResponseType = 'RC' then
     result := rtSDIMessageRC
@@ -141,8 +205,6 @@ begin
     result := rtSDIMessageNS
   else if AResponseType = 'MC' then
     result := rtSDIMessageMC
-  else if AResponseType = 'NE' then
-    result := rtSDIMessageNE
   else if AResponseType = 'MT' then
     result := rtSDIMessageMT
   else if AResponseType = 'EC' then
@@ -153,6 +215,14 @@ begin
     result := rtSDIMessageDT
   else if AResponseType = 'AT' then
     result := rtSDIMessageAT
+  else if AResponseType = 'NE' then
+  begin
+    LNotificationNE := TeiNotificationFactory.NewNotificationNEFromString(ANotificationXML);
+    if LNotificationNE.InvoiceAccepted then
+      result := rtSDIMessageNEAccepted
+    else
+      result := rtSDIMessageNERejected
+  end
   else
     result := rtUnknown;
 end;
@@ -165,11 +235,13 @@ end;
 class function TeiUtils.StreamToString(const ASourceStream: TStream): string;
 var
   LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
-  LStringStream := TStringStream.Create;
+  LEncoding := TeiUTFEncodingWithoutBOM.Create;
+  LStringStream := TStringStream.Create('', LEncoding);
   try
     LStringStream.CopyFrom(ASourceStream, 0);
-    Result := LStringStream.DataString;
+    result := LStringStream.DataString;
   finally
     LStringStream.Free;
   end;
@@ -329,6 +401,11 @@ begin
   result := result.Insert(10, 'T');
 end;
 
+class function TeiUtils.DateTimeToUrlParam(const Value: TDateTime): string;
+begin
+  result := FormatDateTime('yyyy-mm-dd"T"hh%3Ann%3Ass', Value);
+end;
+
 class function TeiUtils.NumberToString(const Value: extended; const Decimals: integer = 2): string;
 var
   _fs: TFormatSettings;
@@ -371,6 +448,23 @@ begin
   end;
 end;
 
+class function TeiUtils.PurgeXML(const AStringXML, ARootTag: String): string;
+var
+  LRootTagPos, LSquareBracketPos: integer;
+  LNameSpace: string;
+begin
+  LNameSpace := '';
+  LSquareBracketPos := Pos(':' + ARootTag, AStringXML);
+  if LSquareBracketPos > 0 then
+  begin
+    LRootTagPos := LSquareBracketPos - 1;
+    while (AStringXML[LRootTagPos] <> '<') and (LRootTagPos > 0) do
+      Dec(LRootTagPos);
+    LNameSpace := Copy(AStringXML, LRootTagPos + 1, (LSquareBracketPos - LRootTagPos));
+  end;
+  result := StringReplace(AStringXML, LNameSpace, '', [rfIgnoreCase, rfReplaceAll]);
+end;
+
 class procedure TeiUtils.CopyObjectState(const ASource, ADestination: TObject);
 var
   LTyp: TRttiType;
@@ -409,6 +503,63 @@ begin
     finally
       Free();
     end;
+end;
+
+class function TeiUtils.DecodeFromBase64WithPurge(const ABase64Value: String): string;
+// const
+// LBytesToDiscard: array [0 .. 5] of byte = (1, 2, 3, 4, 5, 6);
+var
+  LByteStream: TBytesStream;
+  LStringStream: TStringStream;
+  LBytes, LBytes2: TBytes;
+  i, j: integer;
+  // LStringList: TStringList;
+begin
+  j := 0;
+
+  // LStringList := TStringList.Create;
+  // try
+  // LStringList.Text := ABase64Value;
+  // LStringList.SaveToFile('T:\BASE64.TXT');
+  // finally
+  // LStringList.Free;
+  // end;
+
+  LBytes := TNetEncoding.Base64.DecodeStringToBytes(ABase64Value);
+
+  // if UTF8 ok.. but ANSI? or Others???
+  for i := 0 to Length(LBytes) - 1 do
+  begin
+    if not((LBytes[i] in [1, 2, 3, 4, 5, 6]) or (LBytes[i - 1] in [1, 2, 3, 4, 5, 6]) or (LBytes[i] = 0)) then
+    begin
+      SetLength(LBytes2, j + 1);
+      LBytes2[j] := LBytes[i];
+      inc(j);
+    end;
+  end;
+  // for i := 0 to Length(LBytes) - 1 do
+  // begin
+  // if not((LBytes[i] = 2) or (LBytes[i - 1] = 2) or (LBytes[i] = 3) or (LBytes[i - 1] = 3) or (LBytes[i] = 4) or (LBytes[i - 1] = 4) or
+  // (LBytes[i] = 0)) then
+  // begin
+  // SetLength(LBytes2, j + 1);
+  // LBytes2[j] := LBytes[i];
+  // inc(j);
+  // end;
+  // end;
+
+  LByteStream := TBytesStream.Create(LBytes2);
+  try
+    LStringStream := TStringStream.Create;
+    try
+      LByteStream.SaveToStream(LStringStream);
+      result := LStringStream.DataString;
+    finally
+      LStringStream.Free;
+    end;
+  finally
+    LByteStream.Free;
+  end;
 end;
 
 initialization

@@ -7,7 +7,7 @@
             <Dependencies/>
         </Projects>
         <Projects Include="..\..\samples\Demo01\Demo01.dproj">
-            <Dependencies/>
+            <Dependencies>eInvoice4D.dproj</Dependencies>
         </Projects>
         <Projects Include="..\..\companions\eInvoiceService\eInvoiceService.dproj">
             <Dependencies/>
@@ -32,13 +32,13 @@
     <Target Name="eInvoice4D:Make">
         <MSBuild Projects="eInvoice4D.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Demo01">
+    <Target Name="Demo01" DependsOnTargets="eInvoice4D">
         <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj"/>
     </Target>
-    <Target Name="Demo01:Clean">
+    <Target Name="Demo01:Clean" DependsOnTargets="eInvoice4D:Clean">
         <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="Demo01:Make">
+    <Target Name="Demo01:Make" DependsOnTargets="eInvoice4D:Make">
         <MSBuild Projects="..\..\samples\Demo01\Demo01.dproj" Targets="Make"/>
     </Target>
     <Target Name="eInvoiceService">

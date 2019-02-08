@@ -44,7 +44,8 @@ interface
 // DO NOT REMOVE !!! IPPeerClient necessary for all REST calls in derived classes
 // DO NOT REMOVE !!! IPPeerClient necessary for all REST calls in derived classes
 // DO NOT REMOVE !!! IPPeerClient necessary for all REST calls in derived classes
-uses IPPeerClient, DForce.ei.Response.Interfaces, DForce.ei.Provider.Interfaces;
+uses IPPeerClient, DForce.ei.Response.Interfaces, DForce.ei.Provider.Interfaces,
+  DForce.ei.Invoice.Interfaces;
 
 type
 
@@ -65,7 +66,10 @@ type
     procedure Disconnect; virtual; abstract;
     function SendInvoice(const AInvoice: string): IeiResponseCollectionEx; virtual; abstract;
     function ReceiveInvoiceNotifications(const AInvoiceFileName: string): IeiResponseCollectionEx; virtual; abstract;
-    procedure ReceivePurchaseInvoices; virtual; abstract;
+    function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime; AEndDate: TDateTime = 0)
+      : IeiInvoiceIDCollectionEx; virtual; abstract;
+    function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx; virtual; abstract;
+    function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; virtual; abstract;
   public
     constructor Create(const AUserName, APassword, ABaseURLWS, ABaseURLAuth: string); virtual;
   end;

@@ -1,3 +1,42 @@
+{***************************************************************************}
+{                                                                           }
+{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
+{                                                                           }
+{           Copyright (C) 2018  Delphi Force                                }
+{                                                                           }
+{           info@delphiforce.it                                             }
+{           https://github.com/delphiforce/eInvoice4D.git                   }
+{                                                                  	        }
+{           Delphi Force Team                                      	        }
+{             Antonio Polito                                                }
+{             Carlo Narcisi                                                 }
+{             Fabio Codebue                                                 }
+{             Marco Mottadelli                                              }
+{             Maurizio del Magno                                            }
+{             Omar Bossoni                                                  }
+{             Thomas Ranzetti                                               }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  This file is part of eInvoice4D                                          }
+{                                                                           }
+{  Licensed under the GNU Lesser General Public License, Version 3;         }
+{  you may not use this file except in compliance with the License.         }
+{                                                                           }
+{  eInvoice4D is free software: you can redistribute it and/or modify       }
+{  it under the terms of the GNU Lesser General Public License as published }
+{  by the Free Software Foundation, either version 3 of the License, or     }
+{  (at your option) any later version.                                      }
+{                                                                           }
+{  eInvoice4D is distributed in the hope that it will be useful,            }
+{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
+{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
+{  GNU Lesser General Public License for more details.                      }
+{                                                                           }
+{  You should have received a copy of the GNU Lesser General Public License }
+{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
+{                                                                           }
+{***************************************************************************}
 unit MainFM;
 
 interface
@@ -36,10 +75,14 @@ type
     btnLoadFromStream: TButton;
     btnLoadFromStreamBase64: TButton;
     btnLoadFromFile: TButton;
-    Button1: TButton;
+    btnListaFatture: TButton;
     btnNotificaNS: TButton;
     Button4: TButton;
     btnNotificaNE: TButton;
+    Button3: TButton;
+    eInvoiceNameToDownload: TEdit;
+    btnScaricaFattura: TButton;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnNotificationsClick(Sender: TObject);
     procedure btnGeneraXMLDiProvaClick(Sender: TObject);
@@ -52,11 +95,14 @@ type
     procedure btnLoadFromStreamClick(Sender: TObject);
     procedure btnLoadFromStreamBase64Click(Sender: TObject);
     procedure btnLoadFromFileClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btnListaFattureClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure btnNotificaNSClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure btnNotificaNEClick(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure btnScaricaFatturaClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
   public
     { Public declarations }
@@ -77,7 +123,7 @@ uses xmldom,
   System.UITypes,
   DForce.ei.Notification.Interfaces,
   DForce.ei.Notification.Factory,
-  System.SysUtils;
+  System.SysUtils, DForce.ei.Utils;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -116,15 +162,68 @@ begin
   end;
 end;
 
-procedure TMainForm.Button1Click(Sender: TObject);
+procedure TMainForm.btnScaricaFatturaClick(Sender: TObject);
+var
+  LXML: IeiResponse;
+  LInvoice: IeiInvoice;
 begin
-  ei.ReceivePurchaseInvoices;
+  ei.Connect;
+  try
+    Memo1.Clear;
+    LXML := ei.ReceivePurchaseInvoiceAsXML(eInvoiceNameToDownload.Text);
+    Memo1.Lines.Add(LXML.MsgRaw);
+
+    // TEST conversione XML
+    // Memo1.Lines.Add('');
+    // Memo1.Lines.Add('-----------------------------------------------------------------------------');
+    // Memo1.Lines.Add('               CONVERTITA DA LINVOICE ');
+    // Memo1.Lines.Add('-----------------------------------------------------------------------------');
+    // Memo1.Lines.Add('');
+    // LInvoice := ei.NewInvoiceFromString(LResponse.MsgRaw);
+    // Memo1.Lines.Add(LInvoice.ToString);
+  finally
+    ei.Disconnect;
+  end;
+end;
+
+procedure TMainForm.btnListaFattureClick(Sender: TObject);
+var
+  LIDCollection: IeiInvoiceIDCollection;
+  LID: string;
+begin
+  Memo1.Lines.Clear;
+  // LIDCollection := ei.ReceivePurchaseInvoiceFileNameCollection(EncodeDate(2019, 1, 1));
+  for LID in LIDCollection do
+  begin
+    Memo1.Lines.Add(LID);
+  end;
+end;
+
+procedure TMainForm.Button1Click(Sender: TObject);
+var
+  LResponse: IeiResponse;
+begin
+  ei.Connect;
+  try
+    Memo1.Clear;
+    for LResponse in ei.ReceivePurchaseInvoiceNotifications('IT02242550982_00B21.xml.p7m') do
+    begin
+      Memo1.Lines.Add(Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode, LResponse.MsgText]));
+      Memo1.Lines.Add(Format('ResponseDate: %s; NotificationDate : %s', [FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.ResponseDate),
+        FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.NotificationDate)]));
+
+      // Memo1.Lines.Add(LResponse.StatusAsString);
+
+      Memo1.Lines.Add(LResponse.MsgRaw);
+    end;
+  finally
+    ei.Disconnect;
+  end;
 end;
 
 procedure TMainForm.Button2Click(Sender: TObject);
 var
   LInvoice: IeiInvoice;
-  LValidationResultCollection: IeiValidationResultCollection;
   LValidationResult: IeiValidationResult;
 begin
   LInvoice := ei.NewInvoice;
@@ -140,13 +239,25 @@ begin
   end;
 end;
 
+procedure TMainForm.Button3Click(Sender: TObject);
+var
+  LXML: TStringList;
+  LStr: string;
+begin
+  LXML := TStringList.Create;
+  LXML.LoadFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001.xml'));
+  LStr := LXML.Text;
+  TeiUtils.PurgeXML(LStr, 'NotificaEsito');
+  LXML.Text := LStr;
+  LXML.SaveToFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001_PURGED.xml'));
+end;
+
 procedure TMainForm.btnNotificaNEClick(Sender: TObject);
 var
   LNotificaNE: IeiNotificationNEEx;
   LXmlNotificaNE: string;
   LFileXML: TFileStream;
   LStringXML: TStringStream;
-  i: Integer;
 begin
   LFileXML := TFileStream.Create(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001.xml'), fmOpenRead);
   try

@@ -24,7 +24,7 @@ object MainForm: TMainForm
   end
   object lblInfoArubaAPI: TLabel
     Left = 524
-    Top = 73
+    Top = 223
     Width = 350
     Height = 13
     Caption = 
@@ -93,7 +93,7 @@ object MainForm: TMainForm
   object btnNotifications: TButton
     Left = 279
     Top = 8
-    Width = 236
+    Width = 240
     Height = 39
     Caption = 'Notifications (getByInvoiceFilename)'
     TabOrder = 4
@@ -135,7 +135,7 @@ object MainForm: TMainForm
   object eInvoiceName: TEdit
     Left = 279
     Top = 46
-    Width = 236
+    Width = 240
     Height = 21
     TabOrder = 8
   end
@@ -189,14 +189,14 @@ object MainForm: TMainForm
     TabOrder = 13
     OnClick = btnLoadFromFileClick
   end
-  object Button1: TButton
+  object btnListaFatture: TButton
     Left = 543
     Top = 8
-    Width = 236
+    Width = 114
     Height = 39
     Caption = 'Ricezione'
     TabOrder = 14
-    OnClick = Button1Click
+    OnClick = btnListaFattureClick
   end
   object btnNotificaNS: TButton
     Left = 8
@@ -209,8 +209,8 @@ object MainForm: TMainForm
     OnClick = btnNotificaNSClick
   end
   object Button4: TButton
-    Left = 727
-    Top = 96
+    Left = 567
+    Top = 141
     Width = 127
     Height = 39
     Cancel = True
@@ -227,5 +227,41 @@ object MainForm: TMainForm
     Caption = 'Notifica NE'
     TabOrder = 17
     OnClick = btnNotificaNEClick
+  end
+  object Button3: TButton
+    Left = 817
+    Top = 192
+    Width = 75
+    Height = 25
+    Caption = 'Purge'
+    TabOrder = 18
+    OnClick = Button3Click
+  end
+  object eInvoiceNameToDownload: TEdit
+    Left = 663
+    Top = 46
+    Width = 230
+    Height = 21
+    TabOrder = 19
+    Text = 'IT01879020517_ehtl1.xml.p7m'
+  end
+  object btnScaricaFattura: TButton
+    Left = 663
+    Top = 8
+    Width = 230
+    Height = 39
+    Caption = 'Scarica fattura (getByFilename)'
+    TabOrder = 20
+    OnClick = btnScaricaFatturaClick
+  end
+  object Button1: TButton
+    Left = 720
+    Top = 96
+    Width = 172
+    Height = 39
+    Cancel = True
+    Caption = 'Receive notification purchase'
+    TabOrder = 21
+    OnClick = Button1Click
   end
 end
