@@ -68,7 +68,7 @@ implementation
 
 uses
   Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, DForce.ei.Utils,
-  DForce.ei.Exception, System.StrUtils, PKCS7Extractor;
+  DForce.ei.Exception, System.StrUtils, PKCS7Extractor, System.WideStrUtils;
 
 { TeiInvoiceFactory }
 
@@ -89,6 +89,11 @@ class function TeiInvoiceFactory.InternalNewInvoiceFromBytes(
       then Exit;
     Dec(LStop, LStart);
     Delete(AXML, LStart, LStop);
+  end;
+
+  function GetRawString(const Bytes: TBytes): RawByteString; inline;
+  begin
+    SetString(Result, PAnsiChar(Pointer(Bytes)), Length(Bytes));
   end;
 
 var
@@ -117,14 +122,16 @@ begin
       try
         LOutStream := TBytesStream.Create;
         LP7M.SaveToStream(LOutStream);
-        LInnerXML := TEncoding.UTF8.GetString(LOutStream.Bytes);
+        if IsUTF8String(GetRawString(LOutStream.Bytes))
+          then LInnerXML := TEncoding.UTF8.GetString(LOutStream.Bytes)
+          else LInnerXML := TEncoding.ANSI.GetString(LOutStream.Bytes);
       finally
         LOutStream.Free;
       end;
     end else
-    begin
-      LInnerXML := TEncoding.UTF8.GetString(AXMLBytes);
-    end;
+    if IsUTF8String(GetRawString(AXMLBytes))
+      then LInnerXML := TEncoding.UTF8.GetString(AXMLBytes)
+      else LInnerXML := TEncoding.ANSI.GetString(AXMLBytes);
   finally
     LP7M.Free;
     LInStream.Free;
