@@ -256,12 +256,13 @@ begin
     LRESTRequest.Method := rmPOST;
     LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
       [poDoNotEncode]);
+
     LRESTRequest.Body.Add(LJSONBody, TRESTContentType.ctAPPLICATION_JSON);
 
     LRESTRequest.Execute;
     //DONE: uso l'HelpContext per passare avanti il codice errore
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.CreateFmtHelp('Sending invoice error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText], LRESTResponse.StatusCode);
+      raise eiGenericException.CreateFmtHelp('Sending invoice error: %d - %s: %s%s', [LRESTResponse.StatusCode, LRESTResponse.StatusText, #13#10 + #13#10, LRESTResponse.Content], LRESTResponse.StatusCode.MaxValue);
 
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
