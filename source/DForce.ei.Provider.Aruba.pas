@@ -239,7 +239,7 @@ begin
   inherited;
   JObjResponse := nil;
 
-  LBase64Invoice := TNetEncoding.Base64.Encode(AInvoice);
+  LBase64Invoice := TNetEncoding.Base64.Encode(AInvoice).Replace(#13#10, '', [rfReplaceAll]);
   LJSONBody := '{"dataFile" : "' + LBase64Invoice + '", "credential" : "", "domain" : ""}';
 
   LRESTClient := TRESTClient.Create(nil);
