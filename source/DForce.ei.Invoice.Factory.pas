@@ -1,42 +1,42 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
+{ *************************************************************************** }
 unit DForce.ei.Invoice.Factory;
 
 interface
@@ -51,7 +51,7 @@ type
 
   TeiInvoiceFactory = class
   private
-    class function InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
+    class function InternalNewInvoiceFromString(AStringXML: String): IeiInvoiceEx;
   public
     class function NewInvoice: IeiInvoiceEx;
     class function NewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
@@ -67,16 +67,17 @@ type
 implementation
 
 uses Xml.XMLDoc, DForce.ei.Invoice.Ex, System.NetEncoding, System.SysUtils,
-  DForce.ei.Utils;
+  DForce.ei.Utils, DForce.ei.Utils.Sanitizer;
 
 { TeiInvoiceFactory }
 
-class function TeiInvoiceFactory.InternalNewInvoiceFromString(const AStringXML: String): IeiInvoiceEx;
+class function TeiInvoiceFactory.InternalNewInvoiceFromString(AStringXML: String): IeiInvoiceEx;
 var
   LRootTagName: string;
 begin
+  AStringXML := TeiSanitizer.SanitizeXMLStructure(AStringXML);
   LRootTagName := TeiUtils.ExtractRootTagName(AStringXML);
-  result := LoadXMLData(TeiUtils.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
+  result := LoadXMLData(AStringXML).GetDocBinding(LRootTagName, TeiInvoiceEx, TargetNamespace) as IeiInvoiceEx;
 end;
 
 class function TeiInvoiceFactory.NewInvoice: IeiInvoiceEx;

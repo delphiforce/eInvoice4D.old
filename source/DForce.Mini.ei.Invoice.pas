@@ -116,7 +116,7 @@ begin
   // Extract the XML text and sanitize it
   TeiSanitizer.SanitizeInvoice(Self);
   LxmlText := Self.GetXML;
-  TeiSanitizer.SanitizeXMLText(LxmlText);
+  TeiSanitizer.SanitizeXMLValues(LxmlText);
 
   Lxml := TStringList.Create;
   try

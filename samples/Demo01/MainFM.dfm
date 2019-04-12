@@ -70,6 +70,7 @@ object MainForm: TMainForm
         're a richiedere la notifica specificando il '
       'filename.')
     ParentFont = False
+    ScrollBars = ssVertical
     TabOrder = 1
   end
   object Button2: TButton
@@ -228,21 +229,12 @@ object MainForm: TMainForm
     TabOrder = 17
     OnClick = btnNotificaNEClick
   end
-  object Button3: TButton
-    Left = 817
-    Top = 192
-    Width = 75
-    Height = 25
-    Caption = 'Purge'
-    TabOrder = 18
-    OnClick = Button3Click
-  end
   object eInvoiceNameToDownload: TEdit
     Left = 663
     Top = 46
     Width = 230
     Height = 21
-    TabOrder = 19
+    TabOrder = 18
     Text = 'IT01879020517_ehtl1.xml.p7m'
   end
   object btnScaricaFattura: TButton
@@ -251,7 +243,7 @@ object MainForm: TMainForm
     Width = 230
     Height = 39
     Caption = 'Scarica fattura (getByFilename)'
-    TabOrder = 20
+    TabOrder = 19
     OnClick = btnScaricaFatturaClick
   end
   object Button1: TButton
@@ -261,7 +253,25 @@ object MainForm: TMainForm
     Height = 39
     Cancel = True
     Caption = 'Receive notification purchase'
-    TabOrder = 21
+    TabOrder = 20
     OnClick = Button1Click
+  end
+  object btnAddAttachment: TButton
+    Left = 274
+    Top = 202
+    Width = 127
+    Height = 39
+    Cancel = True
+    Caption = 'Add Attachment'
+    TabOrder = 21
+    OnClick = btnAddAttachmentClick
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 440
+    Top = 208
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 448
+    Top = 296
   end
 end

@@ -1,42 +1,42 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
+{ *************************************************************************** }
 unit DForce.ei.Utils;
 
 interface
@@ -69,10 +69,8 @@ type
     class procedure CopyObjectState(const ASource, ADestination: IInterface); overload;
     class procedure StringToStream(const ADestStream: TStream; const ASourceString: String);
     class function StreamToString(const ASourceStream: TStream): string;
-    class function ExtractInvoiceIDFromNotification(const ANotificationXML: string): string; // Deprecated??? // To test???
-    class function PurgeXML(const AStringXML, ARootTag: String): string;
+    class function ExtractInvoiceIDFromNotification(const ANotificationXML: string): string; deprecated; // Deprecated??? // To test???
     class function ExtractRootTagName(XMLText: string): string;
-    class function DecodeFromBase64WithPurge(const ABase64Value: String): string; deprecated;
   end;
 
 implementation
@@ -448,23 +446,6 @@ begin
   end;
 end;
 
-class function TeiUtils.PurgeXML(const AStringXML, ARootTag: String): string;
-var
-  LRootTagPos, LSquareBracketPos: integer;
-  LNameSpace: string;
-begin
-  LNameSpace := '';
-  LSquareBracketPos := Pos(':' + ARootTag, AStringXML);
-  if LSquareBracketPos > 0 then
-  begin
-    LRootTagPos := LSquareBracketPos - 1;
-    while (AStringXML[LRootTagPos] <> '<') and (LRootTagPos > 0) do
-      Dec(LRootTagPos);
-    LNameSpace := Copy(AStringXML, LRootTagPos + 1, (LSquareBracketPos - LRootTagPos));
-  end;
-  result := StringReplace(AStringXML, LNameSpace, '', [rfIgnoreCase, rfReplaceAll]);
-end;
-
 class procedure TeiUtils.CopyObjectState(const ASource, ADestination: TObject);
 var
   LTyp: TRttiType;
@@ -503,63 +484,6 @@ begin
     finally
       Free();
     end;
-end;
-
-class function TeiUtils.DecodeFromBase64WithPurge(const ABase64Value: String): string;
-// const
-// LBytesToDiscard: array [0 .. 5] of byte = (1, 2, 3, 4, 5, 6);
-var
-  LByteStream: TBytesStream;
-  LStringStream: TStringStream;
-  LBytes, LBytes2: TBytes;
-  i, j: integer;
-  // LStringList: TStringList;
-begin
-  j := 0;
-
-  // LStringList := TStringList.Create;
-  // try
-  // LStringList.Text := ABase64Value;
-  // LStringList.SaveToFile('T:\BASE64.TXT');
-  // finally
-  // LStringList.Free;
-  // end;
-
-  LBytes := TNetEncoding.Base64.DecodeStringToBytes(ABase64Value);
-
-  // if UTF8 ok.. but ANSI? or Others???
-  for i := 0 to Length(LBytes) - 1 do
-  begin
-    if not((LBytes[i] in [1, 2, 3, 4, 5, 6]) or (LBytes[i - 1] in [1, 2, 3, 4, 5, 6]) or (LBytes[i] = 0)) then
-    begin
-      SetLength(LBytes2, j + 1);
-      LBytes2[j] := LBytes[i];
-      inc(j);
-    end;
-  end;
-  // for i := 0 to Length(LBytes) - 1 do
-  // begin
-  // if not((LBytes[i] = 2) or (LBytes[i - 1] = 2) or (LBytes[i] = 3) or (LBytes[i - 1] = 3) or (LBytes[i] = 4) or (LBytes[i - 1] = 4) or
-  // (LBytes[i] = 0)) then
-  // begin
-  // SetLength(LBytes2, j + 1);
-  // LBytes2[j] := LBytes[i];
-  // inc(j);
-  // end;
-  // end;
-
-  LByteStream := TBytesStream.Create(LBytes2);
-  try
-    LStringStream := TStringStream.Create;
-    try
-      LByteStream.SaveToStream(LStringStream);
-      result := LStringStream.DataString;
-    finally
-      LStringStream.Free;
-    end;
-  finally
-    LByteStream.Free;
-  end;
 end;
 
 initialization

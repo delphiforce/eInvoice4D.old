@@ -54,6 +54,7 @@ type
     function Add(const AItem: T): Integer;
     function GetEnumerator: TEnumerator<T>;
     procedure AddRange(const Collection: IeiCollection<T>);
+    procedure Delete(const AIndex: Integer);
     // Count
     function GetCount: Integer;
     // Items
@@ -90,6 +91,11 @@ constructor TeiCollection<T>.Create;
 begin
   inherited;
   FContainer := TList<T>.Create;
+end;
+
+procedure TeiCollection<T>.Delete(const AIndex: Integer);
+begin
+  FContainer.Delete(AIndex);
 end;
 
 destructor TeiCollection<T>.Destroy;

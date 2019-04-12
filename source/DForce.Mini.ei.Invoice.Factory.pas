@@ -55,7 +55,7 @@ type
     class function InternalStreamToString(const AStream: TStream): string;
   public
     class function NewInvoice: IeiInvoiceMini;
-    class function NewInvoiceFromString(const AStringXML: String): IeiInvoiceMini;
+    class function NewInvoiceFromString(AStringXML: String): IeiInvoiceMini;
     class function NewInvoiceFromFile(const AFileName: String): IeiInvoiceMini;
     class function NewInvoiceFromStream(const AStream: TStream): IeiInvoiceMini;
   end;
@@ -63,15 +63,18 @@ type
 implementation
 
 uses
-  Xml.XMLDoc, DForce.Mini.ei.Invoice, System.SysUtils, DForce.Mini.ei.Utils;
+  Xml.XMLDoc, DForce.Mini.ei.Invoice, System.SysUtils, DForce.Mini.ei.Utils,
+  DForce.ei.Utils.Sanitizer, DForce.ei.Encoding;
 
 { TeiInvoiceFactory }
 
 class function TeiInvoiceMiniFactory.InternalStreamToString(const AStream: TStream): string;
 var
   LStringStream: TStringStream;
+  LEncoding: TEncoding;
 begin
-  LStringStream := TStringStream.Create;
+  LEncoding := TeiUTFEncodingWithoutBOM.Create;
+  LStringStream := TStringStream.Create('', LEncoding);
   try
     LStringStream.CopyFrom(AStream, 0);
     Result := LStringStream.DataString;
@@ -102,12 +105,13 @@ begin
   Result := NewInvoiceFromString(InternalStreamToString(AStream));
 end;
 
-class function TeiInvoiceMiniFactory.NewInvoiceFromString(const AStringXML: String): IeiInvoiceMini;
+class function TeiInvoiceMiniFactory.NewInvoiceFromString(AStringXML: String): IeiInvoiceMini;
 var
   LRootTagName: string;
 begin
+  AStringXML := TeiSanitizer.SanitizeXMLStructure(AStringXML);
   LRootTagName := TeiUtilsMini.ExtractRootTagName(AStringXML);
-  result := LoadXMLData(TeiUtilsMini.PurgeXML(AStringXML, LRootTagName)).GetDocBinding(LRootTagName, TeiInvoiceMini, TargetNamespace) as IeiInvoiceMini;
+  result := LoadXMLData(AStringXML).GetDocBinding(LRootTagName, TeiInvoiceMini, TargetNamespace) as IeiInvoiceMini;
 end;
 
 end.

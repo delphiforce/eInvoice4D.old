@@ -1,55 +1,16 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
-{  20140616 by ing.Paolo Filippini                                          }
-{  Logger multithread.                                                      }
-{  Di default il log è salvato in <HOMEDIR>\<application>.log               }
-{                                                                           }
-{  Uso:                                                                     }
-{  - invocare GetPfLogger.metodo: crea da solo l'istanza e la mantiene      }
-{  - GetPfLogger(logfilename) consente di indicare il nome del file         }
-{  (solo alla prima chiamata)                                               }
-{                                                                           }
-{  20151103 Ottimizzizazioni e bug fix                                      }
-{  20151008 Cambiato percorso di default del log (nella homedir)            }
-{***************************************************************************}
 unit DForce.ei.Logger.pfLogger;
+
+{ 20140616 by ing.Paolo Filippini
+  Logger multithread.
+  Di default il log è salvato in <HOMEDIR>\<application>.log
+  Uso:
+  - invocare GetPfLogger.metodo: crea da solo l'istanza e la mantiene
+  - GetPfLogger(logfilename) consente di indicare il nome del file
+  (solo alla prima chiamata)
+
+  20151103 Ottimizzizazioni e bug fix
+  20151008 Cambiato percorso di default del log (nella homedir)
+}
 
 interface
 
@@ -81,6 +42,8 @@ function GetPFLogger(const LogFilename: string = ''): IpfLogger;
 
 function CreatePFLogger(const LogFilename: string = ''): IpfLogger;
 
+function GetPFLoggerFileName: String;
+
 implementation
 
 uses system.SyncObjs, system.UITypes, system.ioutils;
@@ -101,6 +64,8 @@ type
 
 type
   TpfLogger = class(TInterfacedObject, IpfLogger)
+  private
+    class var FLogDir: String;
   private
     FThread: TLogThread;
     FLogLevel: pfLogLevel;
@@ -125,6 +90,7 @@ type
   public
     constructor Create(const LogFilename: string = '');
     destructor Destroy; override;
+    class function GetLogDir: String;
   end;
 
 var
@@ -169,9 +135,11 @@ var
   s: String;
   FullFileName: string;
 begin
-  FullFileName := Tpath.GetDirectoryName(FLogFileName) + Tpath.DirectorySeparatorChar + 'Log' + Tpath.DirectorySeparatorChar +
-    FormatDateTime('YYYYMM', date) + Tpath.DirectorySeparatorChar + Tpath.GetFileNameWithoutExtension(FLogFileName);
-  FullFileName := FullFileName + '_' + FormatDateTime('yyyymmdd', date) + '_' + GetEnvironmentVariable('USERNAME') + '.log';
+//  FullFileName := Tpath.GetDirectoryName(FLogFileName) + Tpath.DirectorySeparatorChar + 'Log' + Tpath.DirectorySeparatorChar +
+//    FormatDateTime('YYYYMM', date) + Tpath.DirectorySeparatorChar + Tpath.GetFileNameWithoutExtension(FLogFileName);
+//
+  FullFileName := FullFileName + '_' + FormatDateTime('yyyymmdd', date) + '.log';
+  FullFileName := GetPFLoggerFileName;
   ForceDirectories(Tpath.GetDirectoryName(FullFileName));
   result := false;
   try
@@ -244,12 +212,23 @@ begin
   result := prvPFLogger;
 end;
 
+function GetPFLoggerFileName: String;
+begin
+  Result := TpfLogger.GetLogDir;
+
+  Result := Tpath.GetDirectoryName(Result) + Tpath.DirectorySeparatorChar + 'Log' + Tpath.DirectorySeparatorChar +
+  FormatDateTime('YYYYMM', date) + Tpath.DirectorySeparatorChar + Tpath.GetFileNameWithoutExtension(Result);
+
+  Result := Result + '_' + FormatDateTime('yyyymmdd', date) + '.log';
+end;
+
 { TpfLogger }
 
 constructor TpfLogger.Create(const LogFilename: string = '');
 begin
   inherited Create;
 
+  FLogDir := LogFilename;
   FCurrentSection := '';
 
   FThread := TLogThread.Create(LogFilename);
@@ -352,6 +331,11 @@ begin
     FCurrentSection := FCurrentSection.Join('|', arr, 0, length(arr) - 2)
   else
     FCurrentSection := '';
+end;
+
+class function TpfLogger.GetLogDir: String;
+begin
+  Result := FLogDir;
 end;
 
 function TpfLogger.GetLogLevel: string;

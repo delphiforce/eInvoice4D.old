@@ -1,42 +1,42 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
+{ *************************************************************************** }
 unit DForce.ei;
 
 interface
@@ -49,7 +49,7 @@ uses DForce.ei.Provider.Interfaces, DForce.ei.Response.Interfaces, System.Classe
 const
   // Delay time in millisec between every provider API call
   // You can set your custom value by calling ei.SetDelay method
-  CONST_DELAY = 500;
+  CONST_DELAY = 5100; // Cautelativo per SLA Aruba (soprattuto per invio fatture attive)
 
 type
 
@@ -138,8 +138,14 @@ type
       const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String> = nil); overload;
 
     class function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
-      AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx;
-    class function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponse;
+      AEndDate: TDateTime = 0): IeiInvoiceIDCollection;
+    class function ReceivePurchaseInvoice(const AInvoiceID: string; const ASanitized: Boolean = false): IeiResponseCollection;
+    class function ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
+      const ASanitized: Boolean = false): IeiResponseCollection; overload;
+    class procedure ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
+      const AAfterEachMethod: TProc<IeiResponseCollection, String>;
+      const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String> = nil; const ASanitized: Boolean = false); overload;
+
     class function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollection;
 
     class procedure SetCustomExtractP7mMethod(const AMethod: TeiExtractP7mMethod);
@@ -509,7 +515,8 @@ begin
 end;
 
 class procedure ei.ReceiveInvoiceCollectionNotifications(const AInvoiceIDCollection: IeiInvoiceIDCollection;
-const AAfterEachMethod: TProc<IeiResponseCollection, String>; const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String>);
+const AAfterEachMethod: TProc<IeiResponseCollection, String>;
+const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String>);
 begin
   InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
     function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
@@ -540,7 +547,7 @@ begin
 end;
 
 class function ei.ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
-AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx;
+AEndDate: TDateTime = 0): IeiInvoiceIDCollection;
 begin
   Sleep(FDelay);
   Result := InternalExecute<string, IeiInvoiceIDCollectionEx>('aaa',
@@ -579,14 +586,19 @@ begin
     end);
 end;
 
-class function ei.ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx;
+class function ei.ReceivePurchaseInvoice(const AInvoiceID: string; const ASanitized: Boolean): IeiResponseCollection;
 begin
   Sleep(FDelay);
-  Result := InternalExecute<string, IeiResponse>('aaa',
-    function(dummy: string): IeiResponse
+  Result := InternalExecute<string, IeiResponseCollection>('aaa',
+    function(dummy: string): IeiResponseCollection
     begin
       try
-        Result := FProvider.ReceivePurchaseInvoiceAsXML(AInvoiceID);
+        Result := FProvider.ReceivePurchaseInvoice(AInvoiceID);
+        if ASanitized then
+        begin
+          LogI('Sanitizing XML structure');
+          Result[0].MsgRaw := TeiSanitizer.SanitizeXMLStructure(Result[0].MsgRaw);
+        end;
       except
         on E: Exception do
         begin
@@ -594,6 +606,52 @@ begin
           raise;
         end;
       end;
+    end);
+end;
+
+class procedure ei.ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
+const AAfterEachMethod: TProc<IeiResponseCollection, String>; const AOnEachErrorMethod: TProc<IeiResponseCollection, Exception, String>;
+const ASanitized: Boolean);
+begin
+  InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
+    function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
+    var
+      LInvoiceID: string;
+      LResponseCollection: IeiResponseCollection;
+    begin
+      Result := TeiResponseFactory.NewResponseCollection;
+      for LInvoiceID in AInvoiceIDCollection do
+      begin
+        try
+          LResponseCollection := nil; // Azzera la response perchè se ci sono degli errori potrebbe rimanere quella precedente
+          LResponseCollection := ei.ReceivePurchaseInvoice(LInvoiceID, ASanitized);
+          if Assigned(AAfterEachMethod) then
+            AAfterEachMethod(LResponseCollection, LInvoiceID);
+        except
+          on E: Exception do
+          begin
+            LogE(E);
+            if Assigned(AOnEachErrorMethod) then
+              AOnEachErrorMethod(LResponseCollection, E, LInvoiceID)
+            else
+              raise;
+          end;
+        end;
+      end;
+    end);
+end;
+
+class function ei.ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
+const ASanitized: Boolean): IeiResponseCollection;
+begin
+  Result := InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
+    function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection
+    var
+      LInvoiceID: string;
+    begin
+      Result := TeiResponseFactory.NewResponseCollection;
+      for LInvoiceID in AInvoiceIDCollection do
+        Result.AddRange(ei.ReceivePurchaseInvoice(LInvoiceID, ASanitized));
     end);
 end;
 

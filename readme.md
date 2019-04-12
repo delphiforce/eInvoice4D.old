@@ -4,6 +4,24 @@
 
 Libreria per la fatturazione elettronica per Delphi 
 
+***Agg. 2019.04.12 - *Release: Sugar Ray Robinson***
+
+- aggiunta la gestione per il ciclo passivo
+
+  ```
+  function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime; AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx; 
+  function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx;
+  function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx;
+  ```
+
+- migliorate le funzioni di log
+
+- migliorate le funzioni Sanitizer
+
+- aggiunta la prima documentazione sui corrispettivi elettronici
+
+  
+
 **Agg. 2019.02.08 - *Release: Julius Verne***
 
 - aggiunte alcune utility come il 

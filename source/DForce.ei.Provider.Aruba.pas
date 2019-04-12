@@ -1,42 +1,42 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
+{ *************************************************************************** }
+{ }
+{ eInvoice4D - (Fatturazione Elettronica per Delphi) }
+{ }
+{ Copyright (C) 2018  Delphi Force }
+{ }
+{ info@delphiforce.it }
+{ https://github.com/delphiforce/eInvoice4D.git }
+{ }
+{ Delphi Force Team }
+{ Antonio Polito }
+{ Carlo Narcisi }
+{ Fabio Codebue }
+{ Marco Mottadelli }
+{ Maurizio del Magno }
+{ Omar Bossoni }
+{ Thomas Ranzetti }
+{ }
+{ *************************************************************************** }
+{ }
+{ This file is part of eInvoice4D }
+{ }
+{ Licensed under the GNU Lesser General Public License, Version 3; }
+{ you may not use this file except in compliance with the License. }
+{ }
+{ eInvoice4D is free software: you can redistribute it and/or modify }
+{ it under the terms of the GNU Lesser General Public License as published }
+{ by the Free Software Foundation, either version 3 of the License, or }
+{ (at your option) any later version. }
+{ }
+{ eInvoice4D is distributed in the hope that it will be useful, }
+{ but WITHOUT ANY WARRANTY; without even the implied warranty of }
+{ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the }
+{ GNU Lesser General Public License for more details. }
+{ }
+{ You should have received a copy of the GNU Lesser General Public License }
+{ along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
+{ }
+{ *************************************************************************** }
 unit DForce.ei.Provider.Aruba;
 
 interface
@@ -51,6 +51,8 @@ uses DForce.ei.Provider.Base,
 type
 
   TeiProviderAruba = class(TeiProviderBase)
+  const
+    ARUBA_PAGE_SIZE = '50';
   private
     FAccessToken: string;
     { TODO : Implementare sistema di refresh del token in base a lavore expires_in }
@@ -69,7 +71,7 @@ type
     function ReceiveInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
     function ReceivePurchaseInvoiceFileNameCollection(const AVatCodeReceiver: string; const AStartDate: TDateTime;
       AEndDate: TDateTime = 0): IeiInvoiceIDCollectionEx; override;
-    function ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx; override;
+    function ReceivePurchaseInvoice(const AInvoiceID: string): IeiResponseCollectionEx; override;
     function ReceivePurchaseInvoiceNotifications(const AInvoiceID: string): IeiResponseCollectionEx; override;
   end;
 
@@ -84,7 +86,11 @@ uses System.UITypes,
   DForce.ei.Utils,
   DForce.ei.Response.Factory,
   System.Math,
-  DateUtils, DForce.ei.Utils.P7mExtractor;
+  DateUtils,
+  DForce.ei.Utils.P7mExtractor,
+  DForce.ei.Utils.Sanitizer,
+  DForce.ei, System.Classes,
+  System.IOUtils;
 
 procedure TeiProviderAruba.Authenticate;
 var
@@ -156,6 +162,7 @@ var
   LJsonNotification: TJSONObject;
   I: Integer;
   LJValue: TJSONValue;
+  LResponseText: String;
 begin
   Result := True;
   JObjResponse := nil;
@@ -179,6 +186,7 @@ begin
     // selection parameters
     LRESTRequest.AddParameter('username', UserName);
     LRESTRequest.AddParameter('page', APage.ToString);
+    LRESTRequest.AddParameter('size', ARUBA_PAGE_SIZE);
     LRESTRequest.AddParameter('startDate', TeiUtils.DateTimeToUrlParam(AStartDate), TRESTRequestParameterKind.pkGETorPOST,
       [poDoNotEncode]);
     LRESTRequest.AddParameter('endDate', TeiUtils.DateTimeToUrlParam(AEndDate), TRESTRequestParameterKind.pkGETorPOST, [poDoNotEncode]);
@@ -194,8 +202,11 @@ begin
       raise eiGenericException.Create(Format('ReceivePurchaseInvoices error: %d - %s',
         [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
+    LResponseText := LRESTResponse.JSONText;
+    TeiSanitizer.SanitizeJSONInvoiceNumberEscapeChar(LResponseText);
+
     // response
-    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    JObjResponse := TJSONObject.ParseJSONValue(LResponseText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
       LJValue := JObjResponse.Values['content'];
@@ -293,16 +304,20 @@ begin
     LRESTRequest.Method := rmPOST;
     LRESTRequest.AddParameter('Authorization', Format('Bearer %s', [FAccessToken]), TRESTRequestParameterKind.pkHTTPHEADER,
       [poDoNotEncode]);
+
+{ TODO : [IVAN] 2019: INSERITA ELIMINAZIONE DEI CARATTERI DI ACAPO NEL JSON, ARUBA MI RIFIUTAVA LA FATTRUA }
+//    LJSONBody := LJSONBody.Replace(#10,'').Replace(#13,'');
+    TeiSanitizer.SanitizeJSON(LJSONBody);
     LRESTRequest.Body.Add(LJSONBody, TRESTContentType.ctAPPLICATION_JSON);
 
     LRESTRequest.Execute;
     if LRESTResponse.StatusCode <> 200 then
-      raise eiGenericException.Create(Format('Sending invoice error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
-
+      raise eiGenericException.Create(Format('Sending invoice error: %d - %s --> %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText,LRESTResponse.Content ]));
+      // Modifica proposta da Ivan Revelli per  visualizzare anche il Content della risposta Aruba che contiene una descrizione dell'errore.
+      // OLD CODE:  raise eiGenericException.Create(Format('Sending invoice error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
     Result := TeiResponseFactory.NewResponseCollection;
     JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
     LResponse := TeiResponseFactory.NewResponse;
-
     LResponse.MsgCode := JValueToString(JObjResponse.Values['errorCode']);
     LResponse.MsgText := JValueToString(JObjResponse.Values['errorDescription']);
     LResponse.FileName := JValueToString(JObjResponse.Values['uploadFileName']);
@@ -413,17 +428,21 @@ begin
   LCurrentPage := 1;
   repeat
     LastPage := InternalReceivePurchaseInvoiceFileNameCollection(AVatCodeReceiver, AStartDate, AEndDate, LCurrentPage, Result);
+    if not LastPage then
+      Sleep(CONST_DELAY);
     Inc(LCurrentPage);
   until LastPage;
 end;
 
-function TeiProviderAruba.ReceivePurchaseInvoiceAsXML(const AInvoiceID: string): IeiResponseEx;
+function TeiProviderAruba.ReceivePurchaseInvoice(const AInvoiceID: string): IeiResponseCollectionEx;
 var
   LRESTClient: TRESTClient;
   LRESTRequest: TRESTRequest;
   LRESTResponse: TRESTResponse;
+  LResponse: IeiResponseEx;
   JObjResponse: TJSONObject;
   LXml: string;
+  LResponseText: String;
 begin
   inherited;
   JObjResponse := nil;
@@ -450,27 +469,34 @@ begin
     if LRESTResponse.StatusCode <> 200 then
       raise eiGenericException.Create(Format('getByFilename error: %d - %s', [LRESTResponse.StatusCode, LRESTResponse.StatusText]));
 
-    Result := TeiResponseFactory.NewResponse;
-    JObjResponse := TJSONObject.ParseJSONValue(LRESTResponse.JSONText) as TJSONObject;
+    LResponseText := LRESTResponse.JSONText;
+    TeiSanitizer.SanitizeJSONInvoiceNumberEscapeChar(LResponseText);
+
+    Result := TeiResponseFactory.NewResponseCollection;
+    JObjResponse := TJSONObject.ParseJSONValue(LResponseText) as TJSONObject;
     if Assigned(JObjResponse) then
     begin
-      Result.ResponseType := TeiUtils.ResponseTypeToEnum(JObjResponse.GetValue<TJSONString>('docType').Value);
-      Result.FileName := JValueToString(JObjResponse.Values['filename']);
+      LResponse := TeiResponseFactory.NewResponse;
+      LResponse.ResponseType := rtReceivedFromProvider;
+      LResponse.FileName := JValueToString(JObjResponse.Values['filename']);
+      LResponse.ResponseDate := Date;
+      LResponse.NotificationDate := JValueToDateTimeDefault(JObjResponse.Values['lastUpdate'], nil);
       LXml := JValueToString(JObjResponse.Values['file']);
-      if pos('.p7m', LowerCase(Result.FileName)) > 0 then
+      if pos('.p7m', LowerCase(LResponse.FileName)) > 0 then
       begin
         // estrazione xml da file p7m
-        Result.MsgRaw := TExtractP7m.Extract(LXml);
+        LResponse.MsgRaw := TExtractP7m.Extract(LXml);
         // Result.MsgRaw := TeiUtils.DecodeFromBase64WithPurge(LXml);
         // Result.MsgRaw := PurgeP7mSignature(Result.MsgRaw);
       end
       else
       begin
         // estrazione xml senza p7m
-        Result.MsgRaw := LXml;
-        if not Result.MsgRaw.IsEmpty then
-          Result.MsgRaw := TNetEncoding.Base64.Decode(Result.MsgRaw);
+        LResponse.MsgRaw := LXml;
+        if not LResponse.MsgRaw.IsEmpty then
+          LResponse.MsgRaw := TNetEncoding.Base64.Decode(LResponse.MsgRaw);
       end;
+      Result.Add(LResponse);
     end;
 
   finally

@@ -80,6 +80,12 @@ contains
   DForce.ei.Logger.pfLogger in '..\..\source\DForce.ei.Logger.pfLogger.pas',
   DForce.ei.Utils.Sanitizer in '..\..\source\DForce.ei.Utils.Sanitizer.pas',
   DForce.ei.Encoding in '..\..\source\DForce.ei.Encoding.pas',
-  DForce.ei.Utils.P7mExtractor in '..\..\source\DForce.ei.Utils.P7mExtractor.pas';
+  DForce.ei.Utils.P7mExtractor in '..\..\source\DForce.ei.Utils.P7mExtractor.pas',
+  DForce.ei.InvoiceDataExtractor in '..\..\source\DForce.ei.InvoiceDataExtractor.pas',
+  DForce.ei.InvoiceDataExtractor.Interfaces in '..\..\source\DForce.ei.InvoiceDataExtractor.Interfaces.pas',
+  DForce.ei.InvoiceDataExtractor.Factory in '..\..\source\DForce.ei.InvoiceDataExtractor.Factory.pas',
+  DForce.ei.Invoice.Attachments in '..\..\source\DForce.ei.Invoice.Attachments.pas',
+  DForce.ei.Invoice.Attachments.Interfaces in '..\..\source\DForce.ei.Invoice.Attachments.Interfaces.pas',
+  DForce.ei.Invoice.Attachments.Factory in '..\..\source\DForce.ei.Invoice.Attachments.Factory.pas';
 
 end.

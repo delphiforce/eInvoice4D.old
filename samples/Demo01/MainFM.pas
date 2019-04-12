@@ -1,42 +1,3 @@
-{***************************************************************************}
-{                                                                           }
-{           eInvoice4D - (Fatturazione Elettronica per Delphi)              }
-{                                                                           }
-{           Copyright (C) 2018  Delphi Force                                }
-{                                                                           }
-{           info@delphiforce.it                                             }
-{           https://github.com/delphiforce/eInvoice4D.git                   }
-{                                                                  	        }
-{           Delphi Force Team                                      	        }
-{             Antonio Polito                                                }
-{             Carlo Narcisi                                                 }
-{             Fabio Codebue                                                 }
-{             Marco Mottadelli                                              }
-{             Maurizio del Magno                                            }
-{             Omar Bossoni                                                  }
-{             Thomas Ranzetti                                               }
-{                                                                           }
-{***************************************************************************}
-{                                                                           }
-{  This file is part of eInvoice4D                                          }
-{                                                                           }
-{  Licensed under the GNU Lesser General Public License, Version 3;         }
-{  you may not use this file except in compliance with the License.         }
-{                                                                           }
-{  eInvoice4D is free software: you can redistribute it and/or modify       }
-{  it under the terms of the GNU Lesser General Public License as published }
-{  by the Free Software Foundation, either version 3 of the License, or     }
-{  (at your option) any later version.                                      }
-{                                                                           }
-{  eInvoice4D is distributed in the hope that it will be useful,            }
-{  but WITHOUT ANY WARRANTY; without even the implied warranty of           }
-{  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            }
-{  GNU Lesser General Public License for more details.                      }
-{                                                                           }
-{  You should have received a copy of the GNU Lesser General Public License }
-{  along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>.      }
-{                                                                           }
-{***************************************************************************}
 unit MainFM;
 
 interface
@@ -79,10 +40,12 @@ type
     btnNotificaNS: TButton;
     Button4: TButton;
     btnNotificaNE: TButton;
-    Button3: TButton;
     eInvoiceNameToDownload: TEdit;
     btnScaricaFattura: TButton;
     Button1: TButton;
+    btnAddAttachment: TButton;
+    OpenDialog1: TOpenDialog;
+    SaveDialog1: TSaveDialog;
     procedure FormCreate(Sender: TObject);
     procedure btnNotificationsClick(Sender: TObject);
     procedure btnGeneraXMLDiProvaClick(Sender: TObject);
@@ -100,9 +63,9 @@ type
     procedure btnNotificaNSClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure btnNotificaNEClick(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
     procedure btnScaricaFatturaClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure btnAddAttachmentClick(Sender: TObject);
   private
   public
     { Public declarations }
@@ -150,8 +113,8 @@ begin
     for LResponse in ei.ReceiveInvoiceNotifications(eInvoiceName.Text) do
     begin
       Memo1.Lines.Add(Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode, LResponse.MsgText]));
-      Memo1.Lines.Add(Format('ResponseDate: %s; NotificationDate : %s', [FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.ResponseDate),
-        FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.NotificationDate)]));
+      Memo1.Lines.Add(Format('ResponseDate: %s; NotificationDate : %s', [FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.ResponseDate), FormatDateTime('dd/mm/yy hh:nn:ss',
+        LResponse.NotificationDate)]));
 
       // Memo1.Lines.Add(LResponse.StatusAsString);
 
@@ -164,23 +127,14 @@ end;
 
 procedure TMainForm.btnScaricaFatturaClick(Sender: TObject);
 var
-  LXML: IeiResponse;
   LInvoice: IeiInvoice;
+  LResponse: IeiResponseCollection;
 begin
   ei.Connect;
   try
     Memo1.Clear;
-    LXML := ei.ReceivePurchaseInvoiceAsXML(eInvoiceNameToDownload.Text);
-    Memo1.Lines.Add(LXML.MsgRaw);
-
-    // TEST conversione XML
-    // Memo1.Lines.Add('');
-    // Memo1.Lines.Add('-----------------------------------------------------------------------------');
-    // Memo1.Lines.Add('               CONVERTITA DA LINVOICE ');
-    // Memo1.Lines.Add('-----------------------------------------------------------------------------');
-    // Memo1.Lines.Add('');
-    // LInvoice := ei.NewInvoiceFromString(LResponse.MsgRaw);
-    // Memo1.Lines.Add(LInvoice.ToString);
+    LResponse := ei.ReceivePurchaseInvoice(eInvoiceNameToDownload.Text);
+    Memo1.Lines.Add(LResponse.Items[0].MsgRaw);
   finally
     ei.Disconnect;
   end;
@@ -209,8 +163,8 @@ begin
     for LResponse in ei.ReceivePurchaseInvoiceNotifications('IT02242550982_00B21.xml.p7m') do
     begin
       Memo1.Lines.Add(Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode, LResponse.MsgText]));
-      Memo1.Lines.Add(Format('ResponseDate: %s; NotificationDate : %s', [FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.ResponseDate),
-        FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.NotificationDate)]));
+      Memo1.Lines.Add(Format('ResponseDate: %s; NotificationDate : %s', [FormatDateTime('dd/mm/yy hh:nn:ss', LResponse.ResponseDate), FormatDateTime('dd/mm/yy hh:nn:ss',
+        LResponse.NotificationDate)]));
 
       // Memo1.Lines.Add(LResponse.StatusAsString);
 
@@ -237,19 +191,6 @@ begin
       Memo1.Lines.Add(LValidationResult.Code);
     end;
   end;
-end;
-
-procedure TMainForm.Button3Click(Sender: TObject);
-var
-  LXML: TStringList;
-  LStr: string;
-begin
-  LXML := TStringList.Create;
-  LXML.LoadFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001.xml'));
-  LStr := LXML.Text;
-  TeiUtils.PurgeXML(LStr, 'NotificaEsito');
-  LXML.Text := LStr;
-  LXML.SaveToFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_11111_NE_001_PURGED.xml'));
 end;
 
 procedure TMainForm.btnNotificaNEClick(Sender: TObject);
@@ -342,6 +283,34 @@ begin
   LInvoice := ei.NewInvoiceFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR02.xml'));
   Memo1.Lines.Text := LInvoice.ToString;
   LInvoice.SaveToFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR03.xml'));
+end;
+
+procedure TMainForm.btnAddAttachmentClick(Sender: TObject);
+var
+  LInvoice: IeiInvoice;
+  LFileName1, LFileName2: string;
+  i: Integer;
+  LPath: string;
+begin
+  if not OpenDialog1.Execute then
+    exit;
+  LFileName1 := OpenDialog1.FileName;
+  if OpenDialog1.Execute then
+    LFileName2 := OpenDialog1.FileName;
+
+  LInvoice := ei.NewInvoice;
+  LInvoice.FillWithSampleData;
+  LInvoice.Attachments.Add('PROVA1', StringReplace(ExtractFileExt(LFileName1), '.', '', [rfReplaceAll]), 'NONE', 'PROVA ALLEGATO 1').LoadFromFile(LFileName1);
+  if not LFileName2.IsEmpty then
+    LInvoice.Attachments.Add('PROVA2').LoadFromFile(LFileName2);
+  Memo1.Lines.Clear;
+  Memo1.Lines.Text := LInvoice.ToString;
+
+  // Salvataggio di tutti gli allegati
+  LPath := 't:\';
+  // for i := 0 to LInvoice.Attachments.Count - 1 do
+  // LInvoice.Attachments.Items[i].SaveToFile(LPath);
+  LInvoice.Attachments['PROVA1'].SaveToFile(LPath);
 end;
 
 procedure TMainForm.btnLoadFromFileClick(Sender: TObject);
@@ -448,8 +417,7 @@ begin
   ei.Connect;
   try
     for LResponse in ei.SendInvoice(LInvoice) do
-      Memo1.Lines.Add(#13#10 + Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode,
-        LResponse.MsgText]));
+      Memo1.Lines.Add(#13#10 + Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode, LResponse.MsgText]));
   finally
     ei.Disconnect;
   end;
@@ -463,8 +431,7 @@ begin
   LInvoice := ei.NewInvoice;
   LInvoice.FillWithSampleData;
   for LResponse in ei.SendInvoice(LInvoice) do
-    Memo1.Lines.Add(#13#10 + Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode,
-      LResponse.MsgText]));
+    Memo1.Lines.Add(#13#10 + Format('File name: %s; Msg code: %s; Msg text: %s', [LResponse.FileName, LResponse.MsgCode, LResponse.MsgText]));
 end;
 
 procedure TMainForm.btnInviaAProviderSempliceClick(Sender: TObject);

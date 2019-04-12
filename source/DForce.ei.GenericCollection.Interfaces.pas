@@ -52,6 +52,7 @@ type
     function Add(const AItem: T): Integer;
     function GetEnumerator: TEnumerator<T>;
     procedure AddRange(const Collection: IeiCollection<T>);
+    procedure Delete(const AIndex: Integer);
     // Count
     function GetCount: Integer;
     property Count: Integer read GetCount;

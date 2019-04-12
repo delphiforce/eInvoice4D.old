@@ -92,6 +92,9 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 function TeiResponse.GetFileName: string;
 begin
   Result := FFileName;
@@ -134,7 +137,7 @@ end;
 
 procedure TeiResponse.SetFileName(const Value: string);
 begin
-  FFileName := Value;
+  FFileName := Trim(Value);
 end;
 
 procedure TeiResponse.SetInvoice(const AInvoice: IeiInvoiceEx);

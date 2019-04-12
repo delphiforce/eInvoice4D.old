@@ -37,39 +37,39 @@
 { along with eInvoice4D.  If not, see <http://www.gnu.org/licenses/>. }
 { }
 { *************************************************************************** }
-unit DForce.ei.Invoice.Interfaces;
+unit DForce.ei.Invoice.Attachments.Factory;
 
 interface
 
-uses DForce.ei.Invoice.Base, System.Classes,
-  System.Generics.Collections, DForce.ei.GenericCollection.Interfaces,
-  DForce.ei.Validation.Interfaces, DForce.ei.Invoice.Attachments.Interfaces;
+uses
+  DForce.ei.Invoice.Interfaces, DForce.ei.Invoice.Attachments.Interfaces,
+  DForce.ei.Invoice.Base;
 
 type
 
-  IeiInvoiceEx = interface(IXMLFatturaElettronicaType)
-    ['{CF5D3661-D454-40F7-A358-F81E8FD4CD55}']
-    function ToString: String;
-    function ToStringBase64: String;
-    function Validate: boolean;
-    function ValidationResultCollection: IeiValidationResultCollectionInt;
-    procedure SaveToFile(const AFileName: String);
-    procedure SaveToStream(const AStream: TStream);
-    procedure SaveToStreamBase64(const AStream: TStream);
-    procedure FillWithSampleData;
-    function IsPA: boolean;
-    // Reference
-    procedure SetReference(const AValue: string);
-    function GetReference: string;
-    property Reference: string read GetReference write SetReference;
-    // Attachment
-    function Attachments: IeiAttachments;
+  TeiAttachmentsFactory = class
+  public
+    class function NewAttachments(const AInvoice: IeiInvoiceEx): IeiAttachments;
+    class function NewAttachment(const AXMLAttachment: IXMLAllegatiType; const ANomeAttachment: string = ''; const AFormatoAttachment: string = '';
+      const AAlgoritmoCompressione: string = ''; const ADescrizioneAttachment: string = ''): IeiAttachment;
   end;
 
-  IeiInvoiceCollectionEx = IeiCollection<IeiInvoiceEx>;
-
-  IeiInvoiceIDCollectionEx = IeiCollection<string>;
-
 implementation
+
+uses
+  DForce.ei.Invoice.Attachments;
+
+{ TeiAttachmentsFactory }
+
+class function TeiAttachmentsFactory.NewAttachments(const AInvoice: IeiInvoiceEx): IeiAttachments;
+begin
+  result := TeiAttachments.Create(AInvoice);
+end;
+
+class function TeiAttachmentsFactory.NewAttachment(const AXMLAttachment: IXMLAllegatiType; const ANomeAttachment: string = ''; const AFormatoAttachment: string = '';
+  const AAlgoritmoCompressione: string = ''; const ADescrizioneAttachment: string = ''): IeiAttachment;
+begin
+  result := TeiAttachment.Create(AXMLAttachment, ANomeAttachment, AFormatoAttachment, AAlgoritmoCompressione, ADescrizioneAttachment);
+end;
 
 end.
