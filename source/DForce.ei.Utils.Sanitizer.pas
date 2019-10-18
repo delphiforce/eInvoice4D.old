@@ -19,6 +19,7 @@ type
     class procedure _InternalSanitizeStylesheetTag(var AXMLText: string);
     class procedure _InternalSanitizeTagComments(var AXMLText: string);
     class procedure _InternalSanitizeCDATA(var AXMLText: string);
+    class procedure _InternalSanitizeHtmlTags(var AXMLText: string);
     class procedure _InternalSanitizeSignature(var AXMLText: string);
     class procedure _InternalSanitizeCharInsideTags(var AXMLText: string; const AChar: Char);
     class procedure _InternalSanitizeCharAfterTags(var AXMLText: string; const AChar: Char);
@@ -36,7 +37,7 @@ type
 
 implementation
 
-uses System.StrUtils, System.SysUtils, DForce.ei.Exception;
+uses System.StrUtils, System.SysUtils, DForce.ei.Exception, System.Classes;
 
 { TeiSanitizer }
 
@@ -149,7 +150,8 @@ const
   CDATA_BEGIN = '<![CDATA[';
   CDATA_END = ']]>';
 var
-  LTagBegin, LTagEnd: integer;
+  LTagBegin, LTagEnd, LValueLength: integer;
+  LValue: String;
 begin
   // Loop for all stylesheet tags
   LTagBegin := Pos(CDATA_BEGIN, AXMLText);
@@ -157,14 +159,46 @@ begin
   begin
     // Remove CDATA begin part
     Delete(AXMLText, LTagBegin, Length(CDATA_BEGIN));
-    // Search the EndPart of CDATA and delete it
+    // Search the EndPart of CDATA
     LTagEnd := PosEx(CDATA_END, AXMLText, LTagBegin);
     if LTagEnd > 0 then
-      Delete(AXMLText, LTagEnd, Length(CDATA_END));
+    begin
+      // Sanitize value inside the CDATA
+      LTagEnd := PosEx(CDATA_END, AXMLText, LTagBegin);
+      LValueLength := LTagEnd - LTagBegin;
+      LValue := Copy(AXMLText, LTagBegin, LValueLength);
+      LValue := SanitizeXMLValueSpecialChars(LValue);
+      AXMLText := StuffString(AXMLText, LTagBegin, LValueLength, LValue);
+      // Search the EndPart of CDATA again
+      LTagEnd := PosEx(CDATA_END, AXMLText, LTagBegin);
+      if LTagEnd > 0 then
+        Delete(AXMLText, LTagEnd, Length(CDATA_END));
+    end;
     // Next
     LTagBegin := Pos(CDATA_BEGIN, AXMLText);
   end;
 end;
+//class procedure TeiSanitizer._InternalSanitizeCDATA(var AXMLText: string);
+//const
+//  CDATA_BEGIN = '<![CDATA[';
+//  CDATA_END = ']]>';
+//var
+//  LTagBegin, LTagEnd: integer;
+//begin
+//  // Loop for all stylesheet tags
+//  LTagBegin := Pos(CDATA_BEGIN, AXMLText);
+//  while LTagBegin > 0 do
+//  begin
+//    // Remove CDATA begin part
+//    Delete(AXMLText, LTagBegin, Length(CDATA_BEGIN));
+//    // Search the EndPart of CDATA and delete it
+//    LTagEnd := PosEx(CDATA_END, AXMLText, LTagBegin);
+//    if LTagEnd > 0 then
+//      Delete(AXMLText, LTagEnd, Length(CDATA_END));
+//    // Next
+//    LTagBegin := Pos(CDATA_BEGIN, AXMLText);
+//  end;
+//end;
 
 class procedure TeiSanitizer._InternalSanitizeCharAfterTags(var AXMLText: string; const AChar: Char);
 var
@@ -183,21 +217,48 @@ end;
 
 class procedure TeiSanitizer._InternalSanitizeCharInsideTags(var AXMLText: string; const AChar: Char);
 var
-  LTagBegin, LTagEnd, LCharPos: integer;
+  LTagBegin, LNextTagBegin, LTagEnd, LTagLength: integer;
+  LTag: String;
 begin
   // Loop for all tags
   LTagBegin := Pos('<', AXMLText);
   while LTagBegin > 0 do
   begin
     LTagEnd := PosEx('>', AXMLText, LTagBegin);
-    LCharPos := PosEx(AChar, AXMLText, LTagBegin);
-    while (LTagEnd > 0) and (LCharPos > 0) and (LCharPos < LTagEnd) do
+    // NB: Individua il prossimo TagBegin e se questo è all'interno dell'intervallo
+    //      tra LTagBegin e LTagEnd (è dentro il presunto "tag" che stiamo elaborando)
+    //      in realtà significa che quello che stiamo considerando LTagBegin è un carattere
+    //      "<" che non è l'inizio di un tag bensì è all'nterno di un "valore" quindi lo salta
+    //      e passa al prossimo.
+    LNextTagBegin := PosEx('<', AXMLText, LTagBegin+1);
+    if (LNextTagBegin > LTagEnd) or (LNextTagBegin = 0) then
     begin
-      Delete(AXMLText, LCharPos, 1);
-      Dec(LTagEnd);
+      LTagLength := LTagEnd - LTagBegin + 1; // < e > compresi
+      LTag := Copy(AXMLText, LTagBegin, LTagLength);
+      LTag := StringReplace(LTag, AChar, ' ', [rfReplaceAll, rfIgnoreCase]);
+      AXMLText := StuffString(AXMLText, LTagBegin, LTagLength, LTag);
     end;
     // Next tag
     LTagBegin := PosEx('<', AXMLText, LTagBegin + 1);
+  end;
+end;
+
+class procedure TeiSanitizer._InternalSanitizeHtmlTags(var AXMLText: string);
+const
+  HTML_TAGS = '<br>;<p>;</p>;<span>;</span>;<details>;</details>;<h1>;</h1>;<h2>;</h2>;<h3>;</h3>;<h4>;</h4>;<h5>;</h5>;<h6>;</h6>;'+
+    '<b>;</b>;<em>;</em>;<i>;</i>;<pre>;</pre>;<small>;</small>;<strong>;</strong>;<sub>;</sub>;<sup>;</sup>';
+var
+  LTagList: TStringList;
+  LTag: String;
+begin
+  LTagList := TStringList.Create;
+  try
+    LTagList.Delimiter := ';';
+    LTagList.DelimitedText := HTML_TAGS;
+    for LTag in LTagList do
+      AXMLText := StringReplace(AXMLText, LTag, '', [rfReplaceAll, rfIgnoreCase]);
+  finally
+    LTagList.Free;
   end;
 end;
 
@@ -327,14 +388,18 @@ end;
 
 class function TeiSanitizer.SanitizeXMLStructure(AXMLText: string): string;
 begin
-  _InternalSanitizeCDATA(AXMLText);
-  _InternalSanitizeTagComments(AXMLText);
-  _InternalSanitizeStylesheetTag(AXMLText);
-  _InternalSanitizeNameSpaces(AXMLText);
-  _InternalSanitizeAttributes(AXMLText);
   _InternalSanitizeCharInsideTags(AXMLText, #13);
   _InternalSanitizeCharInsideTags(AXMLText, #10);
   _InternalSanitizeCharInsideTags(AXMLText, #9);
+  _InternalSanitizeCDATA(AXMLText);
+  _InternalSanitizeTagComments(AXMLText);
+  _InternalSanitizeHtmlTags(AXMLText);
+  _InternalSanitizeStylesheetTag(AXMLText);
+  _InternalSanitizeNameSpaces(AXMLText);
+  _InternalSanitizeAttributes(AXMLText);
+//  _InternalSanitizeCharInsideTags(AXMLText, #13);
+//  _InternalSanitizeCharInsideTags(AXMLText, #10);
+//  _InternalSanitizeCharInsideTags(AXMLText, #9);
   _InternalSanitizeCharAfterTags(AXMLText, ' ');
   _InternalSanitizeSignature(AXMLText);
   Result := AXMLText;
