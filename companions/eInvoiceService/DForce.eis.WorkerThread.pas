@@ -127,11 +127,11 @@ begin
   LInvoiceIDCollection := FApplicationAdapter.LoadSalesInvoicesForNotificationRequest;
   // Receive notifications
   ei.ReceiveInvoiceCollectionNotifications(LInvoiceIDCollection,
-    procedure(AResponseCollection: IeiResponseCollection)
+    procedure(AResponseCollection: IeiResponseCollection; AInvoiceID: String)
     begin
       FApplicationAdapter.PersistSalesNotificationResponse(AResponseCollection);
     end,
-    procedure(AResponseCollection: IeiResponseCollection; AException: Exception)
+    procedure(AResponseCollection: IeiResponseCollection; AException: Exception; AInvoiceID: String)
     begin
       OnErrorMethodCommon(AResponseCollection, AException);
       FApplicationAdapter.PersistSalesNotificationResponse(AResponseCollection);

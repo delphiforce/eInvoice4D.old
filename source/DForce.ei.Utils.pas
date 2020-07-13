@@ -155,7 +155,7 @@ begin
     raise eiGenericException.Create('EndRootTagPos not found');
   // Detect the first space char after the root name
   LFirstSpacePos := Pos(' ', XMLText);
-  if (LFirstSpacePos <> 0) and (LFirstSpacePos < LEndRootTagPos) then
+  if (LFirstSpacePos <> 0) and (LFirstSpacePos < LEndRootTagPos) and (LFirstSpacePos > LStartRootTagPos) then
     LEndRootTagPos := LFirstSpacePos;
   // Detect the ":" between the NameSpace and the root tag (if exists)
   LDoublePointPos := Pos(':', XMLText);
