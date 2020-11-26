@@ -641,8 +641,8 @@ begin
     end);
 end;
 
-class function ei.ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection;
-const ASanitized: Boolean): IeiResponseCollection;
+class function ei.ReceivePurchaseInvoiceCollection(const AInvoiceIDCollection: IeiInvoiceIDCollection; const ASanitized: Boolean)
+  : IeiResponseCollection;
 begin
   Result := InternalExecute<IeiInvoiceIDCollection, IeiResponseCollection>(AInvoiceIDCollection,
     function(AInvoiceIDCollection: IeiInvoiceIDCollection): IeiResponseCollection

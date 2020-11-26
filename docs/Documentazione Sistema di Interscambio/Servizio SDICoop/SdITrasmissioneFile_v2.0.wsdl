@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+	xmlns:soapbind="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://ivaservizi.agenziaentrate.gov.it/docs/wsdl/trasmissionefile/v2.0"
+	targetNamespace="http://ivaservizi.agenziaentrate.gov.it/docs/wsdl/trasmissionefile/v2.0">
+
+	<!-- TIPI -->
+	<wsdl:types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsd:import namespace="http://ivaservizi.agenziaentrate.gov.it/docs/wsdl/trasmissionefile/v2.0" schemaLocation="TrasmissioneFileTypes_v2.0.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+
+	<!-- MESSAGGI -->
+	<wsdl:message name="richiestaSdITrasmissioneFile_Msg">
+		<wsdl:part name="parametersIn" element="tns:file" />
+	</wsdl:message>
+
+	<wsdl:message name="rispostaSdITrasmissioneFile_Msg">
+		<wsdl:part name="parametersOut" element="tns:rispostaFile" />
+	</wsdl:message>
+	
+	<wsdl:message name="richiestaSdIEsitoFile_Msg">
+		<wsdl:part name="parametersIn" element="tns:esito" />
+	</wsdl:message>
+
+	<wsdl:message name="rispostaSdIEsitoFile_Msg">
+		<wsdl:part name="parametersOut" element="tns:rispostaEsito" />
+	</wsdl:message>
+	
+	<!-- PORT TYPE -->
+	<wsdl:portType name="SdITrasmissioneFile">
+	
+		<wsdl:operation name="Trasmetti">
+			<wsdl:input message="tns:richiestaSdITrasmissioneFile_Msg" />
+			<wsdl:output message="tns:rispostaSdITrasmissioneFile_Msg" />
+		</wsdl:operation>
+	
+		<wsdl:operation name="Esito">
+			<wsdl:input message="tns:richiestaSdIEsitoFile_Msg" />
+			<wsdl:output message="tns:rispostaSdIEsitoFile_Msg" />
+		</wsdl:operation>
+	
+	</wsdl:portType>
+
+	<!-- PORT BINDING -->
+	<wsdl:binding name="SdITrasmissioneFile_binding" type="tns:SdITrasmissioneFile">
+		<soapbind:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+		<wsdl:operation name="Trasmetti">
+			<soapbind:operation soapAction="http://ivaservizi.agenziaentrate.gov.it/SdITrasmissioneFile/Trasmetti" />
+			<wsdl:input>
+				<soapbind:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soapbind:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+		<wsdl:operation name="Esito">
+			<soapbind:operation soapAction="http://ivaservizi.agenziaentrate.gov.it/SdITrasmissioneFile/Esito" />
+			<wsdl:input>
+				<soapbind:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soapbind:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		
+	</wsdl:binding>
+	
+	<wsdl:service name="SdITrasmissioneFile_service">
+		<wsdl:port name="SdITrasmissioneFile_port" binding="tns:SdITrasmissioneFile_binding">
+			<soapbind:address location="https://servizi.fatturapa.it/dati-fattura" />
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

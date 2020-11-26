@@ -122,6 +122,7 @@ begin
   try
     Lxml.Text := FormatXMLData(LxmlText);
 
+{*
     // AGGIUNTO V 1.2 - INIZIO
     Lxml[0] := '<?xml version="1.0" encoding="UTF-8"?>';
     Lxml.Insert(1, '<p:FatturaElettronica versione="' + Self.FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione + '"');
@@ -138,6 +139,18 @@ begin
 
     // Aggiunge "p:" alla fine nel Tag di chiusura
     Lxml[Lxml.Count - 1] := '</p:FatturaElettronica>';
+*}
+
+
+    // ----- VER. 1.6.1
+    // DOCTYPE tag
+    Lxml[0] := '<?xml version="1.0" encoding="UTF-8"?>';
+    // ROOT tag opening
+    Lxml.Insert(1, Format('<p:FatturaElettronica versione="%s" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">', [Self.FatturaElettronicaHeader.DatiTrasmissione.FormatoTrasmissione]));
+    // ROOT tag closing
+    Lxml[Lxml.Count - 1] := '</p:FatturaElettronica>';
+    // ----- VER. 1.6.1
+
 
     // Salva tutto (UTF8)
     LEncoding := TeiUTFEncodingWithoutBOM.Create;

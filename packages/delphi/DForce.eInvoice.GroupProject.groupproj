@@ -15,6 +15,9 @@
         <Projects Include="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="C:\Users\Mauri\Documents\Embarcadero\Studio\Projects\NewInvoiceBadDemo.dproj">
+            <Dependencies>eInvoice4D.dproj</Dependencies>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -59,14 +62,23 @@
     <Target Name="eInvoiceServiceParams:Make">
         <MSBuild Projects="..\..\companions\eInvoiceService\eInvoiceServiceParams.dproj" Targets="Make"/>
     </Target>
+    <Target Name="NewInvoiceBadDemo" DependsOnTargets="eInvoice4D">
+        <MSBuild Projects="C:\Users\Mauri\Documents\Embarcadero\Studio\Projects\NewInvoiceBadDemo.dproj"/>
+    </Target>
+    <Target Name="NewInvoiceBadDemo:Clean" DependsOnTargets="eInvoice4D:Clean">
+        <MSBuild Projects="C:\Users\Mauri\Documents\Embarcadero\Studio\Projects\NewInvoiceBadDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="NewInvoiceBadDemo:Make" DependsOnTargets="eInvoice4D:Make">
+        <MSBuild Projects="C:\Users\Mauri\Documents\Embarcadero\Studio\Projects\NewInvoiceBadDemo.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="eInvoice4D;Demo01;eInvoiceService;eInvoiceServiceParams"/>
+        <CallTarget Targets="eInvoice4D;Demo01;eInvoiceService;eInvoiceServiceParams;NewInvoiceBadDemo"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="eInvoice4D:Clean;Demo01:Clean;eInvoiceService:Clean;eInvoiceServiceParams:Clean"/>
+        <CallTarget Targets="eInvoice4D:Clean;Demo01:Clean;eInvoiceService:Clean;eInvoiceServiceParams:Clean;NewInvoiceBadDemo:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="eInvoice4D:Make;Demo01:Make;eInvoiceService:Make;eInvoiceServiceParams:Make"/>
+        <CallTarget Targets="eInvoice4D:Make;Demo01:Make;eInvoiceService:Make;eInvoiceServiceParams:Make;NewInvoiceBadDemo:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

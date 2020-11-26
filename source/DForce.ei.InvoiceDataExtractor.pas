@@ -74,7 +74,7 @@ begin
   if LNumDocFE = '' then
     raise Exception.Create('Numero documento non valido');
   // Se comincia con una cifra (a sx) allora si suppone che l'eventuale registro sia a dx altrimenti a sx
-  if IsDigit(LNumDocFE[1]) then
+  if LNumDocFE[1].IsDigit then
   begin
     LStartIndex := 1;
     LStopIndex := Length(LNumDocFE) + 1;
@@ -92,7 +92,7 @@ begin
   while I <> LStopIndex do
   begin
     LChar := LNumDocFE[I];
-    LEstraendoNumDoc := LEstraendoNumDoc and IsDigit(LChar);
+    LEstraendoNumDoc := LEstraendoNumDoc and LChar.IsDigit;
     if LEstraendoNumDoc then
       LNumStr := LNumStr + LChar
     else

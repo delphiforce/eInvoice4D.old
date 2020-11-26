@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12"
+xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01879020517</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>2000000026</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>KRRH6B9</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02098730985</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>RNZTMS74R28G149Y</CodiceFiscale>
+        <Anagrafica>
+          <Nome>THOMAS</Nome>
+          <Cognome>RANZETTI</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA CASELLE 4/D</Indirizzo>
+        <CAP>25027</CAP>
+        <Comune>QUINZANO D'OGLIO</Comune>
+        <Provincia>BS</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00661030981</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>01874620170</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>L.B. DI DADA GIUSEPPE &amp; C. S.N.C.</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>LOCALITA' FORNACI</Indirizzo>
+        <CAP>25024</CAP>
+        <Comune>LENO</Comune>
+        <Provincia>BS</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD06</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2020-01-20</Data>
+        <Numero>RV1-11</Numero>
+        <DatiRitenuta>
+          <TipoRitenuta>RT01</TipoRitenuta>
+          <ImportoRitenuta>319.28</ImportoRitenuta>
+          <AliquotaRitenuta>20.00</AliquotaRitenuta>
+          <CausalePagamento>A</CausalePagamento>
+        </DatiRitenuta>
+        <DatiRitenuta>
+          <TipoRitenuta>RT01</TipoRitenuta>
+          <ImportoRitenuta>319.28</ImportoRitenuta>
+          <AliquotaRitenuta>20.00</AliquotaRitenuta>
+          <CausalePagamento>B</CausalePagamento>
+        </DatiRitenuta>
+        <DatiCassaPrevidenziale>
+          <TipoCassa>TC22</TipoCassa>
+          <AlCassa>4.00</AlCassa>
+          <ImportoContributoCassa>61.40</ImportoContributoCassa>
+          <ImponibileCassa>1535.00</ImponibileCassa>
+          <AliquotaIVA>22.00</AliquotaIVA>
+          <Ritenuta>SI</Ritenuta>
+        </DatiCassaPrevidenziale>
+        <ImportoTotaleDocumento>1947.61</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>GESTIONE CONTABILE - EUROGEAZI CONTRATTO ASSISTENZA ONLINE VALIDO FINO AL 31/12/2020</Descrizione>
+        <PrezzoUnitario>1405.00</PrezzoUnitario>
+        <PrezzoTotale>1405.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>EUROGEAZI - CANONE ANNUO FATTURAZIONE ELETTRONICA ATTIVA</Descrizione>
+        <PrezzoUnitario>80.00</PrezzoUnitario>
+        <PrezzoTotale>80.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>EUROGEAZI - CANONE ANNUO FATTURAZIONE ELETTRONICA PASSIVA</Descrizione>
+        <PrezzoUnitario>50.00</PrezzoUnitario>
+        <PrezzoTotale>50.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>ADEGUAMENTO ISTAT 0% (NOV 2019 - 2018)</Descrizione>
+        <Quantita>0.00</Quantita>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Ritenuta>SI</Ritenuta>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>1596.40</ImponibileImporto>
+        <Imposta>351.21</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2020-01-20</DataScadenzaPagamento>
+        <ImportoPagamento>1628.33</ImportoPagamento>
+        <IBAN>IT41P0305801604100571726448</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

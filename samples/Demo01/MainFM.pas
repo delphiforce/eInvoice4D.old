@@ -317,8 +317,11 @@ procedure TMainForm.btnLoadFromFileClick(Sender: TObject);
 var
   LInvoice: IeiInvoice;
 begin
+  if not OpenDialog1.Execute then exit;
+
   Memo1.Lines.Clear;
-  LInvoice := ei.NewInvoiceFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR01.xml'));
+//  LInvoice := ei.NewInvoiceFromFile(TPath.Combine(TPath.GetDocumentsPath, 'IT01234567890_FPR01.xml'));
+  LInvoice := ei.NewInvoiceFromFile(OpenDialog1.FileName);
   Memo1.Lines.Text := LInvoice.ToString;
 end;
 

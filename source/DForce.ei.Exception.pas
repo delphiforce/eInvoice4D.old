@@ -47,6 +47,7 @@ type
   eiGenericException = class(Exception);
   eiDecimalsException = class(eiGenericException);
   eiRESTAuthException = class(eiGenericException);
+  eiPropertyException = class(eiGenericException);
 
 implementation
 

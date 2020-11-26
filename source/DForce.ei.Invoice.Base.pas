@@ -59,7 +59,11 @@ interface
 
 {$RTTI EXPLICIT METHODS([vcProtected, vcPublic, vcPublished]) PROPERTIES([vcProtected, vcPublic, vcPublished])}
 
-uses xmldom, XMLDoc, XMLIntf, Classes; // , FE.Interfaces;
+
+uses xmldom,
+  XMLDoc,
+  XMLIntf,
+  Classes; // , FE.Interfaces;
 
 type
 
@@ -110,6 +114,8 @@ type
   IXMLDatiGeneraliDocumentoType = interface;
 
   IXMLDatiRitenutaType = interface;
+
+  IXMLDatiRitenutaTypeList = interface;
 
   IXMLDatiBolloType = interface;
 
@@ -636,7 +642,7 @@ type
     function Get_Divisa: UnicodeString;
     function Get_Data: UnicodeString;
     function Get_Numero: UnicodeString;
-    function Get_DatiRitenuta: IXMLDatiRitenutaType;
+    function Get_DatiRitenuta: IXMLDatiRitenutaTypeList;
     function Get_DatiBollo: IXMLDatiBolloType;
     function Get_DatiCassaPrevidenziale: IXMLDatiCassaPrevidenzialeTypeList;
     function Get_ScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList;
@@ -656,7 +662,7 @@ type
     property Divisa: UnicodeString read Get_Divisa write Set_Divisa;
     property Data: UnicodeString read Get_Data write Set_Data;
     property Numero: UnicodeString read Get_Numero write Set_Numero;
-    property DatiRitenuta: IXMLDatiRitenutaType read Get_DatiRitenuta;
+    property DatiRitenuta: IXMLDatiRitenutaTypeList read Get_DatiRitenuta;
     property DatiBollo: IXMLDatiBolloType read Get_DatiBollo;
     property DatiCassaPrevidenziale: IXMLDatiCassaPrevidenzialeTypeList read Get_DatiCassaPrevidenziale;
     property ScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList read Get_ScontoMaggiorazione;
@@ -684,6 +690,17 @@ type
     property ImportoRitenuta: UnicodeString read Get_ImportoRitenuta write Set_ImportoRitenuta;
     property AliquotaRitenuta: UnicodeString read Get_AliquotaRitenuta write Set_AliquotaRitenuta;
     property CausalePagamento: UnicodeString read Get_CausalePagamento write Set_CausalePagamento;
+  end;
+
+  { IXMLDatiRitenutaTypeList }
+
+  IXMLDatiRitenutaTypeList = interface(IXMLNodeCollection)
+    ['{7F388E71-8078-42B3-9BEF-B2E21085DA4E}']
+    { Methods & Properties }
+    function Add: IXMLDatiRitenutaType;
+    function Insert(const Index: Integer): IXMLDatiRitenutaType;
+    function Get_Item(Index: Integer): IXMLDatiRitenutaType;
+    property Items[Index: Integer]: IXMLDatiRitenutaType read Get_Item; default;
   end;
 
   { IXMLDatiBolloType }
@@ -1876,7 +1893,9 @@ type
 
   //
   [ioEntity]
-  TXMLFatturaElettronicaType = class(TXMLNode, IXMLFatturaElettronicaType, IInterface)
+  TXMLFatturaElettronicaType = class(TXMLNode,
+                                     IXMLFatturaElettronicaType,
+                                     IInterface)
   private
     FFatturaElettronicaBody: IXMLFatturaElettronicaBodyTypeList;
   protected
@@ -1899,7 +1918,8 @@ type
   { TXMLFatturaElettronicaHeaderType }
 
   [ioEntity]
-  TXMLFatturaElettronicaHeaderType = class(TXMLNode, IXMLFatturaElettronicaHeaderType)
+  TXMLFatturaElettronicaHeaderType = class(TXMLNode,
+                                           IXMLFatturaElettronicaHeaderType)
   protected
     { IXMLFatturaElettronicaHeaderType }
     function Get_DatiTrasmissione: IXMLDatiTrasmissioneType;
@@ -1924,7 +1944,8 @@ type
   { TXMLDatiTrasmissioneType }
 
   [ioEntity]
-  TXMLDatiTrasmissioneType = class(TXMLNode, IXMLDatiTrasmissioneType)
+  TXMLDatiTrasmissioneType = class(TXMLNode,
+                                   IXMLDatiTrasmissioneType)
   protected
     { IXMLDatiTrasmissioneType }
     function Get_IdTrasmittente: IXMLIdFiscaleType;
@@ -1944,7 +1965,8 @@ type
   { TXMLIdFiscaleType }
 
   [ioEntity]
-  TXMLIdFiscaleType = class(TXMLNode, IXMLIdFiscaleType)
+  TXMLIdFiscaleType = class(TXMLNode,
+                            IXMLIdFiscaleType)
   protected
     { IXMLIdFiscaleType }
     function Get_IdPaese: UnicodeString;
@@ -1959,7 +1981,8 @@ type
   { TXMLContattiTrasmittenteType }
 
   [ioEntity]
-  TXMLContattiTrasmittenteType = class(TXMLNode, IXMLContattiTrasmittenteType)
+  TXMLContattiTrasmittenteType = class(TXMLNode,
+                                       IXMLContattiTrasmittenteType)
   protected
     { IXMLContattiTrasmittenteType }
     function Get_Telefono: UnicodeString;
@@ -1971,7 +1994,8 @@ type
   { TXMLCedentePrestatoreType }
 
   [ioEntity]
-  TXMLCedentePrestatoreType = class(TXMLNode, IXMLCedentePrestatoreType)
+  TXMLCedentePrestatoreType = class(TXMLNode,
+                                    IXMLCedentePrestatoreType)
   protected
     { IXMLCedentePrestatoreType }
     function Get_DatiAnagrafici: IXMLDatiAnagraficiCedenteType;
@@ -1995,7 +2019,8 @@ type
   { TXMLDatiAnagraficiCedenteType }
 
   [ioEntity]
-  TXMLDatiAnagraficiCedenteType = class(TXMLNode, IXMLDatiAnagraficiCedenteType)
+  TXMLDatiAnagraficiCedenteType = class(TXMLNode,
+                                        IXMLDatiAnagraficiCedenteType)
   protected
     { IXMLDatiAnagraficiCedenteType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2029,7 +2054,8 @@ type
   { TXMLAnagraficaType }
 
   [ioEntity]
-  TXMLAnagraficaType = class(TXMLNode, IXMLAnagraficaType)
+  TXMLAnagraficaType = class(TXMLNode,
+                             IXMLAnagraficaType)
   protected
     { IXMLAnagraficaType }
     function Get_Denominazione: UnicodeString;
@@ -2053,7 +2079,8 @@ type
   { TXMLIndirizzoType }
 
   [ioEntity]
-  TXMLIndirizzoType = class(TXMLNode, IXMLIndirizzoType)
+  TXMLIndirizzoType = class(TXMLNode,
+                            IXMLIndirizzoType)
   protected
     { IXMLIndirizzoType }
     function Get_Indirizzo: UnicodeString;
@@ -2073,7 +2100,8 @@ type
   { TXMLIscrizioneREAType }
 
   [ioEntity]
-  TXMLIscrizioneREAType = class(TXMLNode, IXMLIscrizioneREAType)
+  TXMLIscrizioneREAType = class(TXMLNode,
+                                IXMLIscrizioneREAType)
   protected
     { IXMLIscrizioneREAType }
     function Get_Ufficio: UnicodeString;
@@ -2091,7 +2119,8 @@ type
   { TXMLContattiType }
 
   [ioEntity]
-  TXMLContattiType = class(TXMLNode, IXMLContattiType)
+  TXMLContattiType = class(TXMLNode,
+                           IXMLContattiType)
   protected
     { IXMLContattiType }
     function Get_Telefono: UnicodeString;
@@ -2105,7 +2134,8 @@ type
   { TXMLRappresentanteFiscaleType }
 
   [ioEntity]
-  TXMLRappresentanteFiscaleType = class(TXMLNode, IXMLRappresentanteFiscaleType)
+  TXMLRappresentanteFiscaleType = class(TXMLNode,
+                                        IXMLRappresentanteFiscaleType)
   protected
     { IXMLRappresentanteFiscaleType }
     function Get_DatiAnagrafici: IXMLDatiAnagraficiRappresentanteType;
@@ -2116,7 +2146,8 @@ type
   { TXMLDatiAnagraficiRappresentanteType }
 
   [ioEntity]
-  TXMLDatiAnagraficiRappresentanteType = class(TXMLNode, IXMLDatiAnagraficiRappresentanteType)
+  TXMLDatiAnagraficiRappresentanteType = class(TXMLNode,
+                                               IXMLDatiAnagraficiRappresentanteType)
   protected
     { IXMLDatiAnagraficiRappresentanteType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2130,7 +2161,8 @@ type
   { TXMLCessionarioCommittenteType }
 
   [ioEntity]
-  TXMLCessionarioCommittenteType = class(TXMLNode, IXMLCessionarioCommittenteType)
+  TXMLCessionarioCommittenteType = class(TXMLNode,
+                                         IXMLCessionarioCommittenteType)
   protected
     { IXMLCessionarioCommittenteType }
     function Get_DatiAnagrafici: IXMLDatiAnagraficiCessionarioType;
@@ -2144,7 +2176,8 @@ type
   { TXMLDatiAnagraficiCessionarioType }
 
   [ioEntity]
-  TXMLDatiAnagraficiCessionarioType = class(TXMLNode, IXMLDatiAnagraficiCessionarioType)
+  TXMLDatiAnagraficiCessionarioType = class(TXMLNode,
+                                            IXMLDatiAnagraficiCessionarioType)
   protected
     { IXMLDatiAnagraficiCessionarioType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2158,7 +2191,8 @@ type
   { TXMLRappresentanteFiscaleCessionarioType }
 
   [ioEntity]
-  TXMLRappresentanteFiscaleCessionarioType = class(TXMLNode, IXMLRappresentanteFiscaleCessionarioType)
+  TXMLRappresentanteFiscaleCessionarioType = class(TXMLNode,
+                                                   IXMLRappresentanteFiscaleCessionarioType)
   protected
     { IXMLRappresentanteFiscaleCessionarioType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2176,7 +2210,8 @@ type
   { TXMLTerzoIntermediarioSoggettoEmittenteType }
 
   [ioEntity]
-  TXMLTerzoIntermediarioSoggettoEmittenteType = class(TXMLNode, IXMLTerzoIntermediarioSoggettoEmittenteType)
+  TXMLTerzoIntermediarioSoggettoEmittenteType = class(TXMLNode,
+                                                      IXMLTerzoIntermediarioSoggettoEmittenteType)
   protected
     { IXMLTerzoIntermediarioSoggettoEmittenteType }
     function Get_DatiAnagrafici: IXMLDatiAnagraficiTerzoIntermediarioType;
@@ -2187,7 +2222,8 @@ type
   { TXMLDatiAnagraficiTerzoIntermediarioType }
 
   [ioEntity]
-  TXMLDatiAnagraficiTerzoIntermediarioType = class(TXMLNode, IXMLDatiAnagraficiTerzoIntermediarioType)
+  TXMLDatiAnagraficiTerzoIntermediarioType = class(TXMLNode,
+                                                   IXMLDatiAnagraficiTerzoIntermediarioType)
   protected
     { IXMLDatiAnagraficiTerzoIntermediarioType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2201,7 +2237,8 @@ type
   { TXMLFatturaElettronicaBodyType }
 
   [ioEntity]
-  TXMLFatturaElettronicaBodyType = class(TXMLNode, IXMLFatturaElettronicaBodyType)
+  TXMLFatturaElettronicaBodyType = class(TXMLNode,
+                                         IXMLFatturaElettronicaBodyType)
   private
     FDatiPagamento: IXMLDatiPagamentoTypeList;
     FAllegati: IXMLAllegatiTypeList;
@@ -2225,7 +2262,8 @@ type
   { TXMLFatturaElettronicaBodyTypeList }
 
   [ioEntity]
-  TXMLFatturaElettronicaBodyTypeList = class(TXMLNodeCollection, IXMLFatturaElettronicaBodyTypeList)
+  TXMLFatturaElettronicaBodyTypeList = class(TXMLNodeCollection,
+                                             IXMLFatturaElettronicaBodyTypeList)
   protected
     { IXMLFatturaElettronicaBodyTypeList }
     function Add: IXMLFatturaElettronicaBodyType;
@@ -2239,7 +2277,8 @@ type
   { TXMLDatiGeneraliType }
 
   [ioEntity]
-  TXMLDatiGeneraliType = class(TXMLNode, IXMLDatiGeneraliType)
+  TXMLDatiGeneraliType = class(TXMLNode,
+                               IXMLDatiGeneraliType)
   private
     FDatiOrdineAcquisto: IXMLDatiDocumentiCorrelatiTypeList;
     FDatiContratto: IXMLDatiDocumentiCorrelatiTypeList;
@@ -2280,6 +2319,7 @@ type
   [ioEntity]
   TXMLDatiGeneraliDocumentoType = class(TXMLNode, IXMLDatiGeneraliDocumentoType)
   private
+    FDatiRitenuta: IXMLDatiRitenutaTypeList;
     FDatiCassaPrevidenziale: IXMLDatiCassaPrevidenzialeTypeList;
     FScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList;
     FCausale: IXMLString200LatinTypeList;
@@ -2289,7 +2329,7 @@ type
     function Get_Divisa: UnicodeString;
     function Get_Data: UnicodeString;
     function Get_Numero: UnicodeString;
-    function Get_DatiRitenuta: IXMLDatiRitenutaType;
+    function Get_DatiRitenuta: IXMLDatiRitenutaTypeList;
     function Get_DatiBollo: IXMLDatiBolloType;
     function Get_DatiCassaPrevidenziale: IXMLDatiCassaPrevidenzialeTypeList;
     function Get_ScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList;
@@ -2310,7 +2350,7 @@ type
     property Divisa: UnicodeString read Get_Divisa write Set_Divisa;
     property Data: UnicodeString read Get_Data write Set_Data;
     property Numero: UnicodeString read Get_Numero write Set_Numero;
-    property DatiRitenuta: IXMLDatiRitenutaType read Get_DatiRitenuta;
+    property DatiRitenuta: IXMLDatiRitenutaTypeList read Get_DatiRitenuta;
     property DatiBollo: IXMLDatiBolloType read Get_DatiBollo;
     property DatiCassaPrevidenziale: IXMLDatiCassaPrevidenzialeTypeList read Get_DatiCassaPrevidenziale;
     property ScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList read Get_ScontoMaggiorazione;
@@ -2336,10 +2376,22 @@ type
     procedure Set_CausalePagamento(Value: UnicodeString);
   end;
 
+  { TXMLDatiRitenutaTypeList }
+
+  TXMLDatiRitenutaTypeList = class(TXMLNodeCollection, IXMLDatiRitenutaTypeList)
+  protected
+    { IXMLDatiRitenutaTypeList }
+    function Add: IXMLDatiRitenutaType;
+    function Insert(const Index: Integer): IXMLDatiRitenutaType;
+    function Get_Item(Index: Integer): IXMLDatiRitenutaType;
+  end;
+
+
   { TXMLDatiBolloType }
 
   [ioEntity]
-  TXMLDatiBolloType = class(TXMLNode, IXMLDatiBolloType)
+  TXMLDatiBolloType = class(TXMLNode,
+                            IXMLDatiBolloType)
   protected
     { IXMLDatiBolloType }
     function Get_BolloVirtuale: UnicodeString;
@@ -2351,7 +2403,8 @@ type
   { TXMLDatiCassaPrevidenzialeType }
 
   [ioEntity]
-  TXMLDatiCassaPrevidenzialeType = class(TXMLNode, IXMLDatiCassaPrevidenzialeType)
+  TXMLDatiCassaPrevidenzialeType = class(TXMLNode,
+                                         IXMLDatiCassaPrevidenzialeType)
   protected
     { IXMLDatiCassaPrevidenzialeType }
     function Get_TipoCassa: UnicodeString;
@@ -2375,7 +2428,8 @@ type
   { TXMLDatiCassaPrevidenzialeTypeList }
 
   [ioEntity]
-  TXMLDatiCassaPrevidenzialeTypeList = class(TXMLNodeCollection, IXMLDatiCassaPrevidenzialeTypeList)
+  TXMLDatiCassaPrevidenzialeTypeList = class(TXMLNodeCollection,
+                                             IXMLDatiCassaPrevidenzialeTypeList)
   protected
     { IXMLDatiCassaPrevidenzialeTypeList }
     function Add: IXMLDatiCassaPrevidenzialeType;
@@ -2386,7 +2440,8 @@ type
   { TXMLScontoMaggiorazioneType }
 
   [ioEntity]
-  TXMLScontoMaggiorazioneType = class(TXMLNode, IXMLScontoMaggiorazioneType)
+  TXMLScontoMaggiorazioneType = class(TXMLNode,
+                                      IXMLScontoMaggiorazioneType)
   protected
     { IXMLScontoMaggiorazioneType }
     function Get_Tipo: UnicodeString;
@@ -2400,7 +2455,8 @@ type
   { TXMLScontoMaggiorazioneTypeList }
 
   [ioEntity]
-  TXMLScontoMaggiorazioneTypeList = class(TXMLNodeCollection, IXMLScontoMaggiorazioneTypeList)
+  TXMLScontoMaggiorazioneTypeList = class(TXMLNodeCollection,
+                                          IXMLScontoMaggiorazioneTypeList)
   protected
     { IXMLScontoMaggiorazioneTypeList }
     function Add: IXMLScontoMaggiorazioneType;
@@ -2411,7 +2467,8 @@ type
   { TXMLDatiDocumentiCorrelatiType }
 
   [ioEntity]
-  TXMLDatiDocumentiCorrelatiType = class(TXMLNode, IXMLDatiDocumentiCorrelatiType)
+  TXMLDatiDocumentiCorrelatiType = class(TXMLNode,
+                                         IXMLDatiDocumentiCorrelatiType)
   private
     FRiferimentoNumeroLinea: IXMLRiferimentoNumeroLineaTypeList;
   protected
@@ -2436,7 +2493,8 @@ type
   { TXMLDatiDocumentiCorrelatiTypeList }
 
   [ioEntity]
-  TXMLDatiDocumentiCorrelatiTypeList = class(TXMLNodeCollection, IXMLDatiDocumentiCorrelatiTypeList)
+  TXMLDatiDocumentiCorrelatiTypeList = class(TXMLNodeCollection,
+                                             IXMLDatiDocumentiCorrelatiTypeList)
   protected
     { IXMLDatiDocumentiCorrelatiTypeList }
     function Add: IXMLDatiDocumentiCorrelatiType;
@@ -2447,7 +2505,8 @@ type
   { TXMLDatiSALType }
 
   [ioEntity]
-  TXMLDatiSALType = class(TXMLNode, IXMLDatiSALType)
+  TXMLDatiSALType = class(TXMLNode,
+                          IXMLDatiSALType)
   protected
     { IXMLDatiSALType }
     function Get_RiferimentoFase: Integer;
@@ -2457,7 +2516,8 @@ type
   { TXMLDatiSALTypeList }
 
   [ioEntity]
-  TXMLDatiSALTypeList = class(TXMLNodeCollection, IXMLDatiSALTypeList)
+  TXMLDatiSALTypeList = class(TXMLNodeCollection,
+                              IXMLDatiSALTypeList)
   protected
     { IXMLDatiSALTypeList }
     function Add: IXMLDatiSALType;
@@ -2468,7 +2528,8 @@ type
   { TXMLDatiDDTType }
 
   [ioEntity]
-  TXMLDatiDDTType = class(TXMLNode, IXMLDatiDDTType)
+  TXMLDatiDDTType = class(TXMLNode,
+                          IXMLDatiDDTType)
   private
     FRiferimentoNumeroLinea: IXMLRiferimentoNumeroLineaTypeList;
   protected
@@ -2485,7 +2546,8 @@ type
   { TXMLDatiDDTTypeList }
 
   [ioEntity]
-  TXMLDatiDDTTypeList = class(TXMLNodeCollection, IXMLDatiDDTTypeList)
+  TXMLDatiDDTTypeList = class(TXMLNodeCollection,
+                              IXMLDatiDDTTypeList)
   protected
     { IXMLDatiDDTTypeList }
     function Add: IXMLDatiDDTType;
@@ -2496,7 +2558,8 @@ type
   { TXMLDatiTrasportoType }
 
   [ioEntity]
-  TXMLDatiTrasportoType = class(TXMLNode, IXMLDatiTrasportoType)
+  TXMLDatiTrasportoType = class(TXMLNode,
+                                IXMLDatiTrasportoType)
   protected
     { IXMLDatiTrasportoType }
     function Get_DatiAnagraficiVettore: IXMLDatiAnagraficiVettoreType;
@@ -2530,7 +2593,8 @@ type
   { TXMLDatiAnagraficiVettoreType }
 
   [ioEntity]
-  TXMLDatiAnagraficiVettoreType = class(TXMLNode, IXMLDatiAnagraficiVettoreType)
+  TXMLDatiAnagraficiVettoreType = class(TXMLNode,
+                                        IXMLDatiAnagraficiVettoreType)
   protected
     { IXMLDatiAnagraficiVettoreType }
     function Get_IdFiscaleIVA: IXMLIdFiscaleType;
@@ -2546,7 +2610,8 @@ type
   { TXMLFatturaPrincipaleType }
 
   [ioEntity]
-  TXMLFatturaPrincipaleType = class(TXMLNode, IXMLFatturaPrincipaleType)
+  TXMLFatturaPrincipaleType = class(TXMLNode,
+                                    IXMLFatturaPrincipaleType)
   protected
     { IXMLFatturaPrincipaleType }
     function Get_NumeroFatturaPrincipale: UnicodeString;
@@ -2558,7 +2623,8 @@ type
   { TXMLDatiBeniServiziType }
 
   [ioEntity]
-  TXMLDatiBeniServiziType = class(TXMLNode, IXMLDatiBeniServiziType)
+  TXMLDatiBeniServiziType = class(TXMLNode,
+                                  IXMLDatiBeniServiziType)
   private
     FDettaglioLinee: IXMLDettaglioLineeTypeList;
     FDatiRiepilogo: IXMLDatiRiepilogoTypeList;
@@ -2573,7 +2639,8 @@ type
   { TXMLDettaglioLineeType }
 
   [ioEntity]
-  TXMLDettaglioLineeType = class(TXMLNode, IXMLDettaglioLineeType)
+  TXMLDettaglioLineeType = class(TXMLNode,
+                                 IXMLDettaglioLineeType)
   private
     FCodiceArticolo: IXMLCodiceArticoloTypeList;
     FScontoMaggiorazione: IXMLScontoMaggiorazioneTypeList;
@@ -2616,7 +2683,8 @@ type
   { TXMLDettaglioLineeTypeList }
 
   [ioEntity]
-  TXMLDettaglioLineeTypeList = class(TXMLNodeCollection, IXMLDettaglioLineeTypeList)
+  TXMLDettaglioLineeTypeList = class(TXMLNodeCollection,
+                                     IXMLDettaglioLineeTypeList)
   protected
     { IXMLDettaglioLineeTypeList }
     function Add: IXMLDettaglioLineeType;
@@ -2627,7 +2695,8 @@ type
   { TXMLCodiceArticoloType }
 
   [ioEntity]
-  TXMLCodiceArticoloType = class(TXMLNode, IXMLCodiceArticoloType)
+  TXMLCodiceArticoloType = class(TXMLNode,
+                                 IXMLCodiceArticoloType)
   protected
     { IXMLCodiceArticoloType }
     function Get_CodiceTipo: UnicodeString;
@@ -2639,7 +2708,8 @@ type
   { TXMLCodiceArticoloTypeList }
 
   [ioEntity]
-  TXMLCodiceArticoloTypeList = class(TXMLNodeCollection, IXMLCodiceArticoloTypeList)
+  TXMLCodiceArticoloTypeList = class(TXMLNodeCollection,
+                                     IXMLCodiceArticoloTypeList)
   protected
     { IXMLCodiceArticoloTypeList }
     function Add: IXMLCodiceArticoloType;
@@ -2650,7 +2720,8 @@ type
   { TXMLAltriDatiGestionaliType }
 
   [ioEntity]
-  TXMLAltriDatiGestionaliType = class(TXMLNode, IXMLAltriDatiGestionaliType)
+  TXMLAltriDatiGestionaliType = class(TXMLNode,
+                                      IXMLAltriDatiGestionaliType)
   protected
     { IXMLAltriDatiGestionaliType }
     function Get_TipoDato: UnicodeString;
@@ -2666,7 +2737,8 @@ type
   { TXMLAltriDatiGestionaliTypeList }
 
   [ioEntity]
-  TXMLAltriDatiGestionaliTypeList = class(TXMLNodeCollection, IXMLAltriDatiGestionaliTypeList)
+  TXMLAltriDatiGestionaliTypeList = class(TXMLNodeCollection,
+                                          IXMLAltriDatiGestionaliTypeList)
   protected
     { IXMLAltriDatiGestionaliTypeList }
     function Add: IXMLAltriDatiGestionaliType;
@@ -2677,7 +2749,8 @@ type
   { TXMLDatiRiepilogoType }
 
   [ioEntity]
-  TXMLDatiRiepilogoType = class(TXMLNode, IXMLDatiRiepilogoType)
+  TXMLDatiRiepilogoType = class(TXMLNode,
+                                IXMLDatiRiepilogoType)
   protected
     { IXMLDatiRiepilogoType }
     function Get_AliquotaIVA: UnicodeString;
@@ -2701,7 +2774,8 @@ type
   { TXMLDatiRiepilogoTypeList }
 
   [ioEntity]
-  TXMLDatiRiepilogoTypeList = class(TXMLNodeCollection, IXMLDatiRiepilogoTypeList)
+  TXMLDatiRiepilogoTypeList = class(TXMLNodeCollection,
+                                    IXMLDatiRiepilogoTypeList)
   protected
     { IXMLDatiRiepilogoTypeList }
     function Add: IXMLDatiRiepilogoType;
@@ -2712,7 +2786,8 @@ type
   { TXMLDatiVeicoliType }
 
   [ioEntity]
-  TXMLDatiVeicoliType = class(TXMLNode, IXMLDatiVeicoliType)
+  TXMLDatiVeicoliType = class(TXMLNode,
+                              IXMLDatiVeicoliType)
   protected
     { IXMLDatiVeicoliType }
     function Get_Data: UnicodeString;
@@ -2724,7 +2799,8 @@ type
   { TXMLDatiPagamentoType }
 
   [ioEntity]
-  TXMLDatiPagamentoType = class(TXMLNode, IXMLDatiPagamentoType)
+  TXMLDatiPagamentoType = class(TXMLNode,
+                                IXMLDatiPagamentoType)
   private
     FDettaglioPagamento: IXMLDettaglioPagamentoTypeList;
   protected
@@ -2739,7 +2815,8 @@ type
   { TXMLDatiPagamentoTypeList }
 
   [ioEntity]
-  TXMLDatiPagamentoTypeList = class(TXMLNodeCollection, IXMLDatiPagamentoTypeList)
+  TXMLDatiPagamentoTypeList = class(TXMLNodeCollection,
+                                    IXMLDatiPagamentoTypeList)
   protected
     { IXMLDatiPagamentoTypeList }
     function Add: IXMLDatiPagamentoType;
@@ -2750,7 +2827,8 @@ type
   { TXMLDettaglioPagamentoType }
 
   [ioEntity]
-  TXMLDettaglioPagamentoType = class(TXMLNode, IXMLDettaglioPagamentoType)
+  TXMLDettaglioPagamentoType = class(TXMLNode,
+                                     IXMLDettaglioPagamentoType)
   protected
     { IXMLDettaglioPagamentoType }
     function Get_Beneficiario: UnicodeString;
@@ -2800,7 +2878,8 @@ type
   { TXMLDettaglioPagamentoTypeList }
 
   [ioEntity]
-  TXMLDettaglioPagamentoTypeList = class(TXMLNodeCollection, IXMLDettaglioPagamentoTypeList)
+  TXMLDettaglioPagamentoTypeList = class(TXMLNodeCollection,
+                                         IXMLDettaglioPagamentoTypeList)
   protected
     { IXMLDettaglioPagamentoTypeList }
     function Add: IXMLDettaglioPagamentoType;
@@ -2811,7 +2890,8 @@ type
   { TXMLAllegatiType }
 
   [ioEntity]
-  TXMLAllegatiType = class(TXMLNode, IXMLAllegatiType)
+  TXMLAllegatiType = class(TXMLNode,
+                           IXMLAllegatiType)
   protected
     { IXMLAllegatiType }
     function Get_NomeAttachment: UnicodeString;
@@ -2829,7 +2909,8 @@ type
   { TXMLAllegatiTypeList }
 
   [ioEntity]
-  TXMLAllegatiTypeList = class(TXMLNodeCollection, IXMLAllegatiTypeList)
+  TXMLAllegatiTypeList = class(TXMLNodeCollection,
+                               IXMLAllegatiTypeList)
   protected
     { IXMLAllegatiTypeList }
     function Add: IXMLAllegatiType;
@@ -2840,7 +2921,8 @@ type
   { TXMLSignatureType_ds }
 
   [ioEntity]
-  TXMLSignatureType_ds = class(TXMLNode, IXMLSignatureType_ds)
+  TXMLSignatureType_ds = class(TXMLNode,
+                               IXMLSignatureType_ds)
   private
     FObject_: IXMLObjectType_dsList;
   protected
@@ -2858,7 +2940,8 @@ type
   { TXMLSignedInfoType_ds }
 
   [ioEntity]
-  TXMLSignedInfoType_ds = class(TXMLNode, IXMLSignedInfoType_ds)
+  TXMLSignedInfoType_ds = class(TXMLNode,
+                                IXMLSignedInfoType_ds)
   private
     FReference: IXMLReferenceType_dsList;
   protected
@@ -2875,7 +2958,8 @@ type
   { TXMLCanonicalizationMethodType_ds }
 
   [ioEntity]
-  TXMLCanonicalizationMethodType_ds = class(TXMLNode, IXMLCanonicalizationMethodType_ds)
+  TXMLCanonicalizationMethodType_ds = class(TXMLNode,
+                                            IXMLCanonicalizationMethodType_ds)
   protected
     { IXMLCanonicalizationMethodType_ds }
     function Get_Algorithm: UnicodeString;
@@ -2885,7 +2969,8 @@ type
   { TXMLSignatureMethodType_ds }
 
   [ioEntity]
-  TXMLSignatureMethodType_ds = class(TXMLNode, IXMLSignatureMethodType_ds)
+  TXMLSignatureMethodType_ds = class(TXMLNode,
+                                     IXMLSignatureMethodType_ds)
   protected
     { IXMLSignatureMethodType_ds }
     function Get_Algorithm: UnicodeString;
@@ -2897,7 +2982,8 @@ type
   { TXMLReferenceType_ds }
 
   [ioEntity]
-  TXMLReferenceType_ds = class(TXMLNode, IXMLReferenceType_ds)
+  TXMLReferenceType_ds = class(TXMLNode,
+                               IXMLReferenceType_ds)
   protected
     { IXMLReferenceType_ds }
     function Get_Id: UnicodeString;
@@ -2917,7 +3003,8 @@ type
   { TXMLReferenceType_dsList }
 
   [ioEntity]
-  TXMLReferenceType_dsList = class(TXMLNodeCollection, IXMLReferenceType_dsList)
+  TXMLReferenceType_dsList = class(TXMLNodeCollection,
+                                   IXMLReferenceType_dsList)
   protected
     { IXMLReferenceType_dsList }
     function Add: IXMLReferenceType_ds;
@@ -2928,7 +3015,8 @@ type
   { TXMLTransformsType_ds }
 
   [ioEntity]
-  TXMLTransformsType_ds = class(TXMLNodeCollection, IXMLTransformsType_ds)
+  TXMLTransformsType_ds = class(TXMLNodeCollection,
+                                IXMLTransformsType_ds)
   protected
     { IXMLTransformsType_ds }
     function Get_Transform(Index: Integer): IXMLTransformType_ds;
@@ -2941,7 +3029,8 @@ type
   { TXMLTransformType_ds }
 
   [ioEntity]
-  TXMLTransformType_ds = class(TXMLNodeCollection, IXMLTransformType_ds)
+  TXMLTransformType_ds = class(TXMLNodeCollection,
+                               IXMLTransformType_ds)
   protected
     { IXMLTransformType_ds }
     function Get_Algorithm: UnicodeString;
@@ -2956,7 +3045,8 @@ type
   { TXMLDigestMethodType_ds }
 
   [ioEntity]
-  TXMLDigestMethodType_ds = class(TXMLNode, IXMLDigestMethodType_ds)
+  TXMLDigestMethodType_ds = class(TXMLNode,
+                                  IXMLDigestMethodType_ds)
   protected
     { IXMLDigestMethodType_ds }
     function Get_Algorithm: UnicodeString;
@@ -2966,7 +3056,8 @@ type
   { TXMLSignatureValueType_ds }
 
   [ioEntity]
-  TXMLSignatureValueType_ds = class(TXMLNode, IXMLSignatureValueType_ds)
+  TXMLSignatureValueType_ds = class(TXMLNode,
+                                    IXMLSignatureValueType_ds)
   protected
     { IXMLSignatureValueType_ds }
     function Get_Id: UnicodeString;
@@ -2976,7 +3067,8 @@ type
   { TXMLKeyInfoType_ds }
 
   [ioEntity]
-  TXMLKeyInfoType_ds = class(TXMLNode, IXMLKeyInfoType_ds)
+  TXMLKeyInfoType_ds = class(TXMLNode,
+                             IXMLKeyInfoType_ds)
   private
     FKeyName: IXMLString_List;
     FKeyValue: IXMLKeyValueType_dsList;
@@ -3003,7 +3095,8 @@ type
   { TXMLKeyValueType_ds }
 
   [ioEntity]
-  TXMLKeyValueType_ds = class(TXMLNode, IXMLKeyValueType_ds)
+  TXMLKeyValueType_ds = class(TXMLNode,
+                              IXMLKeyValueType_ds)
   protected
     { IXMLKeyValueType_ds }
     function Get_DSAKeyValue: IXMLDSAKeyValueType_ds;
@@ -3015,7 +3108,8 @@ type
   { TXMLKeyValueType_dsList }
 
   [ioEntity]
-  TXMLKeyValueType_dsList = class(TXMLNodeCollection, IXMLKeyValueType_dsList)
+  TXMLKeyValueType_dsList = class(TXMLNodeCollection,
+                                  IXMLKeyValueType_dsList)
   protected
     { IXMLKeyValueType_dsList }
     function Add: IXMLKeyValueType_ds;
@@ -3026,7 +3120,8 @@ type
   { TXMLDSAKeyValueType_ds }
 
   [ioEntity]
-  TXMLDSAKeyValueType_ds = class(TXMLNode, IXMLDSAKeyValueType_ds)
+  TXMLDSAKeyValueType_ds = class(TXMLNode,
+                                 IXMLDSAKeyValueType_ds)
   protected
     { IXMLDSAKeyValueType_ds }
     function Get_P: UnicodeString;
@@ -3048,7 +3143,8 @@ type
   { TXMLRSAKeyValueType_ds }
 
   [ioEntity]
-  TXMLRSAKeyValueType_ds = class(TXMLNode, IXMLRSAKeyValueType_ds)
+  TXMLRSAKeyValueType_ds = class(TXMLNode,
+                                 IXMLRSAKeyValueType_ds)
   protected
     { IXMLRSAKeyValueType_ds }
     function Get_Modulus: UnicodeString;
@@ -3060,7 +3156,8 @@ type
   { TXMLRetrievalMethodType_ds }
 
   [ioEntity]
-  TXMLRetrievalMethodType_ds = class(TXMLNode, IXMLRetrievalMethodType_ds)
+  TXMLRetrievalMethodType_ds = class(TXMLNode,
+                                     IXMLRetrievalMethodType_ds)
   protected
     { IXMLRetrievalMethodType_ds }
     function Get_URI: UnicodeString;
@@ -3075,7 +3172,8 @@ type
   { TXMLRetrievalMethodType_dsList }
 
   [ioEntity]
-  TXMLRetrievalMethodType_dsList = class(TXMLNodeCollection, IXMLRetrievalMethodType_dsList)
+  TXMLRetrievalMethodType_dsList = class(TXMLNodeCollection,
+                                         IXMLRetrievalMethodType_dsList)
   protected
     { IXMLRetrievalMethodType_dsList }
     function Add: IXMLRetrievalMethodType_ds;
@@ -3086,7 +3184,8 @@ type
   { TXMLX509DataType_ds }
 
   [ioEntity]
-  TXMLX509DataType_ds = class(TXMLNode, IXMLX509DataType_ds)
+  TXMLX509DataType_ds = class(TXMLNode,
+                              IXMLX509DataType_ds)
   private
     FX509IssuerSerial: IXMLX509IssuerSerialType_dsList;
     FX509SKI: IXMLBase64BinaryList;
@@ -3107,7 +3206,8 @@ type
   { TXMLX509DataType_dsList }
 
   [ioEntity]
-  TXMLX509DataType_dsList = class(TXMLNodeCollection, IXMLX509DataType_dsList)
+  TXMLX509DataType_dsList = class(TXMLNodeCollection,
+                                  IXMLX509DataType_dsList)
   protected
     { IXMLX509DataType_dsList }
     function Add: IXMLX509DataType_ds;
@@ -3118,7 +3218,8 @@ type
   { TXMLX509IssuerSerialType_ds }
 
   [ioEntity]
-  TXMLX509IssuerSerialType_ds = class(TXMLNode, IXMLX509IssuerSerialType_ds)
+  TXMLX509IssuerSerialType_ds = class(TXMLNode,
+                                      IXMLX509IssuerSerialType_ds)
   protected
     { IXMLX509IssuerSerialType_ds }
     function Get_X509IssuerName: UnicodeString;
@@ -3130,7 +3231,8 @@ type
   { TXMLX509IssuerSerialType_dsList }
 
   [ioEntity]
-  TXMLX509IssuerSerialType_dsList = class(TXMLNodeCollection, IXMLX509IssuerSerialType_dsList)
+  TXMLX509IssuerSerialType_dsList = class(TXMLNodeCollection,
+                                          IXMLX509IssuerSerialType_dsList)
   protected
     { IXMLX509IssuerSerialType_dsList }
     function Add: IXMLX509IssuerSerialType_ds;
@@ -3141,7 +3243,8 @@ type
   { TXMLPGPDataType_ds }
 
   [ioEntity]
-  TXMLPGPDataType_ds = class(TXMLNode, IXMLPGPDataType_ds)
+  TXMLPGPDataType_ds = class(TXMLNode,
+                             IXMLPGPDataType_ds)
   protected
     { IXMLPGPDataType_ds }
     function Get_PGPKeyID: UnicodeString;
@@ -3153,7 +3256,8 @@ type
   { TXMLPGPDataType_dsList }
 
   [ioEntity]
-  TXMLPGPDataType_dsList = class(TXMLNodeCollection, IXMLPGPDataType_dsList)
+  TXMLPGPDataType_dsList = class(TXMLNodeCollection,
+                                 IXMLPGPDataType_dsList)
   protected
     { IXMLPGPDataType_dsList }
     function Add: IXMLPGPDataType_ds;
@@ -3164,7 +3268,8 @@ type
   { TXMLSPKIDataType_ds }
 
   [ioEntity]
-  TXMLSPKIDataType_ds = class(TXMLNodeCollection, IXMLSPKIDataType_ds)
+  TXMLSPKIDataType_ds = class(TXMLNodeCollection,
+                              IXMLSPKIDataType_ds)
   protected
     { IXMLSPKIDataType_ds }
     function Get_SPKISexp(Index: Integer): UnicodeString;
@@ -3177,7 +3282,8 @@ type
   { TXMLSPKIDataType_dsList }
 
   [ioEntity]
-  TXMLSPKIDataType_dsList = class(TXMLNodeCollection, IXMLSPKIDataType_dsList)
+  TXMLSPKIDataType_dsList = class(TXMLNodeCollection,
+                                  IXMLSPKIDataType_dsList)
   protected
     { IXMLSPKIDataType_dsList }
     function Add: IXMLSPKIDataType_ds;
@@ -3188,7 +3294,8 @@ type
   { TXMLObjectType_ds }
 
   [ioEntity]
-  TXMLObjectType_ds = class(TXMLNode, IXMLObjectType_ds)
+  TXMLObjectType_ds = class(TXMLNode,
+                            IXMLObjectType_ds)
   protected
     { IXMLObjectType_ds }
     function Get_Id: UnicodeString;
@@ -3202,7 +3309,8 @@ type
   { TXMLObjectType_dsList }
 
   [ioEntity]
-  TXMLObjectType_dsList = class(TXMLNodeCollection, IXMLObjectType_dsList)
+  TXMLObjectType_dsList = class(TXMLNodeCollection,
+                                IXMLObjectType_dsList)
   protected
     { IXMLObjectType_dsList }
     function Add: IXMLObjectType_ds;
@@ -3213,7 +3321,8 @@ type
   { TXMLString200LatinTypeList }
 
   [ioEntity]
-  TXMLString200LatinTypeList = class(TXMLNodeCollection, IXMLString200LatinTypeList)
+  TXMLString200LatinTypeList = class(TXMLNodeCollection,
+                                     IXMLString200LatinTypeList)
   protected
     { IXMLString200LatinTypeList }
     function Add(const Value: UnicodeString): IXMLNode;
@@ -3224,7 +3333,8 @@ type
   { TXMLRiferimentoNumeroLineaTypeList }
 
   [ioEntity]
-  TXMLRiferimentoNumeroLineaTypeList = class(TXMLNodeCollection, IXMLRiferimentoNumeroLineaTypeList)
+  TXMLRiferimentoNumeroLineaTypeList = class(TXMLNodeCollection,
+                                             IXMLRiferimentoNumeroLineaTypeList)
   protected
     { IXMLRiferimentoNumeroLineaTypeList }
     function Add(const Value: Integer): IXMLNode;
@@ -3235,7 +3345,8 @@ type
   { TXMLBase64BinaryList }
 
   [ioEntity]
-  TXMLBase64BinaryList = class(TXMLNodeCollection, IXMLBase64BinaryList)
+  TXMLBase64BinaryList = class(TXMLNodeCollection,
+                               IXMLBase64BinaryList)
   protected
     { IXMLBase64BinaryList }
     function Add(const Value: UnicodeString): IXMLNode;
@@ -3246,7 +3357,8 @@ type
   { TXMLString_List }
 
   [ioEntity]
-  TXMLString_List = class(TXMLNodeCollection, IXMLString_List)
+  TXMLString_List = class(TXMLNodeCollection,
+                          IXMLString_List)
   protected
     { IXMLString_List }
     function Add(const Value: UnicodeString): IXMLNode;
@@ -4090,10 +4202,9 @@ begin
   RegisterChildNode('DatiBollo', TXMLDatiBolloType);
   RegisterChildNode('DatiCassaPrevidenziale', TXMLDatiCassaPrevidenzialeType);
   RegisterChildNode('ScontoMaggiorazione', TXMLScontoMaggiorazioneType);
-  FDatiCassaPrevidenziale := CreateCollection(TXMLDatiCassaPrevidenzialeTypeList, IXMLDatiCassaPrevidenzialeType,
-    'DatiCassaPrevidenziale') as IXMLDatiCassaPrevidenzialeTypeList;
-  FScontoMaggiorazione := CreateCollection(TXMLScontoMaggiorazioneTypeList, IXMLScontoMaggiorazioneType, 'ScontoMaggiorazione')
-    as IXMLScontoMaggiorazioneTypeList;
+  FDatiRitenuta := CreateCollection(TXMLDatiRitenutaTypeList, IXMLDatiRitenutaType, 'DatiRitenuta') as IXMLDatiRitenutaTypeList;
+  FDatiCassaPrevidenziale := CreateCollection(TXMLDatiCassaPrevidenzialeTypeList, IXMLDatiCassaPrevidenzialeType, 'DatiCassaPrevidenziale') as IXMLDatiCassaPrevidenzialeTypeList;
+  FScontoMaggiorazione := CreateCollection(TXMLScontoMaggiorazioneTypeList, IXMLScontoMaggiorazioneType, 'ScontoMaggiorazione') as IXMLScontoMaggiorazioneTypeList;
   FCausale := CreateCollection(TXMLString200LatinTypeList, IXMLNode, 'Causale') as IXMLString200LatinTypeList;
   inherited;
 end;
@@ -4138,9 +4249,9 @@ begin
   ChildNodes['Numero'].NodeValue := Value;
 end;
 
-function TXMLDatiGeneraliDocumentoType.Get_DatiRitenuta: IXMLDatiRitenutaType;
+function TXMLDatiGeneraliDocumentoType.Get_DatiRitenuta: IXMLDatiRitenutaTypeList;
 begin
-  Result := ChildNodes['DatiRitenuta'] as IXMLDatiRitenutaType;
+  Result := FDatiRitenuta;
 end;
 
 function TXMLDatiGeneraliDocumentoType.Get_DatiBollo: IXMLDatiBolloType;
@@ -4234,6 +4345,24 @@ procedure TXMLDatiRitenutaType.Set_CausalePagamento(Value: UnicodeString);
 begin
   ChildNodes['CausalePagamento'].NodeValue := Value;
 end;
+
+{ TXMLDatiRitenutaTypeList }
+
+function TXMLDatiRitenutaTypeList.Add: IXMLDatiRitenutaType;
+begin
+  Result := AddItem(-1) as IXMLDatiRitenutaType;
+end;
+
+function TXMLDatiRitenutaTypeList.Insert(const Index: Integer): IXMLDatiRitenutaType;
+begin
+  Result := AddItem(Index) as IXMLDatiRitenutaType;
+end;
+
+function TXMLDatiRitenutaTypeList.Get_Item(Index: Integer): IXMLDatiRitenutaType;
+begin
+  Result := List[Index] as IXMLDatiRitenutaType;
+end;
+
 
 { TXMLDatiBolloType }
 

@@ -86,6 +86,14 @@ contains
   DForce.ei.InvoiceDataExtractor.Factory in '..\..\source\DForce.ei.InvoiceDataExtractor.Factory.pas',
   DForce.ei.Invoice.Attachments in '..\..\source\DForce.ei.Invoice.Attachments.pas',
   DForce.ei.Invoice.Attachments.Interfaces in '..\..\source\DForce.ei.Invoice.Attachments.Interfaces.pas',
-  DForce.ei.Invoice.Attachments.Factory in '..\..\source\DForce.ei.Invoice.Attachments.Factory.pas';
+  DForce.ei.Invoice.Attachments.Factory in '..\..\source\DForce.ei.Invoice.Attachments.Factory.pas',
+  DForce.ei.Core.Prop.Base in '..\..\source\core\DForce.ei.Core.Prop.Base.pas',
+  DForce.ei.Core.Interfaces in '..\..\source\core\DForce.ei.Core.Interfaces.pas',
+  DForce.ei.Core.Prop in '..\..\source\core\DForce.ei.Core.Prop.pas',
+  DForce.ei.Core.Attributes in '..\..\source\core\DForce.ei.Core.Attributes.pas',
+  DForce.ei.Core.Prop.Block in '..\..\source\core\DForce.ei.Core.Prop.Block.pas',
+  DForce.ei.Core.Factory in '..\..\source\core\DForce.ei.Core.Factory.pas',
+  DForce.ei.Invoice.Intf in '..\..\source\invoice\DForce.ei.Invoice.Intf.pas',
+  DForce.ei.Core.Prop.List in '..\..\source\core\DForce.ei.Core.Prop.List.pas';
 
 end.

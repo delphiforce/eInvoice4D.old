@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsi="http://ws-i.org/profiles/basic/1.1/xsd"
+	xmlns:types="http://ivaservizi.agenziaentrate.gov.it/docs/wsdl/QuadraturaWS/v1.0/types"
+	targetNamespace="http://ivaservizi.agenziaentrate.gov.it/docs/wsdl/QuadraturaWS/v1.0/types"
+	version="1.0">
+
+	<!-- ELEMENTI MESSAGGI -->	
+	
+	<!-- FLUSSO IN TRASMISSIONE -->
+	<xsd:element name="RichiestaReportQuadraturaFlussoTrasmissioneB2BRequest" type="types:RichiestaReportQuadraturaRequestType" />
+	<xsd:element name="RichiestaReportQuadraturaFlussoTrasmissioneB2BResponse" type="types:RichiestaReportQuadraturaResponseType" />
+	
+	<xsd:element name="RichiestaReportQuadraturaFlussoTrasmissioneB2GRequest" type="types:RichiestaReportQuadraturaRequestType" />
+	<xsd:element name="RichiestaReportQuadraturaFlussoTrasmissioneB2GResponse" type="types:RichiestaReportQuadraturaResponseType" />
+	
+	<xsd:element name="ScaricoReportQuadraturaFlussoTrasmissioneRequest" type="types:ScaricoReportQuadraturaRequestType" />
+	<xsd:element name="ScaricoReportQuadraturaFlussoTrasmissioneResponse" type="types:ScaricoReportQuadraturaResponseType" />
+	
+	<xsd:element name="RichiestaReinoltroFlussoTrasmissioneRequest" type="types:RichiestaReinoltroRequestType" />
+	<xsd:element name="RichiestaReinoltroFlussoTrasmissioneResponse" type="types:RichiestaReinoltroResponseType" />
+	
+	<xsd:element name="ScaricoReportReinoltroFlussoTrasmissioneRequest" type="types:ScaricoReportReinoltroRequestType" />
+	<xsd:element name="ScaricoReportReinoltroFlussoTrasmissioneResponse" type="types:ScaricoReportReinoltroResponseType" />
+	
+	<!-- FLUSSO IN RICEZIONE -->
+	<xsd:element name="RichiestaReportQuadraturaFlussoRicezioneB2BRequest" type="types:RichiestaReportQuadraturaRequestType" />
+	<xsd:element name="RichiestaReportQuadraturaFlussoRicezioneB2BResponse" type="types:RichiestaReportQuadraturaResponseType" />
+    
+    <xsd:element name="RichiestaReportQuadraturaFlussoRicezioneB2GRequest" type="types:RichiestaReportQuadraturaRequestType" />
+	<xsd:element name="RichiestaReportQuadraturaFlussoRicezioneB2GResponse" type="types:RichiestaReportQuadraturaResponseType" />
+    
+	<xsd:element name="ScaricoReportQuadraturaFlussoRicezioneRequest" type="types:ScaricoReportQuadraturaRequestType" />
+	<xsd:element name="ScaricoReportQuadraturaFlussoRicezioneResponse" type="types:ScaricoReportQuadraturaResponseType" />
+	
+	<xsd:element name="RichiestaReinoltroFlussoRicezioneFileFatturaRequest" type="types:RichiestaReinoltroRequestType" />
+	<xsd:element name="RichiestaReinoltroFlussoRicezioneFileFatturaResponse" type="types:RichiestaReinoltroResponseType" />
+	
+	<xsd:element name="RichiestaReinoltroFlussoRicezioneNotificaRequest" type="types:RichiestaReinoltroRequestType" />
+	<xsd:element name="RichiestaReinoltroFlussoRicezioneNotificaResponse" type="types:RichiestaReinoltroResponseType" />
+	
+	<xsd:element name="ScaricoReportReinoltroFlussoRicezioneRequest" type="types:ScaricoReportReinoltroRequestType" />
+	<xsd:element name="ScaricoReportReinoltroFlussoRicezioneResponse" type="types:ScaricoReportReinoltroResponseType" />
+	
+	<!-- TIPI PER MESSAGGI -->
+	
+	<!-- QUADRATURA -->
+	<xsd:complexType name="RichiestaReportQuadraturaRequestType">
+		<xsd:sequence>
+			<xsd:element name="DataDa" type="xsd:date" />
+			<xsd:element name="DataA" type="xsd:date" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="RichiestaReportQuadraturaResponseType">
+		<xsd:sequence>
+			<xsd:element name="IdQuadratura" type="xsd:string" />
+			<xsd:element name="DataOraRicezione" type="xsd:dateTime" />
+			<xsd:element name="Errore" type="types:RichiestaErroreType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ScaricoReportQuadraturaRequestType">
+		<xsd:sequence>
+			<xsd:element name="IdQuadratura" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ScaricoReportQuadraturaResponseType">
+		<xsd:sequence>
+			<xsd:element name="Stato" type="types:StatoReportType" />
+			<xsd:element name="File" type="types:FileType" minOccurs="0" />	
+			<xsd:element name="DataOraProduzione" type="xsd:dateTime" minOccurs="0"/>		
+			<xsd:element name="Errore" type="types:RichiestaErroreType" minOccurs="0"/>	
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- REINOLTRO -->
+	<xsd:complexType name="RichiestaReinoltroRequestType">
+		<xsd:sequence>
+			<xsd:element name="File" type="types:FileType"/>	
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="RichiestaReinoltroResponseType">
+		<xsd:sequence>
+			<xsd:element name="IdReinoltro" type="xsd:string" />
+			<xsd:element name="DataOraRicezione" type="xsd:dateTime" />
+			<xsd:element name="Errore" type="types:RichiestaErroreType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ScaricoReportReinoltroRequestType">
+		<xsd:sequence>
+			<xsd:element name="IdReinoltro" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ScaricoReportReinoltroResponseType">
+		<xsd:sequence>
+			<xsd:element name="Stato" type="types:StatoReportType" />
+			<xsd:element name="File" type="types:FileType" minOccurs="0" />	
+			<xsd:element name="DataOraProduzione" type="xsd:dateTime" minOccurs="0"/>		
+			<xsd:element name="Errore" type="types:RichiestaErroreType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- COMPLEX TYPE -->
+	<xsd:complexType name="RichiestaErroreType">
+		<xsd:sequence>
+			<xsd:element name="Codice" type="types:CodiceErroreRichiestaType"/>
+			<xsd:element name="Descrizione" type="xsd:string"/>
+			<xsd:element name="ListaErroriDettaglio" type="types:ListaErroriDettaglioType" minOccurs="0"/>		
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ListaErroriDettaglioType">
+		<xsd:sequence>
+			<xsd:element name="ErroreDettaglio" type="types:ErroreType" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ErroreType">
+		<xsd:sequence>
+			<xsd:element name="Codice" type="xsd:string"/>
+			<xsd:element name="Descrizione" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="FileType">
+		<xsd:sequence>
+			<xsd:element name="NomeFile" type="types:NomeFileType" />
+			<xsd:element name="File" type="xsd:base64Binary" xmime:expectedContentTypes="*/*" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- SIMPLE TYPES -->
+	<xsd:simpleType name="NomeFileType">
+		<xsd:restriction base="xsd:normalizedString">
+			<xsd:pattern value="[a-zA-Z0-9_\.]{9,50}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+    <!-- ENUMERAZIONE CODICI ERRORI RICHIESTA -->
+	<xsd:simpleType name="CodiceErroreRichiestaType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ER01" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER01 = SERVIZIO NON DISPONIBILE
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ER02" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER02 = UTENTE NON ABILITATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ER03" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER03 = RICHIESTA TROPPO FREQUENTE
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ER04" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER04 = PARAMETRI DI INPUT NON VALIDI
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ER05" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER05 = RICHIESTA NON VALIDA
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ER06" >
+				<xsd:annotation>
+					<xsd:documentation>
+						ER06 = DATO NON TROVATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- ENUMERAZIONE STATI REPORT -->
+	<xsd:simpleType name="StatoReportType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SR01">
+				<xsd:annotation>
+					<xsd:documentation>
+						SR01 = IN ELABORAZIONE
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SR02" >
+				<xsd:annotation>
+					<xsd:documentation>
+						SR02 = SCARTATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SR03" >
+				<xsd:annotation>
+					<xsd:documentation>
+						SR03 = ELABORATO
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>
