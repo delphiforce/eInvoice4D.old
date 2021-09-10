@@ -52,6 +52,7 @@ type
     FReference: string;
     FValidationResultCollection: IeiValidationResultCollectionInt;
   protected
+    function BuildFileName: String;
     function ToString: String; reintroduce;
     function ToStringBase64: String;
     function Validate: boolean;
@@ -81,6 +82,26 @@ uses Xml.XMLDoc, System.NetEncoding, DForce.ei.Exception, System.SysUtils,
 
 { TeiInvoiceEx }
 
+function TeiInvoiceEx.BuildFileName: String;
+var
+  LSiglaNazione: String;
+  LIdFiscale: String;
+  LProgressivoInvio: String;
+begin
+  LSiglaNazione := FatturaElettronicaHeader.CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdPaese.Trim;
+  LIdFiscale := FatturaElettronicaHeader.CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice.Trim;
+  LProgressivoInvio := FatturaElettronicaHeader.DatiTrasmissione.ProgressivoInvio.Trim;
+  // Effettua alcuni controlli
+  if LSiglaNazione = '' then
+    raise eiGenericException.Create('Property 1.2.1.1.1 <IdPaese> is not valid!');
+  if LIdFiscale = '' then
+    raise eiGenericException.Create('Property 1.2.1.1.2 <IdCodice> is not valid!');
+  if (LProgressivoInvio = '') or (LProgressivoInvio = '-1') then
+    raise eiGenericException.Create('Property 1.1.2 <ProgressivoInvio> is not valid!');
+  // Compila il nome del file
+  Result := Format('%s%s_%s.xml', [LSiglaNazione, LIdFiscale, LProgressivoInvio]);
+end;
+
 procedure TeiInvoiceEx.FillWithSampleData;
 begin
   TeiUtils.FillInvoiceSample(Self);
@@ -105,8 +126,6 @@ procedure TeiInvoiceEx.SaveToFile(const AFileName: String);
 var
   LFileStream: TFileStream;
 begin
-  if FileExists(AFileName) then
-    raise eiGenericException.Create(Format('File "%s" already exists', [AFileName]));
   LFileStream := TFileStream.Create(AFileName, fmCreate);
   try
     TeiUtils.StringToStream(LFileStream, ToString);

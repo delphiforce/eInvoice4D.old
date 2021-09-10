@@ -49,6 +49,7 @@ type
 
   IeiInvoiceEx = interface(IXMLFatturaElettronicaType)
     ['{CF5D3661-D454-40F7-A358-F81E8FD4CD55}']
+    function BuildFileName: String;
     function ToString: String;
     function ToStringBase64: String;
     function Validate: boolean;
